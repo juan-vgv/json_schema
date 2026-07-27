@@ -70,6 +70,12 @@ final _staticSchemaMapping = {
       Draft2020Subschemas._formatAssertion,
   parseStandardizedUri("https://json-schema.org/draft/2020-12/meta/core"): Draft2020Subschemas.core,
   parseStandardizedUri("https://json-schema.org/draft/2020-12/vocab/core"): Draft2020Subschemas.core,
+  // Alternate `/schema/meta/*` locations that json-schema.org also serves for
+  // the 2020-12 meta-schemas. Custom dialects (e.g. the format-assertion
+  // meta-schema) reference these, so resolve them statically too.
+  parseStandardizedUri("https://json-schema.org/draft/2020-12/schema/meta/core"): Draft2020Subschemas.core,
+  parseStandardizedUri("https://json-schema.org/draft/2020-12/schema/meta/format-assertion"):
+      Draft2020Subschemas._formatAssertion,
   parseStandardizedUri("https://json-schema.org/draft/2020-12/meta/metadata"): Draft2020Subschemas.metadata,
   parseStandardizedUri("https://json-schema.org/draft/2020-12/vocab/metadata"): Draft2020Subschemas.metadata,
   parseStandardizedUri("https://json-schema.org/draft/2020-12/meta/applicator"): Draft2020Subschemas.applicator,
@@ -1308,6 +1314,7 @@ class SupportedVocabularies {
   static final validation2020 = Uri.parse("https://json-schema.org/draft/2020-12/vocab/validation");
   static final metadata2020 = Uri.parse("https://json-schema.org/draft/2020-12/vocab/meta-data");
   static final formatAnnotation2020 = Uri.parse("https://json-schema.org/draft/2020-12/vocab/format-annotation");
+  static final formatAssertion2020 = Uri.parse("https://json-schema.org/draft/2020-12/vocab/format-assertion");
   static final content2020 = Uri.parse("https://json-schema.org/draft/2020-12/vocab/content");
 
   static final all2019 = {

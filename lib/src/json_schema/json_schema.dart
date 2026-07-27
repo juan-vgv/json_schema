@@ -74,13 +74,14 @@ final Map<SchemaVersion, JsonSchema> _emptySchemas = {};
 /// the schema itself is done on construction. Any errors in the schema
 /// result in a FormatException being thrown.
 class JsonSchema {
-  JsonSchema._fromMap(this._root, Map? schemaMap, this._path, {JsonSchema? parent})
+  JsonSchema._fromMap(this._root, Map? schemaMap, this._path, {JsonSchema? parent, bool insideUnknownKeyword = false})
       : _schemaMap = schemaMap != null ? Map<String, dynamic>.unmodifiable(schemaMap) : null,
         _schemaBool = null {
     if (schemaMap == null) {
       throw ArgumentError.notNull('schemaMap');
     }
     _parent = parent;
+    _insideUnknownKeyword = insideUnknownKeyword;
     _initialize();
   }
 
@@ -362,7 +363,13 @@ class JsonSchema {
         ..addAll(_vocabMaps)
         ..addAll(_customVocabMap);
       for (final vocabUri in metaschemaVocabulary?.keys ?? <Uri>[]) {
-        accessMap.addAll(vocabMap[vocabUri.toString()]);
+        // An unrecognized vocabulary declared `false` (optional) is ignored.
+        // Unrecognized vocabularies declared `true` (required) already throw at
+        // parse time in [_setMetaschemaVocabulary], so they never reach here.
+        final vocabSetters = vocabMap[vocabUri.toString()];
+        if (vocabSetters != null) {
+          accessMap.addAll(vocabSetters);
+        }
       }
     } else {
       accessMap = _accessMapV7;
@@ -375,11 +382,14 @@ class JsonSchema {
         accessor(this, v);
       } else {
         // Attempt to create a schema out of the custom property and register the ref, but don't error if it's not a valid schema.
+        // The value of an unknown keyword is not a schema, so mark its subtree
+        // as opaque: any `$id`/`$anchor` inside it must not become a real
+        // identifier (see [_insideUnknownKeyword]).
         _createOrRetrieveSchema('$_path/$k', v, (rhs) {
           // Translate ref for schema to include full inheritedUri.
           final String refPath = rhs._translateLocalRefToFullUri(Uri.parse(rhs.path!)).toString();
           return _refMap[refPath] = rhs;
-        }, mustBeValid: false);
+        }, mustBeValid: false, insideUnknownKeyword: true);
       }
     }
 
@@ -576,14 +586,26 @@ class JsonSchema {
   }
 
   /// Given a [Uri] path, find the ref'd [JsonSchema] from the map.
-  JsonSchema _getSchemaFromPath(Uri? pathUri, [Set<Uri?>? refsEncountered]) {
+  ///
+  /// When [stopAtTerminalRef] is `true`, resolution stops at the schema located
+  /// at the pointer even if that schema is itself a pure `$ref`, returning the
+  /// ref-bearing schema instead of collapsing the whole `$ref` chain to its
+  /// terminal target. The validator uses this to walk a `$ref` chain one hop at
+  /// a time so each intermediate resource scope is registered as a dynamic
+  /// parent (required for `$dynamicRef` scope resolution across chained refs).
+  JsonSchema _getSchemaFromPath(Uri? pathUri, [Set<Uri?>? refsEncountered, bool stopAtTerminalRef = false]) {
     // Store encountered refs to avoid cycles.
     refsEncountered ??= {};
 
     final currentPair = SchemaPathPair(this, pathUri);
-    final memomizedResult = _memomizedResults?[currentPair];
-    if (memomizedResult != null) {
-      return memomizedResult;
+    // Memoized results collapse the ref chain; skip the cache in
+    // stop-at-terminal-ref mode so a single-hop lookup is never served a
+    // fully-collapsed result (or vice versa).
+    if (!stopAtTerminalRef) {
+      final memomizedResult = _memomizedResults?[currentPair];
+      if (memomizedResult != null) {
+        return memomizedResult;
+      }
     }
 
     Uri basePathUri;
@@ -615,9 +637,14 @@ class JsonSchema {
     // Follow JSON Pointer path of fragments if provided.
     if (pathUri.fragment.isNotEmpty) {
       final List<String> fragments = Uri.parse(pathUri.fragment).pathSegments;
-      final foundSchema = _recursiveResolvePath(pathUri, fragments, baseSchema, refsEncountered);
+      final foundSchema =
+          _recursiveResolvePath(pathUri, fragments, baseSchema, refsEncountered, stopAtTerminalRef: stopAtTerminalRef);
       if (foundSchema != null) {
-        _memomizedResults?[currentPair] = foundSchema;
+        // Don't memoize the single-hop result; the cache is for collapsed
+        // chains only (see the guard at the top of this method).
+        if (!stopAtTerminalRef) {
+          _memomizedResults?[currentPair] = foundSchema;
+        }
         return foundSchema;
       }
     }
@@ -690,7 +717,7 @@ class JsonSchema {
 
   JsonSchema? _recursiveResolvePath(
       Uri? pathUri, List<String> fragments, JsonSchema? baseSchema, Set<Uri?> refsEncountered,
-      {bool skipInitialRefCheck = false}) {
+      {bool skipInitialRefCheck = false, bool stopAtTerminalRef = false}) {
     // Set of properties that are ignored when set beside a `$ref`.
     final Set<String> consts = {r'$id', r'$schema', r'$comment'};
     if (fragments.isNotEmpty) {
@@ -771,6 +798,12 @@ class JsonSchema {
         // If currentSchema contains a ref, try resolving it.
         // There is a very similar check before the fragment loop starts.
         if (currentSchema.ref != null) {
+          // In hop-by-hop mode, stop at the terminal ref-bearing schema so the
+          // caller can register its scope and resolve the next hop itself,
+          // instead of collapsing the entire chain to its terminal target.
+          if (stopAtTerminalRef && i + 1 == fragments.length) {
+            continue;
+          }
           // If we are at the end of the fragments to search and there are additional properties in the schema,
           // continue here so the currentSchema will be returned.
           if (i + 1 == fragments.length &&
@@ -810,8 +843,16 @@ class JsonSchema {
     if (schema.schemaVersion < SchemaVersion.draft2020_12) {
       return null;
     }
+    // A `$dynamicAnchor` is registered under its enclosing resource's base URI,
+    // so resolve against that base (the schema's own `$id`, or the nearest
+    // ancestor's for a sub-schema that carries no `$id` of its own) rather than
+    // `schema.id`, which is null for non-resource-root scopes on a `$ref` chain.
+    final base = schema._uri ?? schema._inheritedUri;
+    if (base == null) {
+      return null;
+    }
     // IDs in draft2019 and up do not have fragments.
-    var ref = Uri.parse("${schema.id.toString()}#$dynamicAnchor").toString();
+    var ref = Uri.parse("$base#$dynamicAnchor").toString();
     if (_refMap.containsKey(ref)) {
       var anchorPoint = _refMap[ref]!;
       if (anchorPoint.dynamicAnchor == dynamicAnchor) {
@@ -822,9 +863,12 @@ class JsonSchema {
   }
 
   /// Create a sub-schema inside the root, using either a directly nested schema, or a definition.
-  JsonSchema _createSubSchema(Object? schemaDefinition, String path) {
+  JsonSchema _createSubSchema(Object? schemaDefinition, String path, {bool insideUnknownKeyword = false}) {
+    // An opaque (unknown-keyword) subtree stays opaque for all descendants.
+    final childInsideUnknownKeyword = _insideUnknownKeyword || insideUnknownKeyword;
     if (schemaDefinition is Map) {
-      return JsonSchema._fromMap(_root, schemaDefinition, path, parent: this);
+      return JsonSchema._fromMap(_root, schemaDefinition, path,
+          parent: this, insideUnknownKeyword: childInsideUnknownKeyword);
 
       // Boolean schemas are only supported in draft 6 and later.
     } else if (schemaDefinition is bool && schemaVersion >= SchemaVersion.draft6) {
@@ -871,7 +915,20 @@ class JsonSchema {
         await refProvider!.provide(baseUri.toString()) ??
         await refProvider!.provide('$baseUri#');
 
-    return _createAndResolveProvidedSchema(ref, schemaDefinition);
+    final resolved = _createAndResolveProvidedSchema(ref, schemaDefinition);
+
+    // A fetched remote schema may itself reference further remotes (a nested
+    // `$ref` that resolves relative to the fetched file's URI). Those transitive
+    // retrievals are registered on the freshly-built sub-root and satisfied by
+    // its own asynchronous _resolveAllPathsAsync. Await that completion so the
+    // shared _refMap is fully populated before validation reads from it;
+    // otherwise the nested target is never fetched and resolvePath throws.
+    final subRoot = resolved?._root;
+    if (subRoot != null && !identical(subRoot, _root) && !subRoot._thisCompleter.isCompleted) {
+      await subRoot._thisCompleter.future;
+    }
+
+    return resolved;
   }
 
   JsonSchema? _createAndResolveProvidedSchema(Uri ref, dynamic schemaDefinition) {
@@ -929,6 +986,14 @@ class JsonSchema {
   /// The parent [JsonSchema] for this [JsonSchema].
   JsonSchema? _parent;
 
+  /// Whether this [JsonSchema] lives inside the value of an unknown keyword.
+  ///
+  /// Per spec, an unknown keyword is not a schema, so any `$id`, `$anchor`, or
+  /// `$dynamicAnchor` found within its value must not be registered as a real
+  /// identifier. This flag is inherited by all descendant sub-schemas so the
+  /// entire opaque subtree is excluded from identifier resolution.
+  bool _insideUnknownKeyword = false;
+
   /// JSON of the [JsonSchema] as a [Map]. Only this value or [_schemaBool] should be set, not both.
   final Map<String, dynamic>? _schemaMap;
 
@@ -981,13 +1046,16 @@ class JsonSchema {
   String? _contentEncoding;
 
   /// Content Schema.
-  String? _contentSchema;
+  JsonSchema? _contentSchema;
 
   /// A [JsonSchema] used for validataion if the schema doesn't validate against the 'if' schema.
   JsonSchema? _elseSchema;
 
   /// Possible values of the [JsonSchema].
-  List? _enumValues = [];
+  ///
+  /// Left `null` when the `enum` keyword is absent so it can be distinguished
+  /// from a present-but-empty `enum: []`, which matches no instance.
+  List? _enumValues;
 
   /// Example values for the given schema.
   List _examples = [];
@@ -1396,7 +1464,9 @@ class JsonSchema {
   static final Map<String, SchemaPropertySetter> _draft2020FormatAnnotation = <String, SchemaPropertySetter>{}
     ..addAll({'format': (JsonSchema s, dynamic v) => s._setFormat(v)});
 
-  // Not used in the draft 2020, but including for completeness and potential future vocabulary useage.
+  // Parses `format` identically to the annotation vocabulary. Whether `format`
+  // is enforced as an assertion is decided at validation time via
+  // [JsonSchema.formatIsAssertion], which detects this vocabulary in the dialect.
   static final Map<String, SchemaPropertySetter> _draft2020FormatAssertion = <String, SchemaPropertySetter>{}
     ..addAll({'format': (JsonSchema s, dynamic v) => s._setFormat(v)});
 
@@ -1461,7 +1531,12 @@ class JsonSchema {
   }
 
   /// Get a nested [JsonSchema] from a path.
-  JsonSchema resolvePath(Uri? path) => _getSchemaFromPath(path);
+  ///
+  /// When [stopAtTerminalRef] is `true`, a `$ref` chain is resolved one hop at
+  /// a time: the returned schema is the immediate target of [path], even when
+  /// that target is itself a pure `$ref`. See [_getSchemaFromPath].
+  JsonSchema resolvePath(Uri? path, {bool stopAtTerminalRef = false}) =>
+      _getSchemaFromPath(path, null, stopAtTerminalRef);
 
   /// Get a [JsonSchema] from the dynamicParent with the given anchor. Returns null if none exists.
   JsonSchema? resolveDynamicAnchor(String dynamicAnchor, {JsonSchema? dynamicParent}) =>
@@ -1598,7 +1673,7 @@ class JsonSchema {
   /// Description of the [JsonSchema].
   ///
   /// Spec: https://json-schema.org/draft/2019-09/json-schema-validation.html#rfc.section.8.5
-  String? get contentSchema => _contentSchema;
+  JsonSchema? get contentSchema => _contentSchema;
 
   /// A [JsonSchema] used for validataion if the schema doesn't validate against the 'if' schema.
   ///
@@ -1778,6 +1853,13 @@ class JsonSchema {
   ///
   /// Spec: https://json-schema.org/draft/2019-09/json-schema-core.html#rfc.section.8.1.2
   Map<Uri, bool>? get metaschemaVocabulary => _metaschemaVocabulary ?? _root?._metaschemaVocabulary;
+
+  /// Whether the active dialect declares the Draft 2020-12 format-assertion
+  /// vocabulary. When present, `format` behaves as an assertion regardless of
+  /// the caller's `validateFormats` option.
+  ///
+  /// Spec: https://json-schema.org/draft/2020-12/json-schema-validation.html#rfc.section.7
+  bool get formatIsAssertion => metaschemaVocabulary?.containsKey(SupportedVocabularies.formatAssertion2020) ?? false;
 
   // --------------------------------------------------------------------------
   // Schema List Item Related Getters
@@ -1966,15 +2048,23 @@ class JsonSchema {
     // Does it have a fragment? Append the base and check if it exists in the _refMap
     // Does it have a path? Append the base and check if it exists in the _refMap
     if (ref.scheme.isEmpty && ref.path != _root!._uri?.path) {
-      /// If the ref has a path, append it to the inheritedUriBase
+      /// If the ref has a path, resolve it against the current base URI.
       if (ref.path != '/' && ref.path.isNotEmpty) {
-        final String path = ref.path.startsWith('/') ? ref.path : '/${ref.path}';
-        String template = '${_uriBase ?? _inheritedUriBase ?? ''}$path';
-
-        if (ref.fragment.isNotEmpty) {
-          template += '#${ref.fragment}';
+        // Resolve following RFC 3986 so that an absolute-path reference (one
+        // beginning with '/') resolves against the base's authority root and
+        // dot-segments ('./', '../') plus nested `$id` bases are honored,
+        // instead of blindly concatenating the path onto the base directory.
+        final base = _uri ?? _inheritedUri ?? _uriBase ?? _inheritedUriBase;
+        if (base != null && base.toString().isNotEmpty) {
+          ref = base.resolveUri(ref);
+        } else {
+          final String path = ref.path.startsWith('/') ? ref.path : '/${ref.path}';
+          var template = path;
+          if (ref.fragment.isNotEmpty) {
+            template += '#${ref.fragment}';
+          }
+          ref = Uri.parse(template);
         }
-        ref = Uri.parse(template);
       } else {
         // If the ref has a fragment, append it to the _uri or _inheritedUri, or use it alone.
         ref = Uri.parse('${_uri ?? _inheritedUri ?? ''}#${ref.fragment}');
@@ -2037,7 +2127,8 @@ class JsonSchema {
   JsonSchema? _addSchemaToRefMap(String path, JsonSchema? schema) => _refMap[path] = schema!;
 
   // Create a [JsonSchema] from a sub-schema of the root.
-  _createOrRetrieveSchema(String path, dynamic schema, SchemaAssigner assigner, {mustBeValid = true}) {
+  _createOrRetrieveSchema(String path, dynamic schema, SchemaAssigner assigner,
+      {mustBeValid = true, bool insideUnknownKeyword = false}) {
     Never Function()? throwError;
 
     if (schema is bool && !(schemaVersion >= SchemaVersion.draft6)) {
@@ -2058,24 +2149,28 @@ class JsonSchema {
     /// add it to the map of local schema assignments.
     /// Otherwise, call the assigner function and create a new [JsonSchema].
     if (isRemoteReference) {
-      final schemaDefinitionMap = TypeValidators.object(path, schema);
-      Uri ref = TypeValidators.uri(r'$ref', schemaDefinitionMap[r'$ref']);
-
-      // Add any relevant inherited Uri information.
-      ref = _translateLocalRefToFullUri(ref);
-
-      // Add retrievals to _root schema.
-      _addRefRetrievals(ref);
-
       if (schemaVersion < SchemaVersion.draft2019_09) {
+        final schemaDefinitionMap = TypeValidators.object(path, schema);
+        Uri ref = TypeValidators.uri(r'$ref', schemaDefinitionMap[r'$ref']);
+
+        // Add any relevant inherited Uri information.
+        ref = _translateLocalRefToFullUri(ref);
+
+        // Add retrievals to _root schema.
+        _addRefRetrievals(ref);
+
         _schemaAssignments.add(() => assigner(_getSchemaFromPath(ref)));
       } else {
         // References can't overwrite the reference node in draft 2019 or later.
-        assigner(_createSubSchema(schema, path));
+        // Build the full subschema so that a sibling `$id` rebases the `$ref`
+        // (and any `$anchor`) in the subschema's own scope; translating and
+        // retrieving here would use the parent's base URI and can fabricate a
+        // spurious remote fetch for an in-document target.
+        assigner(_createSubSchema(schema, path, insideUnknownKeyword: insideUnknownKeyword));
       }
     } else {
       // Sub schema can be created immediately.
-      assigner(_createSubSchema(schema, path));
+      assigner(_createSubSchema(schema, path, insideUnknownKeyword: insideUnknownKeyword));
     }
   }
 
@@ -2133,7 +2228,15 @@ class JsonSchema {
   _setContentEncoding(dynamic value) => _contentEncoding = TypeValidators.string('contentEncoding', value);
 
   /// Validate, calculate and set the value of the 'contentSchema' JSON Schema keyword.
-  _setContentSchema(dynamic value) => _contentSchema = TypeValidators.string('contentSchema', value);
+  ///
+  /// Per spec, `contentSchema` is a subschema (annotation only), not a string.
+  _setContentSchema(dynamic value) {
+    if (value is Map || value is bool && schemaVersion >= SchemaVersion.draft6) {
+      _createOrRetrieveSchema('$_path/contentSchema', value, (rhs) => _contentSchema = rhs);
+    } else {
+      throw FormatExceptions.error('contentSchema must be object (or boolean in draft6 and later): $value');
+    }
+  }
 
   /// Validate, calculate and set the value of the 'else' JSON Schema keyword.
   _setElse(dynamic value) {
@@ -2170,10 +2273,25 @@ class JsonSchema {
 
     // If the current schema $id has no scheme.
     if (_id!.scheme.isEmpty) {
-      // If the $id has a path and the root has a base, append it to the base.
-      if (_inheritedUriBase != null && _id!.path != '/' && _id!.path.isNotEmpty) {
-        final path = _id!.path.startsWith('/') ? _id!.path : '/${_id!.path}';
-        _id = Uri.parse('${_inheritedUriBase.toString()}$path');
+      // If the $id has a path, resolve it against the inherited base URI.
+      if (_id!.path != '/' && _id!.path.isNotEmpty) {
+        // Resolve following RFC 3986 against the nearest ancestor base URI so a
+        // relative `$id` composes correctly (no doubled '/', proper handling of
+        // absolute-path and dot-segment ids) instead of being concatenated onto
+        // the base directory.
+        //
+        // The base must never be this schema's own (currently being-set) id.
+        // For a root, `_inheritedUri` falls back to `root?._uri`, which is this
+        // schema itself and would resolve the id against the half-set value,
+        // dropping the directory of the URI the root was fetched from. Skip that
+        // self-reference for the root and resolve against the fetch URI instead.
+        final base = (_root == this ? null : _inheritedUri) ?? _fetchedFromUri ?? _inheritedUriBase ?? _uri;
+        if (base != null && base.toString().isNotEmpty) {
+          _id = base.resolveUri(_id!);
+        } else {
+          final path = _id!.path.startsWith('/') ? _id!.path : '/${_id!.path}';
+          _id = Uri.parse(path);
+        }
 
         // If the $id has a fragment, append it to the base, or use it alone.
       } else if (_id!.fragment.isNotEmpty) {
@@ -2191,9 +2309,13 @@ class JsonSchema {
       // This is expected behavior.
     }
 
-    // Add the current schema to the ref map by its id, so it can be referenced elsewhere.
-    final String refMapString = '$_id${_id!.hasFragment ? '' : '#'}';
-    _addSchemaToRefMap(refMapString, this);
+    // Add the current schema to the ref map by its id, so it can be referenced
+    // elsewhere. An `$id` inside an unknown keyword is not a real identifier, so
+    // it must not be registered.
+    if (!_insideUnknownKeyword) {
+      final String refMapString = '$_id${_id!.hasFragment ? '' : '#'}';
+      _addSchemaToRefMap(refMapString, this);
+    }
     return _id;
   }
 
@@ -2207,17 +2329,23 @@ class JsonSchema {
   /// Validate, set, and register the value of the '$anchor' JSON Schema keyword.
   _setAnchor(dynamic value) {
     _anchor = TypeValidators.anchorString(r"$anchor", value);
-    final uri = _uri ?? _inheritedUri ?? '';
-    final String refMapString = '$uri#$_anchor';
-    _addSchemaToRefMap(refMapString, this);
+    // An `$anchor` inside an unknown keyword is not a real identifier.
+    if (!_insideUnknownKeyword) {
+      final uri = _uri ?? _inheritedUri ?? '';
+      final String refMapString = '$uri#$_anchor';
+      _addSchemaToRefMap(refMapString, this);
+    }
     return _anchor;
   }
 
   _setDynamicAnchor(dynamic value) {
     _dynamicAnchor = TypeValidators.anchorString(r"$dynamicAnchor", value);
-    final uri = _uri ?? _inheritedUri ?? '';
-    final String refMapString = '$uri#$_dynamicAnchor';
-    _addSchemaToRefMap(refMapString, this);
+    // A `$dynamicAnchor` inside an unknown keyword is not a real identifier.
+    if (!_insideUnknownKeyword) {
+      final uri = _uri ?? _inheritedUri ?? '';
+      final String refMapString = '$uri#$_dynamicAnchor';
+      _addSchemaToRefMap(refMapString, this);
+    }
     return _dynamicAnchor;
   }
 
@@ -2317,7 +2445,9 @@ class JsonSchema {
 
     // The ref's base is a relative file path, so it should be treated as a relative file URI
     final isRelativeFileUri = _inheritedUriBase != null && _inheritedUriBase!.scheme.isEmpty;
-    final isLocalRef = _inheritedUri!.removeFragment() == _dynamicRef!.removeFragment();
+    // A $dynamicRef into the current document (e.g. a boolean-schema target under
+    // $defs) may sit in a schema with no inherited URI; treat that as a local ref.
+    final isLocalRef = _inheritedUri != null && _inheritedUri!.removeFragment() == _dynamicRef!.removeFragment();
     if ((_dynamicRef!.scheme.isNotEmpty && !isLocalRef) || isRelativeFileUri) {
       // Add retrievals to _root schema.
       _addRefRetrievals(_dynamicRef);
