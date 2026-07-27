@@ -5,8 +5,9 @@
         "https://json-schema.org/draft/2020-12/vocab/core": true,
         "https://json-schema.org/draft/2020-12/vocab/format-assertion": false
     },
+    "$dynamicAnchor": "meta",
     "allOf": [
-        { "$ref": "https://json-schema.org/draft/2020-12/schema/meta/core" },
-        { "$ref": "https://json-schema.org/draft/2020-12/schema/meta/format-assertion" }
+        { "$ref": "https://json-schema.org/draft/2020-12/meta/core" },
+        { "$ref": "https://json-schema.org/draft/2020-12/meta/format-assertion" }
     ]
 }

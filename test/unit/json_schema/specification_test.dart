@@ -38,7 +38,6 @@
 
 import 'dart:convert';
 
-import 'package:json_schema/src/json_schema/models/validation_results.dart';
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 

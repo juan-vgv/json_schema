@@ -25728,7 +25728,9 @@ Map<String, String> specificationTests = {
     {
         "description":
             "additionalProperties being false does not allow other properties",
+        "specification": [ { "core":"10.3.2.3", "quote": "The value of \"additionalProperties\" MUST be a valid JSON Schema. Boolean \"false\" forbids everything." } ],
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "properties": {"foo": {}, "bar": {}},
             "patternProperties": { "^v": {} },
             "additionalProperties": false
@@ -25768,7 +25770,9 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "non-ASCII pattern with additionalProperties",
+        "specification": [ { "core":"10.3.2.3"} ],
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "patternProperties": {"^á": {}},
             "additionalProperties": false
         },
@@ -25786,9 +25790,10 @@ Map<String, String> specificationTests = {
         ]
     },
     {
-        "description":
-            "additionalProperties allows a schema which should validate",
+        "description": "additionalProperties with schema",
+        "specification": [ { "core":"10.3.2.3", "quote": "The value of \"additionalProperties\" MUST be a valid JSON Schema." } ],
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "properties": {"foo": {}, "bar": {}},
             "additionalProperties": {"type": "boolean"}
         },
@@ -25811,9 +25816,10 @@ Map<String, String> specificationTests = {
         ]
     },
     {
-        "description":
-            "additionalProperties can exist by itself",
+        "description": "additionalProperties can exist by itself",
+        "specification": [ { "core":"10.3.2.3", "quote": "With no other applicator applying to object instances. This validates all the instance values irrespective of their property names" } ],
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "additionalProperties": {"type": "boolean"}
         },
         "tests": [
@@ -25831,7 +25837,11 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "additionalProperties are allowed by default",
-        "schema": {"properties": {"foo": {}, "bar": {}}},
+        "specification": [ { "core":"10.3.2.3", "quote": "Omitting this keyword has the same assertion behavior as an empty schema." } ],
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "properties": {"foo": {}, "bar": {}}
+        },
         "tests": [
             {
                 "description": "additional properties are allowed",
@@ -25841,8 +25851,10 @@ Map<String, String> specificationTests = {
         ]
     },
     {
-        "description": "additionalProperties should not look in applicators",
+        "description": "additionalProperties does not look in applicators",
+        "specification":[ { "core": "10.2", "quote": "Subschemas of applicator keywords evaluate the instance completely independently such that the results of one such subschema MUST NOT impact the results of sibling subschemas." } ],
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "allOf": [
                 {"properties": {"foo": {}}}
             ],
@@ -25855,6 +25867,80 @@ Map<String, String> specificationTests = {
                 "valid": false
             }
         ]
+    },
+    {
+        "description": "additionalProperties with null valued instance properties",
+        "specification": [ { "core":"10.3.2.3" } ],
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": {
+                "type": "null"
+            }
+        },
+        "tests": [
+            {
+                "description": "allows null values",
+                "data": {"foo": null},
+                "valid": true
+            }
+        ]
+    },
+    {
+        "description": "additionalProperties with propertyNames",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "propertyNames": {
+                "maxLength": 5
+            },
+            "additionalProperties": {
+                "type": "number"
+            }
+        },
+        "tests": [
+            {
+                "description": "Valid against both keywords",
+                "data": { "apple": 4 },
+                "valid": true
+            },
+            {
+                "description": "Valid against propertyNames, but not additionalProperties",
+                "data": { "fig": 2, "pear": "available" },
+                "valid": false
+            }
+        ]
+    },
+    {
+        "description": "dependentSchemas with additionalProperties",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "properties": {"foo2": {}},
+            "dependentSchemas": {
+                "foo" : {},
+                "foo2": {
+                    "properties": {
+                        "bar": {}
+                    }
+                }
+            },
+            "additionalProperties": false
+        },
+        "tests": [
+            {
+                "description": "additionalProperties doesn't consider dependentSchemas",
+                "data": {"foo": ""},
+                "valid": false
+            },
+            {
+                "description": "additionalProperties can't see bar",
+                "data": {"bar": ""},
+                "valid": false
+            },
+            {
+                "description": "additionalProperties can't see bar even when foo2 is present",
+                "data": {"foo2": "", "bar": ""},
+                "valid": false
+            }
+        ]
     }
 ]
 """,
@@ -25862,6 +25948,7 @@ Map<String, String> specificationTests = {
     {
         "description": "allOf",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "allOf": [
                 {
                     "properties": {
@@ -25903,6 +25990,7 @@ Map<String, String> specificationTests = {
     {
         "description": "allOf with base schema",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "properties": {"bar": {"type": "integer"}},
             "required": ["bar"],
             "allOf" : [
@@ -25951,6 +26039,7 @@ Map<String, String> specificationTests = {
     {
         "description": "allOf simple types",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "allOf": [
                 {"maximum": 30},
                 {"minimum": 20}
@@ -25971,7 +26060,10 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "allOf with boolean schemas, all true",
-        "schema": {"allOf": [true, true]},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "allOf": [true, true]
+        },
         "tests": [
             {
                 "description": "any value is valid",
@@ -25982,7 +26074,10 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "allOf with boolean schemas, some false",
-        "schema": {"allOf": [true, false]},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "allOf": [true, false]
+        },
         "tests": [
             {
                 "description": "any value is invalid",
@@ -25993,7 +26088,10 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "allOf with boolean schemas, all false",
-        "schema": {"allOf": [false, false]},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "allOf": [false, false]
+        },
         "tests": [
             {
                 "description": "any value is invalid",
@@ -26005,6 +26103,7 @@ Map<String, String> specificationTests = {
     {
         "description": "allOf with one empty schema",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "allOf": [
                 {}
             ]
@@ -26020,6 +26119,7 @@ Map<String, String> specificationTests = {
     {
         "description": "allOf with two empty schemas",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "allOf": [
                 {},
                 {}
@@ -26036,6 +26136,7 @@ Map<String, String> specificationTests = {
     {
         "description": "allOf with the first empty schema",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "allOf": [
                 {},
                 { "type": "number" }
@@ -26057,6 +26158,7 @@ Map<String, String> specificationTests = {
     {
         "description": "allOf with the last empty schema",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "allOf": [
                 { "type": "number" },
                 {}
@@ -26078,6 +26180,7 @@ Map<String, String> specificationTests = {
     {
         "description": "nested allOf, to check validation semantics",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "allOf": [
                 {
                     "allOf": [
@@ -26104,6 +26207,7 @@ Map<String, String> specificationTests = {
     {
         "description": "allOf combined with anyOf, oneOf",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "allOf": [ { "multipleOf": 2 } ],
             "anyOf": [ { "multipleOf": 3 } ],
             "oneOf": [ { "multipleOf": 5 } ]
@@ -26157,6 +26261,7 @@ Map<String, String> specificationTests = {
     {
         "description": "Location-independent identifier",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "$ref": "#foo",
             "$defs": {
                 "A": {
@@ -26181,10 +26286,11 @@ Map<String, String> specificationTests = {
     {
         "description": "Location-independent identifier with absolute URI",
         "schema": {
-            "$ref": "http://localhost:1234/bar#foo",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$ref": "http://localhost:1234/draft2020-12/bar#foo",
             "$defs": {
                 "A": {
-                    "$id": "http://localhost:1234/bar",
+                    "$id": "http://localhost:1234/draft2020-12/bar",
                     "$anchor": "foo",
                     "type": "integer"
                 }
@@ -26206,8 +26312,9 @@ Map<String, String> specificationTests = {
     {
         "description": "Location-independent identifier with base URI change in subschema",
         "schema": {
-            "$id": "http://localhost:1234/root",
-            "$ref": "http://localhost:1234/nested.json#foo",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "http://localhost:1234/draft2020-12/root",
+            "$ref": "http://localhost:1234/draft2020-12/nested.json#foo",
             "$defs": {
                 "A": {
                     "$id": "nested.json",
@@ -26234,66 +26341,10 @@ Map<String, String> specificationTests = {
         ]
     },
     {
-        "description": "$anchor inside an enum is not a real identifier",
-        "comment": "the implementation must not be confused by an $anchor buried in the enum",
-        "schema": {
-            "$defs": {
-                "anchor_in_enum": {
-                    "enum": [
-                        {
-                            "$anchor": "my_anchor",
-                            "type": "null"
-                        }
-                    ]
-                },
-                "real_identifier_in_schema": {
-                    "$anchor": "my_anchor",
-                    "type": "string"
-                },
-                "zzz_anchor_in_const": {
-                    "const": {
-                        "$anchor": "my_anchor",
-                        "type": "null"
-                    }
-                }
-            },
-            "anyOf": [
-                { "$ref": "#/$defs/anchor_in_enum" },
-                { "$ref": "#my_anchor" }
-            ]
-        },
-        "tests": [
-            {
-                "description": "exact match to enum, and type matches",
-                "data": {
-                    "$anchor": "my_anchor",
-                    "type": "null"
-                },
-                "valid": true
-            },
-            {
-                "description": "in implementations that strip $anchor, this may match either $def",
-                "data": {
-                    "type": "null"
-                },
-                "valid": false
-            },
-            {
-                "description": "match $ref to $anchor",
-                "data": "a string to match #/$defs/anchor_in_enum",
-                "valid": true
-            },
-            {
-                "description": "no match on enum or $ref to $anchor",
-                "data": 1,
-                "valid": false
-            }
-        ]
-    },
-    {
         "description": "same $anchor with different base uri",
         "schema": {
-            "$id": "http://localhost:1234/foobar",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "http://localhost:1234/draft2020-12/foobar",
             "$defs": {
                 "A": {
                     "$id": "child1",
@@ -26314,12 +26365,12 @@ Map<String, String> specificationTests = {
         },
         "tests": [
             {
-                "description": "$ref should resolve to /$defs/A/allOf/1",
+                "description": "$ref resolves to /$defs/A/allOf/1",
                 "data": "a",
                 "valid": true
             },
             {
-                "description": "$ref should not resolve to /$defs/A/allOf/0",
+                "description": "$ref does not resolve to /$defs/A/allOf/0",
                 "data": 1,
                 "valid": false
             }
@@ -26331,6 +26382,7 @@ Map<String, String> specificationTests = {
     {
         "description": "anyOf",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "anyOf": [
                 {
                     "type": "integer"
@@ -26366,6 +26418,7 @@ Map<String, String> specificationTests = {
     {
         "description": "anyOf with base schema",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "string",
             "anyOf" : [
                 {
@@ -26396,7 +26449,10 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "anyOf with boolean schemas, all true",
-        "schema": {"anyOf": [true, true]},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "anyOf": [true, true]
+        },
         "tests": [
             {
                 "description": "any value is valid",
@@ -26407,7 +26463,10 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "anyOf with boolean schemas, some true",
-        "schema": {"anyOf": [true, false]},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "anyOf": [true, false]
+        },
         "tests": [
             {
                 "description": "any value is valid",
@@ -26418,7 +26477,10 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "anyOf with boolean schemas, all false",
-        "schema": {"anyOf": [false, false]},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "anyOf": [false, false]
+        },
         "tests": [
             {
                 "description": "any value is invalid",
@@ -26430,6 +26492,7 @@ Map<String, String> specificationTests = {
     {
         "description": "anyOf complex types",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "anyOf": [
                 {
                     "properties": {
@@ -26471,6 +26534,7 @@ Map<String, String> specificationTests = {
     {
         "description": "anyOf with one empty schema",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "anyOf": [
                 { "type": "number" },
                 {}
@@ -26492,6 +26556,7 @@ Map<String, String> specificationTests = {
     {
         "description": "nested anyOf, to check validation semantics",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "anyOf": [
                 {
                     "anyOf": [
@@ -26625,7 +26690,10 @@ Map<String, String> specificationTests = {
   "/draft2020-12/const.json": r"""[
     {
         "description": "const validation",
-        "schema": {"const": 2},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "const": 2
+        },
         "tests": [
             {
                 "description": "same value is valid",
@@ -26646,7 +26714,10 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "const with object",
-        "schema": {"const": {"foo": "bar", "baz": "bax"}},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "const": {"foo": "bar", "baz": "bax"}
+        },
         "tests": [
             {
                 "description": "same object is valid",
@@ -26672,7 +26743,10 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "const with array",
-        "schema": {"const": [{ "foo": "bar" }]},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "const": [{ "foo": "bar" }]
+        },
         "tests": [
             {
                 "description": "same array is valid",
@@ -26693,7 +26767,10 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "const with null",
-        "schema": {"const": null},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "const": null
+        },
         "tests": [
             {
                 "description": "null is valid",
@@ -26709,7 +26786,10 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "const with false does not match 0",
-        "schema": {"const": false},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "const": false
+        },
         "tests": [
             {
                 "description": "false is valid",
@@ -26730,7 +26810,10 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "const with true does not match 1",
-        "schema": {"const": true},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "const": true
+        },
         "tests": [
             {
                 "description": "true is valid",
@@ -26751,7 +26834,10 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "const with [false] does not match [0]",
-        "schema": {"const": [false]},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "const": [false]
+        },
         "tests": [
             {
                 "description": "[false] is valid",
@@ -26772,7 +26858,10 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "const with [true] does not match [1]",
-        "schema": {"const": [true]},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "const": [true]
+        },
         "tests": [
             {
                 "description": "[true] is valid",
@@ -26793,7 +26882,10 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "const with {\"a\": false} does not match {\"a\": 0}",
-        "schema": {"const": {"a": false}},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "const": {"a": false}
+        },
         "tests": [
             {
                 "description": "{\"a\": false} is valid",
@@ -26814,7 +26906,10 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "const with {\"a\": true} does not match {\"a\": 1}",
-        "schema": {"const": {"a": true}},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "const": {"a": true}
+        },
         "tests": [
             {
                 "description": "{\"a\": true} is valid",
@@ -26835,7 +26930,10 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "const with 0 does not match other zero-like types",
-        "schema": {"const": 0},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "const": 0
+        },
         "tests": [
             {
                 "description": "false is invalid",
@@ -26871,7 +26969,10 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "const with 1 does not match true",
-        "schema": {"const": 1},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "const": 1
+        },
         "tests": [
             {
                 "description": "true is invalid",
@@ -26892,7 +26993,10 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "const with -2.0 matches integer and float types",
-        "schema": {"const": -2.0},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "const": -2.0
+        },
         "tests": [
             {
                 "description": "integer -2 is valid",
@@ -26923,7 +27027,10 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "float and integers are equal up to 64-bit representation limits",
-        "schema": {"const": 9007199254740992},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "const": 9007199254740992
+        },
         "tests": [
             {
                 "description": "integer is valid",
@@ -26949,7 +27056,10 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "nul characters in strings",
-        "schema": { "const": "hello\u0000there" },
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "const": "hello\u0000there"
+        },
         "tests": [
             {
                 "description": "match string with nul",
@@ -26962,6 +27072,50 @@ Map<String, String> specificationTests = {
                 "valid": false
             }
         ]
+    },
+    {
+        "description": "characters with the same visual representation but different codepoint",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "const": "μ",
+            "$comment": "U+03BC"
+        },
+        "tests": [
+            {
+                "description": "character uses the same codepoint",
+                "data": "μ",
+                "comment": "U+03BC",
+                "valid": true
+            },
+            {
+                "description": "character looks the same but uses a different codepoint",
+                "data": "µ",
+                "comment": "U+00B5",
+                "valid": false
+            }
+        ]
+    },
+    {
+        "description": "characters with the same visual representation, but different number of codepoints",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "const": "ä",
+            "$comment": "U+00E4"
+        },
+        "tests": [
+            {
+                "description": "character uses the same codepoint",
+                "data": "ä",
+                "comment": "U+00E4",
+                "valid": true
+            },
+            {
+                "description": "character looks the same but uses combining marks",
+                "data": "ä",
+                "comment": "a, U+0308",
+                "valid": false
+            }
+        ]
     }
 ]
 """,
@@ -26969,6 +27123,7 @@ Map<String, String> specificationTests = {
     {
         "description": "contains keyword validation",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "contains": {"minimum": 5}
         },
         "tests": [
@@ -27007,6 +27162,7 @@ Map<String, String> specificationTests = {
     {
         "description": "contains keyword with const keyword",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "contains": { "const": 5 }
         },
         "tests": [
@@ -27029,7 +27185,10 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "contains keyword with boolean schema true",
-        "schema": {"contains": true},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "contains": true
+        },
         "tests": [
             {
                 "description": "any non-empty array is valid",
@@ -27045,7 +27204,10 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "contains keyword with boolean schema false",
-        "schema": {"contains": false},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "contains": false
+        },
         "tests": [
             {
                 "description": "any non-empty array is invalid",
@@ -27067,6 +27229,7 @@ Map<String, String> specificationTests = {
     {
         "description": "items + contains",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "items": { "multipleOf": 2 },
             "contains": { "multipleOf": 3 }
         },
@@ -27096,6 +27259,7 @@ Map<String, String> specificationTests = {
     {
         "description": "contains with false if subschema",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "contains": {
                 "if": false,
                 "else": true
@@ -27113,6 +27277,22 @@ Map<String, String> specificationTests = {
                 "valid": false
             }
         ]
+    },
+    {
+        "description": "contains with null instance elements",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "contains": {
+                "type": "null"
+            }
+        },
+        "tests": [
+            {
+                "description": "allows null items",
+                "data": [ null ],
+                "valid": true
+            }
+        ]
     }
 ]
 """,
@@ -27120,6 +27300,7 @@ Map<String, String> specificationTests = {
     {
         "description": "validation of string-encoded content based on media type",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "contentMediaType": "application/json"
         },
         "tests": [
@@ -27143,6 +27324,7 @@ Map<String, String> specificationTests = {
     {
         "description": "validation of binary string-encoding",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "contentEncoding": "base64"
         },
         "tests": [
@@ -27166,6 +27348,7 @@ Map<String, String> specificationTests = {
     {
         "description": "validation of binary-encoded media type documents",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "contentMediaType": "application/json",
             "contentEncoding": "base64"
         },
@@ -27195,9 +27378,10 @@ Map<String, String> specificationTests = {
     {
         "description": "validation of binary-encoded media type documents with schema",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "contentMediaType": "application/json",
             "contentEncoding": "base64",
-            "contentSchema": { "required": ["foo"], "properties": { "foo": { "type": "string" } } }
+            "contentSchema": { "type": "object", "required": ["foo"], "properties": { "foo": { "type": "string" } } }
         },
         "tests": [
             {
@@ -27248,6 +27432,7 @@ Map<String, String> specificationTests = {
     {
         "description": "invalid type for default",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "properties": {
                 "foo": {
                     "type": "integer",
@@ -27271,6 +27456,7 @@ Map<String, String> specificationTests = {
     {
         "description": "invalid string value for default",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "properties": {
                 "bar": {
                     "type": "string",
@@ -27295,6 +27481,7 @@ Map<String, String> specificationTests = {
     {
         "description": "the default keyword does not do anything if the property is missing",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "object",
             "properties": {
                 "alpha": {
@@ -27328,6 +27515,7 @@ Map<String, String> specificationTests = {
     {
         "description": "validate definition against metaschema",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "$ref": "https://json-schema.org/draft/2020-12/schema"
         },
         "tests": [
@@ -27348,7 +27536,10 @@ Map<String, String> specificationTests = {
   "/draft2020-12/dependentRequired.json": r"""[
     {
         "description": "single dependency",
-        "schema": {"dependentRequired": {"bar": ["foo"]}},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "dependentRequired": {"bar": ["foo"]}
+        },
         "tests": [
             {
                 "description": "neither",
@@ -27389,7 +27580,10 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "empty dependents",
-        "schema": {"dependentRequired": {"bar": []}},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "dependentRequired": {"bar": []}
+        },
         "tests": [
             {
                 "description": "empty object",
@@ -27410,7 +27604,10 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "multiple dependents required",
-        "schema": {"dependentRequired": {"quux": ["foo", "bar"]}},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "dependentRequired": {"quux": ["foo", "bar"]}
+        },
         "tests": [
             {
                 "description": "neither",
@@ -27447,6 +27644,7 @@ Map<String, String> specificationTests = {
     {
         "description": "dependencies with escaped characters",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "dependentRequired": {
                 "foo\nbar": ["foo\rbar"],
                 "foo\"bar": ["foo'bar"]
@@ -27492,6 +27690,7 @@ Map<String, String> specificationTests = {
     {
         "description": "single dependency",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "dependentSchemas": {
                 "bar": {
                     "properties": {
@@ -27547,6 +27746,7 @@ Map<String, String> specificationTests = {
     {
         "description": "boolean subschemas",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "dependentSchemas": {
                 "foo": true,
                 "bar": false
@@ -27578,6 +27778,7 @@ Map<String, String> specificationTests = {
     {
         "description": "dependencies with escaped characters",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "dependentSchemas": {
                 "foo\tbar": {"minProperties": 4},
                 "foo'bar": {"required": ["foo\"bar"]}
@@ -27615,13 +27816,53 @@ Map<String, String> specificationTests = {
                 "valid": false
             }
         ]
+    },
+    {
+        "description": "dependent subschema incompatible with root",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "properties": {
+                "foo": {}
+            },
+            "dependentSchemas": {
+                "foo": {
+                    "properties": {
+                        "bar": {}
+                    },
+                    "additionalProperties": false
+                }
+            }
+        },
+        "tests": [
+            {
+                "description": "matches root",
+                "data": {"foo": 1},
+                "valid": false
+            },
+            {
+                "description": "matches dependency",
+                "data": {"bar": 1},
+                "valid": true
+            },
+            {
+                "description": "matches both",
+                "data": {"foo": 1, "bar": 2},
+                "valid": false
+            },
+            {
+                "description": "no dependency",
+                "data": {"baz": 1},
+                "valid": true
+            }
+        ]
     }
 ]
 """,
   "/draft2020-12/dynamicRef.json": r"""[
     {
-        "description": "A $dynamicRef to a $dynamicAnchor in the same schema resource should behave like a normal $ref to an $anchor",
+        "description": "A $dynamicRef to a $dynamicAnchor in the same schema resource behaves like a normal $ref to an $anchor",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "$id": "https://test.json-schema.org/dynamicRef-dynamicAnchor-same-schema/root",
             "type": "array",
             "items": { "$dynamicRef": "#items" },
@@ -27646,8 +27887,9 @@ Map<String, String> specificationTests = {
         ]
     },
     {
-        "description": "A $dynamicRef to an $anchor in the same schema resource should behave like a normal $ref to an $anchor",
+        "description": "A $dynamicRef to an $anchor in the same schema resource behaves like a normal $ref to an $anchor",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "$id": "https://test.json-schema.org/dynamicRef-anchor-same-schema/root",
             "type": "array",
             "items": { "$dynamicRef": "#items" },
@@ -27672,8 +27914,9 @@ Map<String, String> specificationTests = {
         ]
     },
     {
-        "description": "A $ref to a $dynamicAnchor in the same schema resource should behave like a normal $ref to an $anchor",
+        "description": "A $ref to a $dynamicAnchor in the same schema resource behaves like a normal $ref to an $anchor",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "$id": "https://test.json-schema.org/ref-dynamicAnchor-same-schema/root",
             "type": "array",
             "items": { "$ref": "#items" },
@@ -27698,8 +27941,9 @@ Map<String, String> specificationTests = {
         ]
     },
     {
-        "description": "A $dynamicRef should resolve to the first $dynamicAnchor still in scope that is encountered when the schema is evaluated",
+        "description": "A $dynamicRef resolves to the first $dynamicAnchor still in scope that is encountered when the schema is evaluated",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "$id": "https://test.json-schema.org/typical-dynamic-resolution/root",
             "$ref": "list",
             "$defs": {
@@ -27734,8 +27978,47 @@ Map<String, String> specificationTests = {
         ]
     },
     {
-        "description": "A $dynamicRef with intermediate scopes that don't include a matching $dynamicAnchor should not affect dynamic scope resolution",
+        "description": "A $dynamicRef without anchor in fragment behaves identical to $ref",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://test.json-schema.org/dynamicRef-without-anchor/root",
+            "$ref": "list",
+            "$defs": {
+                "foo": {
+                    "$dynamicAnchor": "items",
+                    "type": "string"
+                },
+                "list": {
+                    "$id": "list",
+                    "type": "array",
+                    "items": { "$dynamicRef": "#/$defs/items" },
+                    "$defs": {
+                      "items": {
+                          "$comment": "This is only needed to satisfy the bookending requirement",
+                          "$dynamicAnchor": "items",
+                          "type": "number"
+                      }
+                    }
+                }
+            }
+        },
+        "tests": [
+            {
+                "description": "An array of strings is invalid",
+                "data": ["foo", "bar"],
+                "valid": false
+            },
+            {
+                "description": "An array of numbers is valid",
+                "data": [24, 42],
+                "valid": true
+            }
+        ]
+    },
+    {
+        "description": "A $dynamicRef with intermediate scopes that don't include a matching $dynamicAnchor does not affect dynamic scope resolution",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "$id": "https://test.json-schema.org/dynamic-resolution-with-intermediate-scopes/root",
             "$ref": "intermediate-scope",
             "$defs": {
@@ -27774,8 +28057,9 @@ Map<String, String> specificationTests = {
         ]
     },
     {
-        "description": "An $anchor with the same name as a $dynamicAnchor should not be used for dynamic scope resolution",
+        "description": "An $anchor with the same name as a $dynamicAnchor is not used for dynamic scope resolution",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "$id": "https://test.json-schema.org/dynamic-resolution-ignores-anchors/root",
             "$ref": "list",
             "$defs": {
@@ -27805,8 +28089,9 @@ Map<String, String> specificationTests = {
         ]
     },
     {
-        "description": "A $dynamicRef without a matching $dynamicAnchor in the same schema resource should behave like a normal $ref to $anchor",
+        "description": "A $dynamicRef without a matching $dynamicAnchor in the same schema resource behaves like a normal $ref to $anchor",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "$id": "https://test.json-schema.org/dynamic-resolution-without-bookend/root",
             "$ref": "list",
             "$defs": {
@@ -27836,8 +28121,9 @@ Map<String, String> specificationTests = {
         ]
     },
     {
-        "description": "A $dynamicRef with a non-matching $dynamicAnchor in the same schema resource should behave like a normal $ref to $anchor",
+        "description": "A $dynamicRef with a non-matching $dynamicAnchor in the same schema resource behaves like a normal $ref to $anchor",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "$id": "https://test.json-schema.org/unmatched-dynamic-anchor/root",
             "$ref": "list",
             "$defs": {
@@ -27868,8 +28154,9 @@ Map<String, String> specificationTests = {
         ]
     },
     {
-        "description": "A $dynamicRef that initially resolves to a schema with a matching $dynamicAnchor should resolve to the first $dynamicAnchor in the dynamic scope",
+        "description": "A $dynamicRef that initially resolves to a schema with a matching $dynamicAnchor resolves to the first $dynamicAnchor in the dynamic scope",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "$id": "https://test.json-schema.org/relative-dynamic-reference/root",
             "$dynamicAnchor": "meta",
             "type": "object",
@@ -27919,8 +28206,9 @@ Map<String, String> specificationTests = {
         ]
     },
     {
-        "description": "A $dynamicRef that initially resolves to a schema without a matching $dynamicAnchor should behave like a normal $ref to $anchor",
+        "description": "A $dynamicRef that initially resolves to a schema without a matching $dynamicAnchor behaves like a normal $ref to $anchor",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "$id": "https://test.json-schema.org/relative-dynamic-reference-without-bookend/root",
             "$dynamicAnchor": "meta",
             "type": "object",
@@ -27962,52 +28250,93 @@ Map<String, String> specificationTests = {
     {
         "description": "multiple dynamic paths to the $dynamicRef keyword",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "$id": "https://test.json-schema.org/dynamic-ref-with-multiple-paths/main",
-            "$defs": {
-                "inner": {
-                    "$id": "inner",
-                    "$dynamicAnchor": "foo",
-                    "title": "inner",
-                    "additionalProperties": {
-                        "$dynamicRef": "#foo"
-                    }
-                }
-            },
             "if": {
-                "propertyNames": {
-                    "pattern": "^[a-m]"
+                "properties": {
+                    "kindOfList": { "const": "numbers" }
+                },
+                "required": ["kindOfList"]
+            },
+            "then": { "$ref": "numberList" },
+            "else": { "$ref": "stringList" },
+
+            "$defs": {
+                "genericList": {
+                    "$id": "genericList",
+                    "properties": {
+                        "list": {
+                            "items": { "$dynamicRef": "#itemType" }
+                        }
+                    },
+                    "$defs": {
+                        "defaultItemType": {
+                            "$comment": "Only needed to satisfy bookending requirement",
+                            "$dynamicAnchor": "itemType"
+                        }
+                    }
+                },
+                "numberList": {
+                    "$id": "numberList",
+                    "$defs": {
+                        "itemType": {
+                            "$dynamicAnchor": "itemType",
+                            "type": "number"
+                        }
+                    },
+                    "$ref": "genericList"
+                },
+                "stringList": {
+                    "$id": "stringList",
+                    "$defs": {
+                        "itemType": {
+                            "$dynamicAnchor": "itemType",
+                            "type": "string"
+                        }
+                    },
+                    "$ref": "genericList"
                 }
-            },
-            "then": {
-                "title": "any type of node",
-                "$id": "anyLeafNode",
-                "$dynamicAnchor": "foo",
-                "$ref": "inner"
-            },
-            "else": {
-                "title": "integer node",
-                "$id": "integerNode",
-                "$dynamicAnchor": "foo",
-                "type": [ "object", "integer" ],
-                "$ref": "inner"
             }
         },
         "tests": [
             {
-                "description": "recurse to anyLeafNode - floats are allowed",
-                "data": { "alpha": 1.1 },
+                "description": "number list with number values",
+                "data": {
+                    "kindOfList": "numbers",
+                    "list": [1.1]
+                },
                 "valid": true
             },
             {
-                "description": "recurse to integerNode - floats are not allowed",
-                "data": { "november": 1.1 },
+                "description": "number list with string values",
+                "data": {
+                    "kindOfList": "numbers",
+                    "list": ["foo"]
+                },
                 "valid": false
+            },
+            {
+                "description": "string list with number values",
+                "data": {
+                    "kindOfList": "strings",
+                    "list": [1.1]
+                },
+                "valid": false
+            },
+            {
+                "description": "string list with string values",
+                "data": {
+                    "kindOfList": "strings",
+                    "list": ["foo"]
+                },
+                "valid": true
             }
         ]
     },
     {
-        "description": "after leaving a dynamic scope, it should not be used by a $dynamicRef",
+        "description": "after leaving a dynamic scope, it is not used by a $dynamicRef",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "$id": "https://test.json-schema.org/dynamic-ref-leaving-dynamic-scope/main",
             "if": {
                 "$id": "first_scope",
@@ -28065,7 +28394,8 @@ Map<String, String> specificationTests = {
     {
         "description": "strict-tree schema, guards against misspelled properties",
         "schema": {
-            "$id": "http://localhost:1234/strict-tree.json",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "http://localhost:1234/draft2020-12/strict-tree.json",
             "$dynamicAnchor": "node",
 
             "$ref": "tree.json",
@@ -28095,7 +28425,8 @@ Map<String, String> specificationTests = {
     {
         "description": "tests for implementation dynamic anchor and reference link",
         "schema": {
-            "$id": "http://localhost:1234/strict-extendible.json",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "http://localhost:1234/draft2020-12/strict-extendible.json",
             "$ref": "extendible-dynamic-ref.json",
             "$defs": {
                 "elements": {
@@ -28137,9 +28468,10 @@ Map<String, String> specificationTests = {
         ]
     },
     {
-        "description": "Tests for implementation dynamic anchor and reference link. Reference should be independent of any possible ordering.",
+        "description": "$ref and $dynamicAnchor are independent of order - $defs first",
         "schema": {
-            "$id": "http://localhost:1234/strict-extendible-allof-defs-first.json",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "http://localhost:1234/draft2020-12/strict-extendible-allof-defs-first.json",
             "allOf": [
                 {
                     "$ref": "extendible-dynamic-ref.json"
@@ -28187,9 +28519,10 @@ Map<String, String> specificationTests = {
         ]
     },
     {
-        "description": "Tests for implementation dynamic anchor and reference link. Reference should be independent of any possible ordering.",
+        "description": "$ref and $dynamicAnchor are independent of order - $ref first",
         "schema": {
-            "$id": "http://localhost:1234/strict-extendible-allof-ref-first.json",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "http://localhost:1234/draft2020-12/strict-extendible-allof-ref-first.json",
             "allOf": [
                 {
                     "$defs": {
@@ -28235,13 +28568,177 @@ Map<String, String> specificationTests = {
                 "valid": true
             }
         ]
+    },
+    {
+        "description": "$ref to $dynamicRef finds detached $dynamicAnchor",
+        "schema": {
+            "$ref": "http://localhost:1234/draft2020-12/detached-dynamicref.json#/$defs/foo"
+        },
+        "tests": [
+            {
+                "description": "number is valid",
+                "data": 1,
+                "valid": true
+            },
+            {
+                "description": "non-number is invalid",
+                "data": "a",
+                "valid": false
+            }
+        ]
+    },
+    {
+        "description": "$dynamicRef points to a boolean schema",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$defs": {
+                "true": true,
+                "false": false
+            },
+            "properties": {
+                "true": {
+                    "$dynamicRef": "#/$defs/true"
+                },
+                "false": {
+                    "$dynamicRef": "#/$defs/false"
+                }
+            }
+        },
+        "tests": [
+            {
+                "description": "follow $dynamicRef to a true schema",
+                "data": { "true": 1 },
+                "valid": true
+            },
+            {
+                "description": "follow $dynamicRef to a false schema",
+                "data": { "false": 1 },
+                "valid": false
+            }
+        ]
+    },
+    {
+        "description": "$dynamicRef skips over intermediate resources - direct reference",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://test.json-schema.org/dynamic-ref-skips-intermediate-resource/main",
+            "type": "object",
+            "properties": {
+                "bar-item": {
+                    "$ref": "item"
+                }
+            },
+            "$defs": {
+                "bar": {
+                    "$id": "bar",
+                    "type": "array",
+                    "items": {
+                        "$ref": "item"
+                    },
+                    "$defs": {
+                        "item": {
+                            "$id": "item",
+                            "type": "object",
+                            "properties": {
+                                "content": {
+                                    "$dynamicRef": "#content"
+                                }
+                            },
+                            "$defs": {
+                                "defaultContent": {
+                                    "$dynamicAnchor": "content",
+                                    "type": "integer"
+                                }
+                            }
+                        },
+                        "content": {
+                            "$dynamicAnchor": "content",
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "tests": [
+            {
+                "description": "integer property passes",
+                "data": { "bar-item": { "content": 42 } },
+                "valid": true
+            },
+            {
+                "description": "string property fails",
+                "data": { "bar-item": { "content": "value" } },
+                "valid": false
+            }
+        ]
+    },
+    {
+        "description": "$dynamicRef avoids the root of each schema, but scopes are still registered",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://test.json-schema.org/dynamic-ref-avoids-root-of-each-schema/base",
+            "$ref": "first#/$defs/stuff",
+            "$defs": {
+                "first": {
+                    "$id": "first",
+                    "$defs": {
+                        "stuff": {
+                            "$ref": "second#/$defs/stuff"
+                        },
+                        "length": {
+                            "$comment": "unused, because there is no $dynamicAnchor here",
+                            "maxLength": 1
+                        }
+                    }
+                },
+                "second": {
+                    "$id": "second",
+                    "$defs": {
+                        "stuff": {
+                            "$ref": "third#/$defs/stuff"
+                        },
+                        "length": {
+                            "$dynamicAnchor": "length",
+                            "maxLength": 2
+                        }
+                    }
+                },
+                "third": {
+                    "$id": "third",
+                    "$defs": {
+                        "stuff": {
+                            "$dynamicRef": "#length"
+                        },
+                        "length": {
+                            "$dynamicAnchor": "length",
+                            "maxLength": 3
+                        }
+                    }
+                }
+            }
+        },
+        "tests": [
+            {
+                "description": "data is sufficient for schema at second#/$defs/length",
+                "data": "hi",
+                "valid": true
+            },
+            {
+                "description": "data is not sufficient for schema at second#/$defs/length",
+                "data": "hey",
+                "valid": false
+            }
+        ]
     }
 ]
 """,
   "/draft2020-12/enum.json": r"""[
     {
         "description": "simple enum validation",
-        "schema": {"enum": [1, 2, 3]},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "enum": [1, 2, 3]
+        },
         "tests": [
             {
                 "description": "one of the enum is valid",
@@ -28257,7 +28754,10 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "heterogeneous enum validation",
-        "schema": {"enum": [6, "foo", [], true, {"foo": 12}]},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "enum": [6, "foo", [], true, {"foo": 12}]
+        },
         "tests": [
             {
                 "description": "one of the enum is valid",
@@ -28288,7 +28788,10 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "heterogeneous enum-with-null validation",
-        "schema": { "enum": [6, null] },
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "enum": [6, null]
+        },
         "tests": [
             {
                 "description": "null is valid",
@@ -28310,6 +28813,7 @@ Map<String, String> specificationTests = {
     {
         "description": "enums in properties",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type":"object",
             "properties": {
                 "foo": {"enum":["foo"]},
@@ -28353,6 +28857,7 @@ Map<String, String> specificationTests = {
     {
         "description": "enum with escaped characters",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "enum": ["foo\nbar", "foo\rbar"]
         },
         "tests": [
@@ -28375,7 +28880,10 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "enum with false does not match 0",
-        "schema": {"enum": [false]},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "enum": [false]
+        },
         "tests": [
             {
                 "description": "false is valid",
@@ -28395,8 +28903,35 @@ Map<String, String> specificationTests = {
         ]
     },
     {
+        "description": "enum with [false] does not match [0]",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "enum": [[false]]
+        },
+        "tests": [
+            {
+                "description": "[false] is valid",
+                "data": [false],
+                "valid": true
+            },
+            {
+                "description": "[0] is invalid",
+                "data": [0],
+                "valid": false
+            },
+            {
+                "description": "[0.0] is invalid",
+                "data": [0.0],
+                "valid": false
+            }
+        ]
+    },
+    {
         "description": "enum with true does not match 1",
-        "schema": {"enum": [true]},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "enum": [true]
+        },
         "tests": [
             {
                 "description": "true is valid",
@@ -28416,8 +28951,35 @@ Map<String, String> specificationTests = {
         ]
     },
     {
+        "description": "enum with [true] does not match [1]",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "enum": [[true]]
+        },
+        "tests": [
+            {
+                "description": "[true] is valid",
+                "data": [true],
+                "valid": true
+            },
+            {
+                "description": "[1] is invalid",
+                "data": [1],
+                "valid": false
+            },
+            {
+                "description": "[1.0] is invalid",
+                "data": [1.0],
+                "valid": false
+            }
+        ]
+    },
+    {
         "description": "enum with 0 does not match false",
-        "schema": {"enum": [0]},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "enum": [0]
+        },
         "tests": [
             {
                 "description": "false is invalid",
@@ -28437,8 +28999,35 @@ Map<String, String> specificationTests = {
         ]
     },
     {
+        "description": "enum with [0] does not match [false]",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "enum": [[0]]
+        },
+        "tests": [
+            {
+                "description": "[false] is invalid",
+                "data": [false],
+                "valid": false
+            },
+            {
+                "description": "[0] is valid",
+                "data": [0],
+                "valid": true
+            },
+            {
+                "description": "[0.0] is valid",
+                "data": [0.0],
+                "valid": true
+            }
+        ]
+    },
+    {
         "description": "enum with 1 does not match true",
-        "schema": {"enum": [1]},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "enum": [1]
+        },
         "tests": [
             {
                 "description": "true is invalid",
@@ -28458,8 +29047,35 @@ Map<String, String> specificationTests = {
         ]
     },
     {
+        "description": "enum with [1] does not match [true]",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "enum": [[1]]
+        },
+        "tests": [
+            {
+                "description": "[true] is invalid",
+                "data": [true],
+                "valid": false
+            },
+            {
+                "description": "[1] is valid",
+                "data": [1],
+                "valid": true
+            },
+            {
+                "description": "[1.0] is valid",
+                "data": [1.0],
+                "valid": true
+            }
+        ]
+    },
+    {
         "description": "nul characters in strings",
-        "schema": { "enum": [ "hello\u0000there" ] },
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "enum": [ "hello\u0000there" ]
+        },
         "tests": [
             {
                 "description": "match string with nul",
@@ -28472,6 +29088,45 @@ Map<String, String> specificationTests = {
                 "valid": false
             }
         ]
+    },
+    {
+        "description": "empty enum",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "enum": []
+        },
+        "tests": [
+            {
+                "description": "string is invalid",
+                "data": "foo",
+                "valid": false
+            },
+            {
+                "description": "number is invalid",
+                "data": 42,
+                "valid": false
+            },
+            {
+                "description": "null is invalid",
+                "data": null,
+                "valid": false
+            },
+            {
+                "description": "object is invalid",
+                "data": {},
+                "valid": false
+            },
+            {
+                "description": "array is invalid",
+                "data": [],
+                "valid": false
+            },
+            {
+                "description": "boolean is invalid",
+                "data": false,
+                "valid": false
+            }
+        ]
     }
 ]
 """,
@@ -28479,6 +29134,7 @@ Map<String, String> specificationTests = {
     {
         "description": "exclusiveMaximum validation",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "exclusiveMaximum": 3.0
         },
         "tests": [
@@ -28510,6 +29166,7 @@ Map<String, String> specificationTests = {
     {
         "description": "exclusiveMinimum validation",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "exclusiveMinimum": 1.1
         },
         "tests": [
@@ -28540,7 +29197,10 @@ Map<String, String> specificationTests = {
   "/draft2020-12/format.json": r"""[
     {
         "description": "email format",
-        "schema": { "format": "email" },
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "format": "email"
+        },
         "tests": [
             {
                 "description": "all string formats ignore integers",
@@ -28570,13 +29230,21 @@ Map<String, String> specificationTests = {
             {
                 "description": "all string formats ignore nulls",
                 "data": null,
+                "valid": true
+            },
+            {
+                "description": "invalid email string is only an annotation by default",
+                "data": "2962",
                 "valid": true
             }
         ]
     },
     {
         "description": "idn-email format",
-        "schema": { "format": "idn-email" },
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "format": "idn-email"
+        },
         "tests": [
             {
                 "description": "all string formats ignore integers",
@@ -28606,13 +29274,21 @@ Map<String, String> specificationTests = {
             {
                 "description": "all string formats ignore nulls",
                 "data": null,
+                "valid": true
+            },
+            {
+                "description": "invalid idn-email string is only an annotation by default",
+                "data": "2962",
                 "valid": true
             }
         ]
     },
     {
         "description": "regex format",
-        "schema": { "format": "regex" },
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "format": "regex"
+        },
         "tests": [
             {
                 "description": "all string formats ignore integers",
@@ -28642,13 +29318,21 @@ Map<String, String> specificationTests = {
             {
                 "description": "all string formats ignore nulls",
                 "data": null,
+                "valid": true
+            },
+            {
+                "description": "invalid regex string is only an annotation by default",
+                "data": "^(abc]",
                 "valid": true
             }
         ]
     },
     {
         "description": "ipv4 format",
-        "schema": { "format": "ipv4" },
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "format": "ipv4"
+        },
         "tests": [
             {
                 "description": "all string formats ignore integers",
@@ -28678,13 +29362,21 @@ Map<String, String> specificationTests = {
             {
                 "description": "all string formats ignore nulls",
                 "data": null,
+                "valid": true
+            },
+            {
+                "description": "invalid ipv4 string is only an annotation by default",
+                "data": "127.0.0.0.1",
                 "valid": true
             }
         ]
     },
     {
         "description": "ipv6 format",
-        "schema": { "format": "ipv6" },
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "format": "ipv6"
+        },
         "tests": [
             {
                 "description": "all string formats ignore integers",
@@ -28714,13 +29406,21 @@ Map<String, String> specificationTests = {
             {
                 "description": "all string formats ignore nulls",
                 "data": null,
+                "valid": true
+            },
+            {
+                "description": "invalid ipv6 string is only an annotation by default",
+                "data": "12345::",
                 "valid": true
             }
         ]
     },
     {
         "description": "idn-hostname format",
-        "schema": { "format": "idn-hostname" },
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "format": "idn-hostname"
+        },
         "tests": [
             {
                 "description": "all string formats ignore integers",
@@ -28750,13 +29450,21 @@ Map<String, String> specificationTests = {
             {
                 "description": "all string formats ignore nulls",
                 "data": null,
+                "valid": true
+            },
+            {
+                "description": "invalid idn-hostname string is only an annotation by default",
+                "data": "〮실례.테스트",
                 "valid": true
             }
         ]
     },
     {
         "description": "hostname format",
-        "schema": { "format": "hostname" },
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "format": "hostname"
+        },
         "tests": [
             {
                 "description": "all string formats ignore integers",
@@ -28786,13 +29494,21 @@ Map<String, String> specificationTests = {
             {
                 "description": "all string formats ignore nulls",
                 "data": null,
+                "valid": true
+            },
+            {
+                "description": "invalid hostname string is only an annotation by default",
+                "data": "-a-host-name-that-starts-with--",
                 "valid": true
             }
         ]
     },
     {
         "description": "date format",
-        "schema": { "format": "date" },
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "format": "date"
+        },
         "tests": [
             {
                 "description": "all string formats ignore integers",
@@ -28822,13 +29538,21 @@ Map<String, String> specificationTests = {
             {
                 "description": "all string formats ignore nulls",
                 "data": null,
+                "valid": true
+            },
+            {
+                "description": "invalid date string is only an annotation by default",
+                "data": "06/19/1963",
                 "valid": true
             }
         ]
     },
     {
         "description": "date-time format",
-        "schema": { "format": "date-time" },
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "format": "date-time"
+        },
         "tests": [
             {
                 "description": "all string formats ignore integers",
@@ -28858,13 +29582,21 @@ Map<String, String> specificationTests = {
             {
                 "description": "all string formats ignore nulls",
                 "data": null,
+                "valid": true
+            },
+            {
+                "description": "invalid date-time string is only an annotation by default",
+                "data": "1990-02-31T15:59:60.123-08:00",
                 "valid": true
             }
         ]
     },
     {
         "description": "time format",
-        "schema": { "format": "time" },
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "format": "time"
+        },
         "tests": [
             {
                 "description": "all string formats ignore integers",
@@ -28894,13 +29626,21 @@ Map<String, String> specificationTests = {
             {
                 "description": "all string formats ignore nulls",
                 "data": null,
+                "valid": true
+            },
+            {
+                "description": "invalid time string is only an annotation by default",
+                "data": "08:30:06 PST",
                 "valid": true
             }
         ]
     },
     {
         "description": "json-pointer format",
-        "schema": { "format": "json-pointer" },
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "format": "json-pointer"
+        },
         "tests": [
             {
                 "description": "all string formats ignore integers",
@@ -28930,13 +29670,21 @@ Map<String, String> specificationTests = {
             {
                 "description": "all string formats ignore nulls",
                 "data": null,
+                "valid": true
+            },
+            {
+                "description": "invalid json-pointer string is only an annotation by default",
+                "data": "/foo/bar~",
                 "valid": true
             }
         ]
     },
     {
         "description": "relative-json-pointer format",
-        "schema": { "format": "relative-json-pointer" },
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "format": "relative-json-pointer"
+        },
         "tests": [
             {
                 "description": "all string formats ignore integers",
@@ -28966,13 +29714,21 @@ Map<String, String> specificationTests = {
             {
                 "description": "all string formats ignore nulls",
                 "data": null,
+                "valid": true
+            },
+            {
+                "description": "invalid relative-json-pointer string is only an annotation by default",
+                "data": "/foo/bar",
                 "valid": true
             }
         ]
     },
     {
         "description": "iri format",
-        "schema": { "format": "iri" },
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "format": "iri"
+        },
         "tests": [
             {
                 "description": "all string formats ignore integers",
@@ -29002,13 +29758,21 @@ Map<String, String> specificationTests = {
             {
                 "description": "all string formats ignore nulls",
                 "data": null,
+                "valid": true
+            },
+            {
+                "description": "invalid iri string is only an annotation by default",
+                "data": "http://2001:0db8:85a3:0000:0000:8a2e:0370:7334",
                 "valid": true
             }
         ]
     },
     {
         "description": "iri-reference format",
-        "schema": { "format": "iri-reference" },
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "format": "iri-reference"
+        },
         "tests": [
             {
                 "description": "all string formats ignore integers",
@@ -29038,13 +29802,21 @@ Map<String, String> specificationTests = {
             {
                 "description": "all string formats ignore nulls",
                 "data": null,
+                "valid": true
+            },
+            {
+                "description": "invalid iri-reference string is only an annotation by default",
+                "data": "\\\\WINDOWS\\filëßåré",
                 "valid": true
             }
         ]
     },
     {
         "description": "uri format",
-        "schema": { "format": "uri" },
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "format": "uri"
+        },
         "tests": [
             {
                 "description": "all string formats ignore integers",
@@ -29074,13 +29846,21 @@ Map<String, String> specificationTests = {
             {
                 "description": "all string formats ignore nulls",
                 "data": null,
+                "valid": true
+            },
+            {
+                "description": "invalid uri string is only an annotation by default",
+                "data": "//foo.bar/?baz=qux#quux",
                 "valid": true
             }
         ]
     },
     {
         "description": "uri-reference format",
-        "schema": { "format": "uri-reference" },
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "format": "uri-reference"
+        },
         "tests": [
             {
                 "description": "all string formats ignore integers",
@@ -29110,13 +29890,21 @@ Map<String, String> specificationTests = {
             {
                 "description": "all string formats ignore nulls",
                 "data": null,
+                "valid": true
+            },
+            {
+                "description": "invalid uri-reference string is only an annotation by default",
+                "data": "\\\\WINDOWS\\fileshare",
                 "valid": true
             }
         ]
     },
     {
         "description": "uri-template format",
-        "schema": { "format": "uri-template" },
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "format": "uri-template"
+        },
         "tests": [
             {
                 "description": "all string formats ignore integers",
@@ -29146,13 +29934,21 @@ Map<String, String> specificationTests = {
             {
                 "description": "all string formats ignore nulls",
                 "data": null,
+                "valid": true
+            },
+            {
+                "description": "invalid uri-template string is only an annotation by default",
+                "data": "http://example.com/dictionary/{term:1}/{term",
                 "valid": true
             }
         ]
     },
     {
         "description": "uuid format",
-        "schema": { "format": "uuid" },
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "format": "uuid"
+        },
         "tests": [
             {
                 "description": "all string formats ignore integers",
@@ -29182,13 +29978,21 @@ Map<String, String> specificationTests = {
             {
                 "description": "all string formats ignore nulls",
                 "data": null,
+                "valid": true
+            },
+            {
+                "description": "invalid uuid string is only an annotation by default",
+                "data": "2eb8aa08-aa98-11ea-b4aa-73b441d1638",
                 "valid": true
             }
         ]
     },
     {
         "description": "duration format",
-        "schema": { "format": "duration" },
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "format": "duration"
+        },
         "tests": [
             {
                 "description": "all string formats ignore integers",
@@ -29219,265 +30023,11 @@ Map<String, String> specificationTests = {
                 "description": "all string formats ignore nulls",
                 "data": null,
                 "valid": true
-            }
-        ]
-    }
-]
-""",
-  "/draft2020-12/id.json": r"""[
-    {
-        "description": "Invalid use of fragments in location-independent $id",
-        "schema": {
-            "$ref": "https://json-schema.org/draft/2020-12/schema"
-        },
-        "tests": [
-            {
-                "description": "Identifier name",
-                "data": {
-                    "$ref": "#foo",
-                    "$defs": {
-                        "A": {
-                            "$id": "#foo",
-                            "type": "integer"
-                        }
-                    }
-                },
-                "valid": false
             },
             {
-                "description": "Identifier name and no ref",
-                "data": {
-                    "$defs": {
-                        "A": { "$id": "#foo" }
-                    }
-                },
-                "valid": false
-            },
-            {
-                "description": "Identifier path",
-                "data": {
-                    "$ref": "#/a/b",
-                    "$defs": {
-                        "A": {
-                            "$id": "#/a/b",
-                            "type": "integer"
-                        }
-                    }
-                },
-                "valid": false
-            },
-            {
-                "description": "Identifier name with absolute URI",
-                "data": {
-                    "$ref": "http://localhost:1234/bar#foo",
-                    "$defs": {
-                        "A": {
-                            "$id": "http://localhost:1234/bar#foo",
-                            "type": "integer"
-                        }
-                    }
-                },
-                "valid": false
-            },
-            {
-                "description": "Identifier path with absolute URI",
-                "data": {
-                    "$ref": "http://localhost:1234/bar#/a/b",
-                    "$defs": {
-                        "A": {
-                            "$id": "http://localhost:1234/bar#/a/b",
-                            "type": "integer"
-                        }
-                    }
-                },
-                "valid": false
-            },
-            {
-                "description": "Identifier name with base URI change in subschema",
-                "data": {
-                    "$id": "http://localhost:1234/root",
-                    "$ref": "http://localhost:1234/nested.json#foo",
-                    "$defs": {
-                        "A": {
-                            "$id": "nested.json",
-                            "$defs": {
-                                "B": {
-                                    "$id": "#foo",
-                                    "type": "integer"
-                                }
-                            }
-                        }
-                    }
-                },
-                "valid": false
-            },
-            {
-                "description": "Identifier path with base URI change in subschema",
-                "data": {
-                    "$id": "http://localhost:1234/root",
-                    "$ref": "http://localhost:1234/nested.json#/a/b",
-                    "$defs": {
-                        "A": {
-                            "$id": "nested.json",
-                            "$defs": {
-                                "B": {
-                                    "$id": "#/a/b",
-                                    "type": "integer"
-                                }
-                            }
-                        }
-                    }
-                },
-                "valid": false
-            }
-        ]
-    },
-    {
-        "description": "Valid use of empty fragments in location-independent $id",
-        "comment": "These are allowed but discouraged",
-        "schema": {
-            "$ref": "https://json-schema.org/draft/2020-12/schema"
-        },
-        "tests": [
-            {
-                "description": "Identifier name with absolute URI",
-                "data": {
-                    "$ref": "http://localhost:1234/bar",
-                    "$defs": {
-                        "A": {
-                            "$id": "http://localhost:1234/bar#",
-                            "type": "integer"
-                        }
-                    }
-                },
+                "description": "invalid duration string is only an annotation by default",
+                "data": "PT1D",
                 "valid": true
-            },
-            {
-                "description": "Identifier name with base URI change in subschema",
-                "data": {
-                    "$id": "http://localhost:1234/root",
-                    "$ref": "http://localhost:1234/nested.json#/$defs/B",
-                    "$defs": {
-                        "A": {
-                            "$id": "nested.json",
-                            "$defs": {
-                                "B": {
-                                    "$id": "#",
-                                    "type": "integer"
-                                }
-                            }
-                        }
-                    }
-                },
-                "valid": true
-            }
-        ]
-    },
-    {
-        "description": "Unnormalized $ids are allowed but discouraged",
-        "schema": {
-            "$ref": "https://json-schema.org/draft/2020-12/schema"
-        },
-        "tests": [
-            {
-                "description": "Unnormalized identifier",
-                "data": {
-                    "$ref": "http://localhost:1234/foo/baz",
-                    "$defs": {
-                        "A": {
-                            "$id": "http://localhost:1234/foo/bar/../baz",
-                            "type": "integer"
-                        }
-                    }
-                },
-                "valid": true
-            },
-            {
-                "description": "Unnormalized identifier and no ref",
-                "data": {
-                    "$defs": {
-                        "A": {
-                            "$id": "http://localhost:1234/foo/bar/../baz",
-                            "type": "integer"
-                        }
-                    }
-                },
-                "valid": true
-            },
-            {
-                "description": "Unnormalized identifier with empty fragment",
-                "data": {
-                    "$ref": "http://localhost:1234/foo/baz",
-                    "$defs": {
-                        "A": {
-                            "$id": "http://localhost:1234/foo/bar/../baz#",
-                            "type": "integer"
-                        }
-                    }
-                },
-                "valid": true
-            },
-            {
-                "description": "Unnormalized identifier with empty fragment and no ref",
-                "data": {
-                    "$defs": {
-                        "A": {
-                            "$id": "http://localhost:1234/foo/bar/../baz#",
-                            "type": "integer"
-                        }
-                    }
-                },
-                "valid": true
-            }
-        ]
-    },
-    {
-        "description": "$id inside an enum is not a real identifier",
-        "comment": "the implementation must not be confused by an $id buried in the enum",
-        "schema": {
-            "$defs": {
-                "id_in_enum": {
-                    "enum": [
-                        {
-                          "$id": "https://localhost:1234/id/my_identifier.json",
-                          "type": "null"
-                        }
-                    ]
-                },
-                "real_id_in_schema": {
-                    "$id": "https://localhost:1234/id/my_identifier.json",
-                    "type": "string"
-                },
-                "zzz_id_in_const": {
-                    "const": {
-                        "$id": "https://localhost:1234/id/my_identifier.json",
-                        "type": "null"
-                    }
-                }
-            },
-            "anyOf": [
-                { "$ref": "#/$defs/id_in_enum" },
-                { "$ref": "https://localhost:1234/id/my_identifier.json" }
-            ]
-        },
-        "tests": [
-            {
-                "description": "exact match to enum, and type matches",
-                "data": {
-                    "$id": "https://localhost:1234/id/my_identifier.json",
-                    "type": "null"
-                },
-                "valid": true
-            },
-            {
-                "description": "match $ref to $id",
-                "data": "a string to match #/$defs/id_in_enum",
-                "valid": true
-            },
-            {
-                "description": "no match on enum or $ref to $id",
-                "data": 1,
-                "valid": false
             }
         ]
     }
@@ -29487,6 +30037,7 @@ Map<String, String> specificationTests = {
     {
         "description": "ignore if without then or else",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "if": {
                 "const": 0
             }
@@ -29507,6 +30058,7 @@ Map<String, String> specificationTests = {
     {
         "description": "ignore then without if",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "then": {
                 "const": 0
             }
@@ -29527,6 +30079,7 @@ Map<String, String> specificationTests = {
     {
         "description": "ignore else without if",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "else": {
                 "const": 0
             }
@@ -29547,6 +30100,7 @@ Map<String, String> specificationTests = {
     {
         "description": "if and then without else",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "if": {
                 "exclusiveMaximum": 0
             },
@@ -29575,6 +30129,7 @@ Map<String, String> specificationTests = {
     {
         "description": "if and else without then",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "if": {
                 "exclusiveMaximum": 0
             },
@@ -29603,6 +30158,7 @@ Map<String, String> specificationTests = {
     {
         "description": "validate against correct branch, then vs else",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "if": {
                 "exclusiveMaximum": 0
             },
@@ -29639,6 +30195,7 @@ Map<String, String> specificationTests = {
     {
         "description": "non-interference across combined schemas",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "allOf": [
                 {
                     "if": {
@@ -29673,6 +30230,7 @@ Map<String, String> specificationTests = {
     {
         "description": "if with boolean schema true",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "if": true,
             "then": { "const": "then" },
             "else": { "const": "else" }
@@ -29693,6 +30251,7 @@ Map<String, String> specificationTests = {
     {
         "description": "if with boolean schema false",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "if": false,
             "then": { "const": "then" },
             "else": { "const": "else" }
@@ -29713,6 +30272,7 @@ Map<String, String> specificationTests = {
     {
         "description": "if appears at the end when serialized (keyword processing sequence)",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "then": { "const": "yes" },
             "else": { "const": "other" },
             "if": { "maxLength": 4 }
@@ -29739,6 +30299,44 @@ Map<String, String> specificationTests = {
                 "valid": false
             }
         ]
+    },
+    {
+        "description": "then: false fails when condition matches",
+        "schema": {
+            "if": { "const": 1 },
+            "then": false
+        },
+        "tests": [
+            {
+                "description": "matches if → then=false → invalid",
+                "data": 1,
+                "valid": false
+            },
+            {
+                "description": "does not match if → then ignored → valid",
+                "data": 2,
+                "valid": true
+            }
+        ]
+    },
+    {
+        "description": "else: false fails when condition does not match",
+        "schema": {
+            "if": { "const": 1 },
+            "else": false
+        },
+        "tests": [
+            {
+               "description": "matches if → else ignored → valid",
+               "data": 1,
+               "valid": true
+            },
+            {
+                "description": "does not match if → else executes → invalid",
+                "data": 2,
+                "valid": false
+            }
+        ]
     }
 ]
 """,
@@ -29746,6 +30344,7 @@ Map<String, String> specificationTests = {
     {
         "description": "evaluating the same schema location against the same data location twice is not a sign of an infinite loop",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "$defs": {
                 "int": { "type": "integer" }
             },
@@ -29783,6 +30382,7 @@ Map<String, String> specificationTests = {
     {
         "description": "a schema given for items",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "items": {"type": "integer"}
         },
         "tests": [
@@ -29813,7 +30413,10 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "items with boolean schema (true)",
-        "schema": {"items": true},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "items": true
+        },
         "tests": [
             {
                 "description": "any array is valid",
@@ -29829,7 +30432,10 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "items with boolean schema (false)",
-        "schema": {"items": false},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "items": false
+        },
         "tests": [
             {
                 "description": "any non-empty array is invalid",
@@ -29846,6 +30452,7 @@ Map<String, String> specificationTests = {
     {
         "description": "items and subitems",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "$defs": {
                 "item": {
                     "type": "array",
@@ -29928,6 +30535,7 @@ Map<String, String> specificationTests = {
     {
         "description": "nested items",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "array",
             "items": {
                 "type": "array",
@@ -29963,6 +30571,7 @@ Map<String, String> specificationTests = {
     {
         "description": "prefixItems with no additional items allowed",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "prefixItems": [{}, {}, {}],
             "items": false
         },
@@ -29995,8 +30604,9 @@ Map<String, String> specificationTests = {
         ]
     },
     {
-        "description": "items should not look in applicators, valid case",
+        "description": "items does not look in applicators, valid case",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "allOf": [
                 { "prefixItems": [ { "minimum": 3 } ] }
             ],
@@ -30004,12 +30614,12 @@ Map<String, String> specificationTests = {
         },
         "tests": [
             {
-                "description": "prefixItems in allOf should not constrain items, invalid case",
+                "description": "prefixItems in allOf does not constrain items, invalid case",
                 "data": [ 3, 5 ],
                 "valid": false
             },
             {
-                "description": "prefixItems in allOf should not constrain items, valid case",
+                "description": "prefixItems in allOf does not constrain items, valid case",
                 "data": [ 5, 5 ],
                 "valid": true
             }
@@ -30018,6 +30628,7 @@ Map<String, String> specificationTests = {
     {
         "description": "prefixItems validation adjusts the starting index for items",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "prefixItems": [ { "type": "string" } ],
             "items": { "type": "integer" }
         },
@@ -30033,6 +30644,42 @@ Map<String, String> specificationTests = {
                 "valid": false
             }
         ]
+    },
+    {
+        "description": "items with heterogeneous array",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "prefixItems": [{}],
+            "items": false
+        },
+        "tests": [
+            {
+                "description": "heterogeneous invalid instance",
+                "data": [ "foo", "bar", 37 ],
+                "valid": false
+            },
+            {
+                "description": "valid instance",
+                "data": [ null ],
+                "valid": true
+            }
+        ]
+    },
+    {
+        "description": "items with null instance elements",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "items": {
+                "type": "null"
+            }
+        },
+        "tests": [
+            {
+                "description": "allows null elements",
+                "data": [ null ],
+                "valid": true
+            }
+        ]
     }
 ]
 """,
@@ -30040,6 +30687,7 @@ Map<String, String> specificationTests = {
     {
         "description": "maxContains without contains is ignored",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "maxContains": 1
         },
         "tests": [
@@ -30058,6 +30706,7 @@ Map<String, String> specificationTests = {
     {
         "description": "maxContains with contains",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "contains": {"const": 1},
             "maxContains": 1
         },
@@ -30090,8 +30739,29 @@ Map<String, String> specificationTests = {
         ]
     },
     {
+        "description": "maxContains with contains, value with a decimal",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "contains": {"const": 1},
+            "maxContains": 1.0
+        },
+        "tests": [
+            {
+                "description": "one element matches, valid maxContains",
+                "data": [ 1 ],
+                "valid": true
+            },
+            {
+                "description": "too many elements match, invalid maxContains",
+                "data": [ 1, 1 ],
+                "valid": false
+            }
+        ]
+    },
+    {
         "description": "minContains < maxContains",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "contains": {"const": 1},
             "minContains": 1,
             "maxContains": 3
@@ -30113,13 +30783,37 @@ Map<String, String> specificationTests = {
                 "valid": false
             }
         ]
+    },
+    {
+        "description": "maxContains = 0 with minContains = 0",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "contains": {"const": 1},
+            "minContains": 0,
+            "maxContains": 0
+        },
+        "tests": [
+            {
+                "description": "empty array",
+                "data": [ ],
+                "valid": true
+            },
+            {
+                "description": "one matching item",
+                "data": [ 1 ],
+                "valid": false
+            }
+        ]
     }
 ]
 """,
   "/draft2020-12/maxItems.json": r"""[
     {
         "description": "maxItems validation",
-        "schema": {"maxItems": 2},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "maxItems": 2
+        },
         "tests": [
             {
                 "description": "shorter is valid",
@@ -30142,13 +30836,35 @@ Map<String, String> specificationTests = {
                 "valid": true
             }
         ]
+    },
+    {
+        "description": "maxItems validation with a decimal",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "maxItems": 2.0
+        },
+        "tests": [
+            {
+                "description": "shorter is valid",
+                "data": [1],
+                "valid": true
+            },
+            {
+                "description": "too long is invalid",
+                "data": [1, 2, 3],
+                "valid": false
+            }
+        ]
     }
 ]
 """,
   "/draft2020-12/maxLength.json": r"""[
     {
         "description": "maxLength validation",
-        "schema": {"maxLength": 2},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "maxLength": 2
+        },
         "tests": [
             {
                 "description": "shorter is valid",
@@ -30171,9 +30887,28 @@ Map<String, String> specificationTests = {
                 "valid": true
             },
             {
-                "description": "two supplementary Unicode code points is long enough",
+                "description": "two graphemes is long enough",
                 "data": "\uD83D\uDCA9\uD83D\uDCA9",
                 "valid": true
+            }
+        ]
+    },
+    {
+        "description": "maxLength validation with a decimal",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "maxLength": 2.0
+        },
+        "tests": [
+            {
+                "description": "shorter is valid",
+                "data": "f",
+                "valid": true
+            },
+            {
+                "description": "too long is invalid",
+                "data": "foo",
+                "valid": false
             }
         ]
     }
@@ -30182,7 +30917,15 @@ Map<String, String> specificationTests = {
   "/draft2020-12/maxProperties.json": r"""[
     {
         "description": "maxProperties validation",
-        "schema": {"maxProperties": 2},
+        "specification": [
+            {
+                "validation": "6.5.1"
+            }
+        ],
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "maxProperties": 2
+        },
         "tests": [
             {
                 "description": "shorter is valid",
@@ -30217,8 +30960,40 @@ Map<String, String> specificationTests = {
         ]
     },
     {
+        "description": "maxProperties validation with a decimal",
+        "specification": [
+            {
+                "validation": "6.5.1"
+            }
+        ],
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "maxProperties": 2.0
+        },
+        "tests": [
+            {
+                "description": "shorter is valid",
+                "data": {"foo": 1},
+                "valid": true
+            },
+            {
+                "description": "too long is invalid",
+                "data": {"foo": 1, "bar": 2, "baz": 3},
+                "valid": false
+            }
+        ]
+    },
+    {
         "description": "maxProperties = 0 means the object is empty",
-        "schema": { "maxProperties": 0 },
+        "specification": [
+            {
+                "validation": "6.5.1"
+            }
+        ],
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "maxProperties": 0
+        },
         "tests": [
             {
                 "description": "no properties is valid",
@@ -30237,7 +31012,10 @@ Map<String, String> specificationTests = {
   "/draft2020-12/maximum.json": r"""[
     {
         "description": "maximum validation",
-        "schema": {"maximum": 3.0},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "maximum": 3.0
+        },
         "tests": [
             {
                 "description": "below the maximum is valid",
@@ -30263,10 +31041,13 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "maximum validation with unsigned integer",
-        "schema": {"maximum": 300},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "maximum": 300
+        },
         "tests":  [
             {
-                "description": "below the maximum is invalid",
+                "description": "below the maximum is valid",
                 "data": 299.97,
                 "valid": true
             },
@@ -30293,6 +31074,7 @@ Map<String, String> specificationTests = {
     {
         "description": "minContains without contains is ignored",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "minContains": 1
         },
         "tests": [
@@ -30311,6 +31093,7 @@ Map<String, String> specificationTests = {
     {
         "description": "minContains=1 with contains",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "contains": {"const": 1},
             "minContains": 1
         },
@@ -30345,6 +31128,7 @@ Map<String, String> specificationTests = {
     {
         "description": "minContains=2 with contains",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "contains": {"const": 1},
             "minContains": 2
         },
@@ -30382,8 +31166,29 @@ Map<String, String> specificationTests = {
         ]
     },
     {
+        "description": "minContains=2 with contains with a decimal value",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "contains": {"const": 1},
+            "minContains": 2.0
+        },
+        "tests": [
+            {
+                "description": "one element matches, invalid minContains",
+                "data": [ 1 ],
+                "valid": false
+            },
+            {
+                "description": "both elements match, valid minContains",
+                "data": [ 1, 1 ],
+                "valid": true
+            }
+        ]
+    },
+    {
         "description": "maxContains = minContains",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "contains": {"const": 1},
             "maxContains": 2,
             "minContains": 2
@@ -30414,6 +31219,7 @@ Map<String, String> specificationTests = {
     {
         "description": "maxContains < minContains",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "contains": {"const": 1},
             "maxContains": 1,
             "minContains": 3
@@ -30444,6 +31250,7 @@ Map<String, String> specificationTests = {
     {
         "description": "minContains = 0",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "contains": {"const": 1},
             "minContains": 0
         },
@@ -30463,6 +31270,7 @@ Map<String, String> specificationTests = {
     {
         "description": "minContains = 0 with maxContains",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "contains": {"const": 1},
             "minContains": 0,
             "maxContains": 1
@@ -30490,7 +31298,10 @@ Map<String, String> specificationTests = {
   "/draft2020-12/minItems.json": r"""[
     {
         "description": "minItems validation",
-        "schema": {"minItems": 1},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "minItems": 1
+        },
         "tests": [
             {
                 "description": "longer is valid",
@@ -30513,13 +31324,35 @@ Map<String, String> specificationTests = {
                 "valid": true
             }
         ]
+    },
+    {
+        "description": "minItems validation with a decimal",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "minItems": 1.0
+        },
+        "tests": [
+            {
+                "description": "longer is valid",
+                "data": [1, 2],
+                "valid": true
+            },
+            {
+                "description": "too short is invalid",
+                "data": [],
+                "valid": false
+            }
+        ]
     }
 ]
 """,
   "/draft2020-12/minLength.json": r"""[
     {
         "description": "minLength validation",
-        "schema": {"minLength": 2},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "minLength": 2
+        },
         "tests": [
             {
                 "description": "longer is valid",
@@ -30542,8 +31375,27 @@ Map<String, String> specificationTests = {
                 "valid": true
             },
             {
-                "description": "one supplementary Unicode code point is not long enough",
+                "description": "one grapheme is not long enough",
                 "data": "\uD83D\uDCA9",
+                "valid": false
+            }
+        ]
+    },
+    {
+        "description": "minLength validation with a decimal",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "minLength": 2.0
+        },
+        "tests": [
+            {
+                "description": "longer is valid",
+                "data": "foo",
+                "valid": true
+            },
+            {
+                "description": "too short is invalid",
+                "data": "f",
                 "valid": false
             }
         ]
@@ -30553,7 +31405,10 @@ Map<String, String> specificationTests = {
   "/draft2020-12/minProperties.json": r"""[
     {
         "description": "minProperties validation",
-        "schema": {"minProperties": 1},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "minProperties": 1
+        },
         "tests": [
             {
                 "description": "longer is valid",
@@ -30584,6 +31439,35 @@ Map<String, String> specificationTests = {
                 "description": "ignores other non-objects",
                 "data": 12,
                 "valid": true
+            },
+            {
+                "description": "ignores null",
+                "data": null,
+                "valid": true
+            },
+            {
+                "description": "ignores booleans",
+                "data": true,
+                "valid": true
+            }
+        ]
+    },
+    {
+        "description": "minProperties validation with a decimal",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "minProperties": 1.0
+        },
+        "tests": [
+            {
+                "description": "longer is valid",
+                "data": {"foo": 1, "bar": 2},
+                "valid": true
+            },
+            {
+                "description": "too short is invalid",
+                "data": {},
+                "valid": false
             }
         ]
     }
@@ -30592,7 +31476,10 @@ Map<String, String> specificationTests = {
   "/draft2020-12/minimum.json": r"""[
     {
         "description": "minimum validation",
-        "schema": {"minimum": 1.1},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "minimum": 1.1
+        },
         "tests": [
             {
                 "description": "above the minimum is valid",
@@ -30618,7 +31505,10 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "minimum validation with signed integer",
-        "schema": {"minimum": -2},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "minimum": -2
+        },
         "tests": [
             {
                 "description": "negative above the minimum is valid",
@@ -30662,7 +31552,10 @@ Map<String, String> specificationTests = {
   "/draft2020-12/multipleOf.json": r"""[
     {
         "description": "by int",
-        "schema": {"multipleOf": 2},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "multipleOf": 2
+        },
         "tests": [
             {
                 "description": "int by int",
@@ -30683,7 +31576,10 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "by number",
-        "schema": {"multipleOf": 1.5},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "multipleOf": 1.5
+        },
         "tests": [
             {
                 "description": "zero is multiple of anything",
@@ -30696,6 +31592,11 @@ Map<String, String> specificationTests = {
                 "valid": true
             },
             {
+                "description": "-4.5 is multiple of 1.5",
+                "data": -4.5,
+                "valid": true
+            },
+            {
                 "description": "35 is not multiple of 1.5",
                 "data": 35,
                 "valid": false
@@ -30704,7 +31605,10 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "by small number",
-        "schema": {"multipleOf": 0.0001},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "multipleOf": 0.0001
+        },
         "tests": [
             {
                 "description": "0.0075 is multiple of 0.0001",
@@ -30719,13 +31623,30 @@ Map<String, String> specificationTests = {
         ]
     },
     {
-        "description": "invalid instance should not raise error when float division = inf",
-        "schema": {"type": "integer", "multipleOf": 0.123456789},
+        "description": "float division = inf",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "integer", "multipleOf": 0.123456789
+        },
         "tests": [
             {
                 "description": "always invalid, but naive implementations may raise an overflow error",
                 "data": 1e308,
                 "valid": false
+            }
+        ]
+    },
+    {
+        "description": "small multiple of large integer",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "integer", "multipleOf": 1e-8
+        },
+        "tests": [
+            {
+                "description": "any integer is a multiple of 1e-8",
+                "data": 12391239123,
+                "valid": true
             }
         ]
     }
@@ -30735,6 +31656,7 @@ Map<String, String> specificationTests = {
     {
         "description": "not",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "not": {"type": "integer"}
         },
         "tests": [
@@ -30753,6 +31675,7 @@ Map<String, String> specificationTests = {
     {
         "description": "not multiple types",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "not": {"type": ["integer", "boolean"]}
         },
         "tests": [
@@ -30776,6 +31699,7 @@ Map<String, String> specificationTests = {
     {
         "description": "not more complex schema",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "not": {
                 "type": "object",
                 "properties": {
@@ -30806,6 +31730,7 @@ Map<String, String> specificationTests = {
     {
         "description": "forbidden property",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "properties": {
                 "foo": { 
                     "not": {}
@@ -30826,19 +31751,173 @@ Map<String, String> specificationTests = {
         ]
     },
     {
-        "description": "not with boolean schema true",
-        "schema": {"not": true},
+        "description": "forbid everything with empty schema",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "not": {}
+        },
         "tests": [
             {
-                "description": "any value is invalid",
+                "description": "number is invalid",
+                "data": 1,
+                "valid": false
+            },
+            {
+                "description": "string is invalid",
                 "data": "foo",
+                "valid": false
+            },
+            {
+                "description": "boolean true is invalid",
+                "data": true,
+                "valid": false
+            },
+            {
+                "description": "boolean false is invalid",
+                "data": false,
+                "valid": false
+            },
+            {
+                "description": "null is invalid",
+                "data": null,
+                "valid": false
+            },
+            {
+                "description": "object is invalid",
+                "data": {"foo": "bar"},
+                "valid": false
+            },
+            {
+                "description": "empty object is invalid",
+                "data": {},
+                "valid": false
+            },
+            {
+                "description": "array is invalid",
+                "data": ["foo"],
+                "valid": false
+            },
+            {
+                "description": "empty array is invalid",
+                "data": [],
                 "valid": false
             }
         ]
     },
     {
-        "description": "not with boolean schema false",
-        "schema": {"not": false},
+        "description": "forbid everything with boolean schema true",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "not": true
+        },
+        "tests": [
+            {
+                "description": "number is invalid",
+                "data": 1,
+                "valid": false
+            },
+            {
+                "description": "string is invalid",
+                "data": "foo",
+                "valid": false
+            },
+            {
+                "description": "boolean true is invalid",
+                "data": true,
+                "valid": false
+            },
+            {
+                "description": "boolean false is invalid",
+                "data": false,
+                "valid": false
+            },
+            {
+                "description": "null is invalid",
+                "data": null,
+                "valid": false
+            },
+            {
+                "description": "object is invalid",
+                "data": {"foo": "bar"},
+                "valid": false
+            },
+            {
+                "description": "empty object is invalid",
+                "data": {},
+                "valid": false
+            },
+            {
+                "description": "array is invalid",
+                "data": ["foo"],
+                "valid": false
+            },
+            {
+                "description": "empty array is invalid",
+                "data": [],
+                "valid": false
+            }
+        ]
+    },
+    {
+        "description": "allow everything with boolean schema false",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "not": false
+        },
+        "tests": [
+            {
+                "description": "number is valid",
+                "data": 1,
+                "valid": true
+            },
+            {
+                "description": "string is valid",
+                "data": "foo",
+                "valid": true
+            },
+            {
+                "description": "boolean true is valid",
+                "data": true,
+                "valid": true
+            },
+            {
+                "description": "boolean false is valid",
+                "data": false,
+                "valid": true
+            },
+            {
+                "description": "null is valid",
+                "data": null,
+                "valid": true
+            },
+            {
+                "description": "object is valid",
+                "data": {"foo": "bar"},
+                "valid": true
+            },
+            {
+                "description": "empty object is valid",
+                "data": {},
+                "valid": true
+            },
+            {
+                "description": "array is valid",
+                "data": ["foo"],
+                "valid": true
+            },
+            {
+                "description": "empty array is valid",
+                "data": [],
+                "valid": true
+            }
+        ]
+    },
+    {
+        "description": "double negation",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "not": { "not": {} }
+        },
         "tests": [
             {
                 "description": "any value is valid",
@@ -30846,13 +31925,40 @@ Map<String, String> specificationTests = {
                 "valid": true
             }
         ]
-    }
+    },
+    {
+        "description": "collect annotations inside a 'not', even if collection is disabled",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "not": {
+                "$comment": "this subschema must still produce annotations internally, even though the 'not' will ultimately discard them",
+                "anyOf": [
+                    true,
+                    { "properties": { "foo": true } }
+                ],
+                "unevaluatedProperties": false
+            }
+        },
+        "tests": [
+            {
+                "description": "unevaluated property",
+                "data": { "bar": 1 },
+                "valid": true
+            },
+            {
+                "description": "annotations are still collected inside a 'not'",
+                "data": { "foo": 1 },
+                "valid": false
+            }
+        ]
+     }
 ]
 """,
   "/draft2020-12/oneOf.json": r"""[
     {
         "description": "oneOf",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "oneOf": [
                 {
                     "type": "integer"
@@ -30888,6 +31994,7 @@ Map<String, String> specificationTests = {
     {
         "description": "oneOf with base schema",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "string",
             "oneOf" : [
                 {
@@ -30918,7 +32025,10 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "oneOf with boolean schemas, all true",
-        "schema": {"oneOf": [true, true, true]},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "oneOf": [true, true, true]
+        },
         "tests": [
             {
                 "description": "any value is invalid",
@@ -30929,7 +32039,10 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "oneOf with boolean schemas, one true",
-        "schema": {"oneOf": [true, false, false]},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "oneOf": [true, false, false]
+        },
         "tests": [
             {
                 "description": "any value is valid",
@@ -30940,7 +32053,10 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "oneOf with boolean schemas, more than one true",
-        "schema": {"oneOf": [true, true, false]},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "oneOf": [true, true, false]
+        },
         "tests": [
             {
                 "description": "any value is invalid",
@@ -30951,7 +32067,10 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "oneOf with boolean schemas, all false",
-        "schema": {"oneOf": [false, false, false]},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "oneOf": [false, false, false]
+        },
         "tests": [
             {
                 "description": "any value is invalid",
@@ -30963,6 +32082,7 @@ Map<String, String> specificationTests = {
     {
         "description": "oneOf complex types",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "oneOf": [
                 {
                     "properties": {
@@ -31004,6 +32124,7 @@ Map<String, String> specificationTests = {
     {
         "description": "oneOf with empty schema",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "oneOf": [
                 { "type": "number" },
                 {}
@@ -31025,6 +32146,7 @@ Map<String, String> specificationTests = {
     {
         "description": "oneOf with required",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "object",
             "oneOf": [
                 { "required": ["foo", "bar"] },
@@ -31054,9 +32176,10 @@ Map<String, String> specificationTests = {
             }
         ]
     },
-	{
+    {
         "description": "oneOf with missing optional property",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "oneOf": [
                 {
                     "properties": {
@@ -31099,6 +32222,7 @@ Map<String, String> specificationTests = {
     {
         "description": "nested oneOf, to check validation semantics",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "oneOf": [
                 {
                     "oneOf": [
@@ -31124,10 +32248,74 @@ Map<String, String> specificationTests = {
     }
 ]
 """,
+  "/draft2020-12/optional/anchor.json": r"""[
+    {
+        "description": "$anchor inside an enum is not a real identifier",
+        "comment": "the implementation must not be confused by an $anchor buried in the enum",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$defs": {
+                "anchor_in_enum": {
+                    "enum": [
+                        {
+                            "$anchor": "my_anchor",
+                            "type": "null"
+                        }
+                    ]
+                },
+                "real_identifier_in_schema": {
+                    "$anchor": "my_anchor",
+                    "type": "string"
+                },
+                "zzz_anchor_in_const": {
+                    "const": {
+                        "$anchor": "my_anchor",
+                        "type": "null"
+                    }
+                }
+            },
+            "anyOf": [
+                { "$ref": "#/$defs/anchor_in_enum" },
+                { "$ref": "#my_anchor" }
+            ]
+        },
+        "tests": [
+            {
+                "description": "exact match to enum, and type matches",
+                "data": {
+                    "$anchor": "my_anchor",
+                    "type": "null"
+                },
+                "valid": true
+            },
+            {
+                "description": "in implementations that strip $anchor, this may match either $def",
+                "data": {
+                    "type": "null"
+                },
+                "valid": false
+            },
+            {
+                "description": "match $ref to $anchor",
+                "data": "a string to match #/$defs/anchor_in_enum",
+                "valid": true
+            },
+            {
+                "description": "no match on enum or $ref to $anchor",
+                "data": 1,
+                "valid": false
+            }
+        ]
+    }
+]
+""",
   "/draft2020-12/optional/bignum.json": r"""[
     {
         "description": "integer",
-        "schema": { "type": "integer" },
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "integer"
+        },
         "tests": [
             {
                 "description": "a bignum is an integer",
@@ -31143,7 +32331,10 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "number",
-        "schema": { "type": "number" },
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "number"
+        },
         "tests": [
             {
                 "description": "a bignum is a number",
@@ -31159,7 +32350,10 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "string",
-        "schema": { "type": "string" },
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "string"
+        },
         "tests": [
             {
                 "description": "a bignum is not a string",
@@ -31169,8 +32363,11 @@ Map<String, String> specificationTests = {
         ]
     },
     {
-        "description": "integer comparison",
-        "schema": { "maximum": 18446744073709551615 },
+        "description": "maximum integer comparison",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "maximum": 18446744073709551615
+        },
         "tests": [
             {
                 "description": "comparison works for high numbers",
@@ -31182,6 +32379,7 @@ Map<String, String> specificationTests = {
     {
         "description": "float comparison with high precision",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "exclusiveMaximum": 972783798187987123879878123.18878137
         },
         "tests": [
@@ -31193,8 +32391,11 @@ Map<String, String> specificationTests = {
         ]
     },
     {
-        "description": "integer comparison",
-        "schema": { "minimum": -18446744073709551615 },
+        "description": "minimum integer comparison",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "minimum": -18446744073709551615
+        },
         "tests": [
             {
                 "description": "comparison works for very negative numbers",
@@ -31206,6 +32407,7 @@ Map<String, String> specificationTests = {
     {
         "description": "float comparison with high precision on negative numbers",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "exclusiveMinimum": -972783798187987123879878123.18878137
         },
         "tests": [
@@ -31218,21 +32420,380 @@ Map<String, String> specificationTests = {
     }
 ]
 """,
+  "/draft2020-12/optional/cross-draft.json": r"""[
+    {
+        "description": "refs to historic drafts are processed as historic drafts",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "array",
+            "$ref": "http://localhost:1234/draft2019-09/ignore-prefixItems.json"
+        },
+        "tests": [
+            {
+                "description": "first item not a string is valid",
+                "comment": "if the implementation is not processing the $ref as a 2019-09 schema, this test will fail",
+                "data": [1, 2, 3],
+                "valid": true
+            }
+        ]
+    }
+]
+""",
+  "/draft2020-12/optional/dependencies-compatibility.json": r"""[
+    {
+        "description": "single dependency",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "dependencies": {"bar": ["foo"]}
+        },
+        "tests": [
+            {
+                "description": "neither",
+                "data": {},
+                "valid": true
+            },
+            {
+                "description": "nondependant",
+                "data": {"foo": 1},
+                "valid": true
+            },
+            {
+                "description": "with dependency",
+                "data": {"foo": 1, "bar": 2},
+                "valid": true
+            },
+            {
+                "description": "missing dependency",
+                "data": {"bar": 2},
+                "valid": false
+            },
+            {
+                "description": "ignores arrays",
+                "data": ["bar"],
+                "valid": true
+            },
+            {
+                "description": "ignores strings",
+                "data": "foobar",
+                "valid": true
+            },
+            {
+                "description": "ignores other non-objects",
+                "data": 12,
+                "valid": true
+            }
+        ]
+    },
+    {
+        "description": "empty dependents",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "dependencies": {"bar": []}
+        },
+        "tests": [
+            {
+                "description": "empty object",
+                "data": {},
+                "valid": true
+            },
+            {
+                "description": "object with one property",
+                "data": {"bar": 2},
+                "valid": true
+            },
+            {
+                "description": "non-object is valid",
+                "data": 1,
+                "valid": true
+            }
+        ]
+    },
+    {
+        "description": "multiple dependents required",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "dependencies": {"quux": ["foo", "bar"]}
+        },
+        "tests": [
+            {
+                "description": "neither",
+                "data": {},
+                "valid": true
+            },
+            {
+                "description": "nondependants",
+                "data": {"foo": 1, "bar": 2},
+                "valid": true
+            },
+            {
+                "description": "with dependencies",
+                "data": {"foo": 1, "bar": 2, "quux": 3},
+                "valid": true
+            },
+            {
+                "description": "missing dependency",
+                "data": {"foo": 1, "quux": 2},
+                "valid": false
+            },
+            {
+                "description": "missing other dependency",
+                "data": {"bar": 1, "quux": 2},
+                "valid": false
+            },
+            {
+                "description": "missing both dependencies",
+                "data": {"quux": 1},
+                "valid": false
+            }
+        ]
+    },
+    {
+        "description": "dependencies with escaped characters",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "dependencies": {
+                "foo\nbar": ["foo\rbar"],
+                "foo\"bar": ["foo'bar"]
+            }
+        },
+        "tests": [
+            {
+                "description": "CRLF",
+                "data": {
+                    "foo\nbar": 1,
+                    "foo\rbar": 2
+                },
+                "valid": true
+            },
+            {
+                "description": "quoted quotes",
+                "data": {
+                    "foo'bar": 1,
+                    "foo\"bar": 2
+                },
+                "valid": true
+            },
+            {
+                "description": "CRLF missing dependent",
+                "data": {
+                    "foo\nbar": 1,
+                    "foo": 2
+                },
+                "valid": false
+            },
+            {
+                "description": "quoted quotes missing dependent",
+                "data": {
+                    "foo\"bar": 2
+                },
+                "valid": false
+            }
+        ]
+    },
+    {
+        "description": "single schema dependency",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "dependencies": {
+                "bar": {
+                    "properties": {
+                        "foo": {"type": "integer"},
+                        "bar": {"type": "integer"}
+                    }
+                }
+            }
+        },
+        "tests": [
+            {
+                "description": "valid",
+                "data": {"foo": 1, "bar": 2},
+                "valid": true
+            },
+            {
+                "description": "no dependency",
+                "data": {"foo": "quux"},
+                "valid": true
+            },
+            {
+                "description": "wrong type",
+                "data": {"foo": "quux", "bar": 2},
+                "valid": false
+            },
+            {
+                "description": "wrong type other",
+                "data": {"foo": 2, "bar": "quux"},
+                "valid": false
+            },
+            {
+                "description": "wrong type both",
+                "data": {"foo": "quux", "bar": "quux"},
+                "valid": false
+            },
+            {
+                "description": "ignores arrays",
+                "data": ["bar"],
+                "valid": true
+            },
+            {
+                "description": "ignores strings",
+                "data": "foobar",
+                "valid": true
+            },
+            {
+                "description": "ignores other non-objects",
+                "data": 12,
+                "valid": true
+            }
+        ]
+    },
+    {
+        "description": "boolean subschemas",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "dependencies": {
+                "foo": true,
+                "bar": false
+            }
+        },
+        "tests": [
+            {
+                "description": "object with property having schema true is valid",
+                "data": {"foo": 1},
+                "valid": true
+            },
+            {
+                "description": "object with property having schema false is invalid",
+                "data": {"bar": 2},
+                "valid": false
+            },
+            {
+                "description": "object with both properties is invalid",
+                "data": {"foo": 1, "bar": 2},
+                "valid": false
+            },
+            {
+                "description": "empty object is valid",
+                "data": {},
+                "valid": true
+            }
+        ]
+    },
+    {
+        "description": "schema dependencies with escaped characters",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "dependencies": {
+                "foo\tbar": {"minProperties": 4},
+                "foo'bar": {"required": ["foo\"bar"]}
+            }
+        },
+        "tests": [
+            {
+                "description": "quoted tab",
+                "data": {
+                    "foo\tbar": 1,
+                    "a": 2,
+                    "b": 3,
+                    "c": 4
+                },
+                "valid": true
+            },
+            {
+                "description": "quoted quote",
+                "data": {
+                    "foo'bar": {"foo\"bar": 1}
+                },
+                "valid": false
+            },
+            {
+                "description": "quoted tab invalid under dependent schema",
+                "data": {
+                    "foo\tbar": 1,
+                    "a": 2
+                },
+                "valid": false
+            },
+            {
+                "description": "quoted quote invalid under dependent schema",
+                "data": {"foo'bar": 1},
+                "valid": false
+            }
+        ]
+    }
+]
+""",
+  "/draft2020-12/optional/dynamicRef.json": r"""[
+  {
+      "description": "$dynamicRef skips over intermediate resources - pointer reference across resource boundary",
+      "schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "$id": "https://test.json-schema.org/dynamic-ref-skips-intermediate-resource/optional/main",
+        "type": "object",
+          "properties": {
+              "bar-item": {
+                  "$ref": "bar#/$defs/item"
+              }
+          },
+          "$defs": {
+              "bar": {
+                  "$id": "bar",
+                  "type": "array",
+                  "items": {
+                      "$ref": "item"
+                  },
+                  "$defs": {
+                      "item": {
+                          "$id": "item",
+                          "type": "object",
+                          "properties": {
+                              "content": {
+                                  "$dynamicRef": "#content"
+                              }
+                          },
+                          "$defs": {
+                              "defaultContent": {
+                                  "$dynamicAnchor": "content",
+                                  "type": "integer"
+                              }
+                          }
+                      },
+                      "content": {
+                          "$dynamicAnchor": "content",
+                          "type": "string"
+                      }
+                  }
+              }
+          }
+      },
+      "tests": [
+          {
+              "description": "integer property passes",
+              "data": { "bar-item": { "content": 42 } },
+              "valid": true
+          },
+          {
+              "description": "string property fails",
+              "data": { "bar-item": { "content": "value" } },
+              "valid": false
+          }
+      ]
+  }]""",
   "/draft2020-12/optional/ecmascript-regex.json": r"""[
     {
         "description": "ECMA 262 regex $ does not match trailing newline",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "string",
             "pattern": "^abc$"
         },
         "tests": [
             {
-                "description": "matches in Python, but should not in jsonschema",
+                "description": "matches in Python, but not in ECMA 262",
                 "data": "abc\\n",
                 "valid": false
             },
             {
-                "description": "should match",
+                "description": "matches",
                 "data": "abc",
                 "valid": true
             }
@@ -31241,6 +32802,7 @@ Map<String, String> specificationTests = {
     {
         "description": "ECMA 262 regex converts \\t to horizontal tab",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "string",
             "pattern": "^\\t$"
         },
@@ -31260,6 +32822,7 @@ Map<String, String> specificationTests = {
     {
         "description": "ECMA 262 regex escapes control codes with \\c and upper letter",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "string",
             "pattern": "^\\cC$"
         },
@@ -31279,6 +32842,7 @@ Map<String, String> specificationTests = {
     {
         "description": "ECMA 262 regex escapes control codes with \\c and lower letter",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "string",
             "pattern": "^\\cc$"
         },
@@ -31298,6 +32862,7 @@ Map<String, String> specificationTests = {
     {
         "description": "ECMA 262 \\d matches ascii digits only",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "string",
             "pattern": "^\\d$"
         },
@@ -31322,6 +32887,7 @@ Map<String, String> specificationTests = {
     {
         "description": "ECMA 262 \\D matches everything but ascii digits",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "string",
             "pattern": "^\\D$"
         },
@@ -31346,6 +32912,7 @@ Map<String, String> specificationTests = {
     {
         "description": "ECMA 262 \\w matches ascii letters only",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "string",
             "pattern": "^\\w$"
         },
@@ -31365,6 +32932,7 @@ Map<String, String> specificationTests = {
     {
         "description": "ECMA 262 \\W matches everything but ascii letters",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "string",
             "pattern": "^\\W$"
         },
@@ -31384,6 +32952,7 @@ Map<String, String> specificationTests = {
     {
         "description": "ECMA 262 \\s matches whitespace",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "string",
             "pattern": "^\\s$"
         },
@@ -31448,6 +33017,7 @@ Map<String, String> specificationTests = {
     {
         "description": "ECMA 262 \\S matches everything but whitespace",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "string",
             "pattern": "^\\S$"
         },
@@ -31510,8 +33080,11 @@ Map<String, String> specificationTests = {
         ]
     },
     {
-        "description": "unicode semantics should be used for all pattern matching",
-        "schema": { "pattern": "\\p{Letter}cole" },
+        "description": "patterns always use unicode semantics with pattern",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "pattern": "\\p{Letter}cole"
+        },
         "tests": [
             {
                 "description": "ascii character in json string",
@@ -31537,7 +33110,10 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "\\w in patterns matches [A-Za-z0-9_], not unicode letters",
-        "schema": { "pattern": "\\wcole" },
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "pattern": "\\wcole"
+        },
         "tests": [
             {
                 "description": "ascii character in json string",
@@ -31562,8 +33138,11 @@ Map<String, String> specificationTests = {
         ]
     },
     {
-        "description": "unicode characters do not match ascii ranges",
-        "schema": { "pattern": "[a-z]cole" },
+        "description": "pattern with ASCII ranges",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "pattern": "[a-z]cole"
+        },
         "tests": [
             {
                 "description": "literal unicode character in json string",
@@ -31584,49 +33163,56 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "\\d in pattern matches [0-9], not unicode digits",
-        "schema": { "pattern": "^\\d+$" },
-        "tests": [
-            {
-                "description": "ascii digits",
-                "data": "42",
-                "valid": true
-            },
-            {
-                "description": "ascii non-digits",
-                "data": "-%#",
-                "valid": false
-            },
-            {
-                "description": "non-ascii digits (BENGALI DIGIT FOUR, BENGALI DIGIT TWO)",
-                "data": "৪২",
-                "valid": false
-            }
-        ]
-    },
-    {
-        "description": "unicode digits are more than 0 through 9",
-        "schema": { "pattern": "^\\p{digit}+$" },
-        "tests": [
-            {
-                "description": "ascii digits",
-                "data": "42",
-                "valid": true
-            },
-            {
-                "description": "ascii non-digits",
-                "data": "-%#",
-                "valid": false
-            },
-            {
-                "description": "non-ascii digits (BENGALI DIGIT FOUR, BENGALI DIGIT TWO)",
-                "data": "৪২",
-                "valid": true
-            }
-        ]
-    },
-    {
-        "description": "unicode semantics should be used for all patternProperties matching",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "pattern": "^\\d+$"
+        },
+        "tests": [
+            {
+                "description": "ascii digits",
+                "data": "42",
+                "valid": true
+            },
+            {
+                "description": "ascii non-digits",
+                "data": "-%#",
+                "valid": false
+            },
+            {
+                "description": "non-ascii digits (BENGALI DIGIT FOUR, BENGALI DIGIT TWO)",
+                "data": "৪২",
+                "valid": false
+            }
+        ]
+    },
+    {
+        "description": "pattern with non-ASCII digits",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "pattern": "^\\p{digit}+$"
+        },
+        "tests": [
+            {
+                "description": "ascii digits",
+                "data": "42",
+                "valid": true
+            },
+            {
+                "description": "ascii non-digits",
+                "data": "-%#",
+                "valid": false
+            },
+            {
+                "description": "non-ascii digits (BENGALI DIGIT FOUR, BENGALI DIGIT TWO)",
+                "data": "৪২",
+                "valid": true
+            }
+        ]
+    },
+    {
+        "description": "patterns always use unicode semantics with patternProperties",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "object",
             "patternProperties": {
                 "\\p{Letter}cole": true
@@ -31659,6 +33245,7 @@ Map<String, String> specificationTests = {
     {
         "description": "\\w in patternProperties matches [A-Za-z0-9_], not unicode letters",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "object",
             "patternProperties": {
                 "\\wcole": true
@@ -31689,8 +33276,9 @@ Map<String, String> specificationTests = {
         ]
     },
     {
-        "description": "unicode characters do not match ascii ranges",
+        "description": "patternProperties with ASCII ranges",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "object",
             "patternProperties": {
                 "[a-z]cole": true
@@ -31718,6 +33306,7 @@ Map<String, String> specificationTests = {
     {
         "description": "\\d in patternProperties matches [0-9], not unicode digits",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "object",
             "patternProperties": {
                 "^\\d+$": true
@@ -31743,8 +33332,9 @@ Map<String, String> specificationTests = {
         ]
     },
     {
-        "description": "unicode digits are more than 0 through 9",
+        "description": "patternProperties with non-ASCII digits",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "object",
             "patternProperties": {
                 "^\\p{digit}+$": true
@@ -31774,7 +33364,11 @@ Map<String, String> specificationTests = {
   "/draft2020-12/optional/float-overflow.json": r"""[
     {
         "description": "all integers are multiples of 0.5, if overflow is handled",
-        "schema": {"type": "integer", "multipleOf": 0.5},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "integer",
+            "multipleOf": 0.5
+        },
         "tests": [
             {
                 "description": "valid if optional overflow handling is implemented",
@@ -31788,6 +33382,7 @@ Map<String, String> specificationTests = {
   "/draft2020-12/optional/format-assertion.json": r"""[
     {
         "description": "schema that uses custom metaschema with format-assertion: false",
+        "comment": "The true/false boolean in $vocabulary only controls behavior for implementations that do not recognize the vocabulary. For implementations that do understand format-assertion, the boolean has no impact on validation behavior — hence both test groups produce identical results.",
         "schema": {
             "$id": "https://schema/using/format-assertion/false",
             "$schema": "http://localhost:1234/draft2020-12/format-assertion-false.json",
@@ -31801,6 +33396,7 @@ Map<String, String> specificationTests = {
             },
             {
                 "description": "format-assertion: false: invalid string",
+                "comment": "valid: false is intentional — the false value in $vocabulary only affects unknown vocabulary handling, not validation behavior itself",
                 "data": "not-an-ipv4",
                 "valid": false
             }
@@ -31831,7 +33427,10 @@ Map<String, String> specificationTests = {
   "/draft2020-12/optional/format/date-time.json": r"""[
     {
         "description": "validation of date-time strings",
-        "schema": { "format": "date-time" },
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "format": "date-time"
+        },
         "tests": [
             {
                 "description": "all string formats ignore integers",
@@ -31924,6 +33523,21 @@ Map<String, String> specificationTests = {
                 "valid": false
             },
             {
+                "description": "an invalid hour in date-time string",
+                "data": "1990-12-31T24:00:00Z",
+                "valid": false
+            },
+            {
+                "description": "an invalid minute in date-time string",
+                "data": "1990-12-31T15:60:00Z",
+                "valid": false
+            },
+            {
+                "description": "an invalid offset minute in date-time string",
+                "data": "1990-12-31T10:00:00+10:60",
+                "valid": false
+            },
+            {
                 "description": "an invalid date-time string",
                 "data": "06/19/1963 08:30:06 PST",
                 "valid": false
@@ -31949,13 +33563,18 @@ Map<String, String> specificationTests = {
                 "valid": false
             },
             {
-                "description": "non-ascii digits should be rejected in the date portion",
+                "description": "invalid non-ASCII '৪' (a Bengali 4) in date portion",
                 "data": "1963-06-1৪T00:00:00Z",
                 "valid": false
             },
             {
-                "description": "non-ascii digits should be rejected in the time portion",
+                "description": "invalid non-ASCII '৪' (a Bengali 4) in time portion",
                 "data": "1963-06-11T0৪:00:00Z",
+                "valid": false
+            },
+            {
+                "description": "invalid extended year",
+                "data": "+11963-06-19T08:30:06.283185Z",
                 "valid": false
             }
         ]
@@ -31965,7 +33584,10 @@ Map<String, String> specificationTests = {
   "/draft2020-12/optional/format/date.json": r"""[
     {
         "description": "validation of date strings",
-        "schema": { "format": "date" },
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "format": "date"
+        },
         "tests": [
             {
                 "description": "all string formats ignore integers",
@@ -32015,16 +33637,6 @@ Map<String, String> specificationTests = {
             {
                 "description": "a valid date string with 28 days in February (normal)",
                 "data": "2021-02-28",
-                "valid": true
-            },
-            {
-                "description": "a invalid date string with 29 days in February (normal)",
-                "data": "2021-02-29",
-                "valid": false
-            },
-            {
-                "description": "a valid date string with 29 days in February (leap)",
-                "data": "2020-02-29",
                 "valid": true
             },
             {
@@ -32133,11 +33745,6 @@ Map<String, String> specificationTests = {
                 "valid": false
             },
             {
-                "description": "a invalid date string with invalid month",
-                "data": "2020-13-01",
-                "valid": false
-            },
-            {
                 "description": "an invalid date string",
                 "data": "06/19/1963",
                 "valid": false
@@ -32163,11 +33770,6 @@ Map<String, String> specificationTests = {
                 "valid": false
             },
             {
-                "description": "invalid month-day combination",
-                "data": "1998-04-31",
-                "valid": false
-            },
-            {
                 "description": "2021 is not a leap year",
                 "data": "2021-02-29",
                 "valid": false
@@ -32178,8 +33780,195 @@ Map<String, String> specificationTests = {
                 "valid": true
             },
             {
-                "description": "non-ascii digits should be rejected",
+                "description": "invalid non-ASCII '৪' (a Bengali 4)",
                 "data": "1963-06-1৪",
+                "valid": false
+            },
+            {
+                "description": "invalid: non-ASCII Bengali digit in month field",
+                "data": "2020-0৪-01",
+                "valid": false
+            },
+            {
+                "description": "ISO8601 / non-RFC3339: YYYYMMDD without dashes (2023-03-28)",
+                "data": "20230328",
+                "valid": false
+            },
+            {
+                "description": "ISO8601 / non-RFC3339: week number implicit day of week (2023-01-02)",
+                "data": "2023-W01",
+                "valid": false
+            },
+            {
+                "description": "ISO8601 / non-RFC3339: week number with day of week (2023-03-28)",
+                "data": "2023-W13-2",
+                "valid": false
+            },
+            {
+                "description": "ISO8601 / non-RFC3339: week number rollover to next year (2023-01-01)",
+                "data": "2022W527",
+                "valid": false
+            },
+            {
+                "description": "an invalid time string in date-time format",
+                "data": "2020-11-28T23:55:45Z",
+                "valid": false
+            },
+            {
+                "description": "century year 0100 is not a leap year",
+                "comment": "https://www.rfc-editor.org/rfc/rfc3339#appendix-C — 100 % 100 == 0 but 100 % 400 != 0",
+                "data": "0100-02-29",
+                "valid": false
+            },
+            {
+                "description": "century year 0400 is a leap year",
+                "comment": "https://www.rfc-editor.org/rfc/rfc3339#appendix-C — 400-year cycle boundary",
+                "data": "0400-02-29",
+                "valid": true
+            },
+            {
+                "description": "century year 2100 is not a leap year",
+                "comment": "https://www.rfc-editor.org/rfc/rfc3339#appendix-C — future century year",
+                "data": "2100-02-29",
+                "valid": false
+            },
+            {
+                "description": "invalid: leading whitespace is not permitted",
+                "comment": "https://www.rfc-editor.org/rfc/rfc3339#section-5.6 — full-date grammar does not include whitespace",
+                "data": " 2024-01-15",
+                "valid": false
+            },
+            {
+                "description": "invalid: trailing whitespace is not permitted",
+                "comment": "https://www.rfc-editor.org/rfc/rfc3339#section-5.6 — full-date grammar does not include whitespace",
+                "data": "2024-01-15 ",
+                "valid": false
+            },
+            {
+                "description": "invalid: month 00 is not valid per date-month range 01-12",
+                "comment": "https://www.rfc-editor.org/rfc/rfc3339#section-5.6 — date-month = 2DIGIT ; 01-12",
+                "data": "2024-00-15",
+                "valid": false
+            },
+            {
+                "description": "invalid: day 00 is not valid per date-mday minimum of 01",
+                "comment": "https://www.rfc-editor.org/rfc/rfc3339#section-5.6 — date-mday = 2DIGIT ; 01-28/29/30/31",
+                "data": "2024-01-00",
+                "valid": false
+            },
+            {
+                "description": "invalid: empty string",
+                "data": "",
+                "valid": false
+            },
+            {
+                "description": "invalid: embedded whitespace between year and month",
+                "data": "2020 -01-01",
+                "valid": false
+            },
+            {
+                "description": "invalid: trailing character after valid full-date",
+                "data": "2020-01-01X",
+                "valid": false
+            },
+            {
+                "description": "invalid: trailing Z after full-date",
+                "data": "2020-01-01Z",
+                "valid": false
+            },
+            {
+                "description": "invalid: full-date followed by space and time component",
+                "data": "2020-01-01 00:00:00Z",
+                "valid": false
+            },
+            {
+                "description": "valid: four-digit year 0001",
+                "data": "0001-01-01",
+                "valid": true
+            },
+            {
+                "description": "invalid: two-digit year (N-2 digits)",
+                "data": "20-01-01",
+                "valid": false
+            },
+            {
+                "description": "invalid: three-digit year (N-1 digits)",
+                "data": "998-01-01",
+                "valid": false
+            },
+            {
+                "description": "invalid: five-digit year (N+1 digits)",
+                "data": "12020-01-01",
+                "valid": false
+            },
+            {
+                "description": "invalid: positive sign prefix on year",
+                "data": "+2020-01-01",
+                "valid": false
+            },
+            {
+                "description": "invalid: negative sign prefix on year",
+                "data": "-2020-01-01",
+                "valid": false
+            },
+            {
+                "description": "invalid: non-ASCII Bengali digit in year field",
+                "data": "২020-01-01",
+                "valid": false
+            },
+            {
+                "description": "invalid: alphabetic characters in year field",
+                "data": "YYYY-01-01",
+                "valid": false
+            },
+            {
+                "description": "invalid: three-digit month (N+1 digits)",
+                "data": "2020-001-01",
+                "valid": false
+            },
+            {
+                "description": "invalid: alphabetic characters in month field",
+                "data": "2020-MM-01",
+                "valid": false
+            },
+            {
+                "description": "invalid: three-digit day (N+1 digits)",
+                "data": "2020-01-001",
+                "valid": false
+            },
+            {
+                "description": "invalid: alphabetic characters in day field",
+                "data": "2020-01-DD",
+                "valid": false
+            },
+            {
+                "description": "invalid: colon separators",
+                "data": "2020:01:01",
+                "valid": false
+            },
+            {
+                "description": "invalid: dot separators",
+                "data": "2020.01.01",
+                "valid": false
+            },
+            {
+                "description": "invalid: space separators",
+                "data": "2020 01 01",
+                "valid": false
+            },
+            {
+                "description": "invalid: mixed slash and hyphen separators",
+                "data": "2020-01/01",
+                "valid": false
+            },
+            {
+                "description": "invalid: duplicated first hyphen",
+                "data": "2020--01-01",
+                "valid": false
+            },
+            {
+                "description": "invalid: duplicated second hyphen",
+                "data": "2020-01--01",
                 "valid": false
             }
         ]
@@ -32189,7 +33978,11 @@ Map<String, String> specificationTests = {
   "/draft2020-12/optional/format/duration.json": r"""[
     {
         "description": "validation of duration strings",
-        "schema": { "format": "duration" },
+        "comment": "RFC 3339 Appendix A defines the ABNF grammar for ISO-8601 durations used by JSON Schema format 'duration'. These tests enforce only the syntax defined by that grammar.",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "format": "duration"
+        },
         "tests": [
             {
                 "description": "all string formats ignore integers",
@@ -32229,6 +34022,11 @@ Map<String, String> specificationTests = {
             {
                 "description": "an invalid duration string",
                 "data": "PT1D",
+                "valid": false
+            },
+            {
+                "description": "must start with P",
+                "data": "4DT12H30M5S",
                 "valid": false
             },
             {
@@ -32307,18 +34105,123 @@ Map<String, String> specificationTests = {
                 "valid": false
             },
             {
-                "description": "non-ascii digits should be rejected",
+                "description": "invalid non-ASCII '২' (a Bengali 2)",
                 "data": "P২Y",
                 "valid": false
+            },
+            {
+                "description": "element without unit",
+                "data": "P1",
+                "valid": false
+            },
+            {
+                "description": "all date and time components",
+                "data": "P1Y2M3DT4H5M6S",
+                "valid": true
+            },
+            {
+                "description": "date components only",
+                "data": "P1Y2M3D",
+                "valid": true
+            },
+            {
+                "description": "time components only",
+                "data": "PT1H2M3S",
+                "valid": true
+            },
+            {
+                "description": "month and day",
+                "data": "P1M2D",
+                "valid": true
+            },
+            {
+                "description": "hour and minute",
+                "data": "PT1H30M",
+                "valid": true
+            },
+            {
+                "description": "multi-digit values in all components",
+                "data": "P10Y10M10DT10H10M10S",
+                "valid": true
+            },
+            {
+                "description": "fractional duration is not allowed by RFC 3339 ABNF",
+                "comment": "numeric components use 1*DIGIT where DIGIT = %x30-39; '.' is not allowed",
+                "data": "PT0.5S",
+                "valid": false
+            },
+            {
+                "description": "leading whitespace is invalid",
+                "data": " P1D",
+                "valid": false
+            },
+            {
+                "description": "trailing whitespace is invalid",
+                "data": "P1D ",
+                "valid": false
+            },
+            {
+                "description": "empty string is invalid",
+                "data": "",
+                "valid": false
+            },
+            {
+                "description": "years and months can appear without days",
+                "data": "P1Y2M",
+                "valid": true
+            },
+            {
+                "description": "years and days cannot appear without months",
+                "data": "P1Y2D",
+                "valid": false
+            },
+            {
+                "description": "months and days can appear without years",
+                "data": "P1M2D",
+                "valid": true
+            },
+            {
+                "description": "hours and minutes can appear without seconds",
+                "data": "PT1H2M",
+                "valid": true
+            },
+            {
+                "description": "hours and seconds cannot appear without minutes",
+                "data": "PT1H2S",
+                "valid": false
+            },
+            {
+                "description": "minutes and seconds can appear without hour",
+                "data": "PT1M2S",
+                "valid": true
             }
         ]
     }
 ]
 """,
+  "/draft2020-12/optional/format/ecmascript-regex.json": r"""[
+  {
+    "description": "\\a is not an ECMA 262 control escape",
+    "schema": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "format": "regex"
+    },
+    "tests": [
+      {
+        "description": "when used as a pattern",
+        "data": "\\a",
+        "valid": false
+      }
+    ]
+  }
+]""",
   "/draft2020-12/optional/format/email.json": r"""[
     {
         "description": "validation of e-mail addresses",
-        "schema": { "format": "email" },
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "format": "email"
+        },
         "tests": [
             {
                 "description": "all string formats ignore integers",
@@ -32376,6 +34279,31 @@ Map<String, String> specificationTests = {
                 "valid": true
             },
             {
+                "description": "a quoted string with a space in the local part is valid",
+                "data": "\"joe bloggs\"@example.com",
+                "valid": true
+            },
+            {
+                "description": "a quoted string with a double dot in the local part is valid",
+                "data": "\"joe..bloggs\"@example.com",
+                "valid": true
+            },
+            {
+                "description": "a quoted string with a @ in the local part is valid",
+                "data": "\"joe@bloggs\"@example.com",
+                "valid": true
+            },
+            {
+                "description": "an IPv4-address-literal after the @ is valid",
+                "data": "joe.bloggs@[127.0.0.1]",
+                "valid": true
+            },
+            {
+                "description": "an IPv6-address-literal after the @ is valid",
+                "data": "joe.bloggs@[IPv6:::1]",
+                "valid": true
+            },
+            {
                 "description": "dot before local part is not valid",
                 "data": ".test@example.com",
                 "valid": false
@@ -32394,6 +34322,41 @@ Map<String, String> specificationTests = {
                 "description": "two subsequent dots inside local part are not valid",
                 "data": "te..st@example.com",
                 "valid": false
+            },
+            {
+                "description": "an invalid domain",
+                "data": "joe.bloggs@invalid=domain.com",
+                "valid": false
+            },
+            {
+                "description": "an invalid IPv4-address-literal",
+                "data": "joe.bloggs@[127.0.0.300]",
+                "valid": false
+            },
+            {
+                "description": "two email addresses is not valid",
+                "data": "user1@oceania.org, user2@oceania.org",
+                "valid": false
+            },
+            {
+                "description": "full \"From\" header is invalid",
+                "data": "\"Winston Smith\" <winston.smith@recdep.minitrue> (Records Department)",
+                "valid": false
+            },
+            {
+                "description": "local part is required",
+                "data": "@example.com",
+                "valid": false
+            },
+            {
+                "description": "domain is required",
+                "data": "joe.bloggs@",
+                "valid": false
+            },
+            {
+                "description": "unquoted space in local part is invalid",
+                "data": "joe bloggs@example.com",
+                "valid": false
             }
         ]
     }
@@ -32402,7 +34365,10 @@ Map<String, String> specificationTests = {
   "/draft2020-12/optional/format/hostname.json": r"""[
     {
         "description": "validation of host names",
-        "schema": { "format": "hostname" },
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "format": "hostname"
+        },
         "tests": [
             {
                 "description": "all string formats ignore integers",
@@ -32440,24 +34406,54 @@ Map<String, String> specificationTests = {
                 "valid": true
             },
             {
-                "description": "a valid punycoded IDN hostname",
-                "data": "xn--4gbwdl.xn--wgbh1c",
+                "description": "single label",
+                "data": "hostname",
                 "valid": true
             },
             {
-                "description": "a host name starting with an illegal character",
-                "data": "-a-host-name-that-starts-with--",
+                "description": "single label with digits",
+                "data": "h0stn4me",
+                "valid": true
+            },
+            {
+                "description": "single label starting with digit",
+                "data": "1host",
+                "valid": true
+            },
+            {
+                "description": "single label ending with digit",
+                "data": "hostnam3",
+                "valid": true
+            },
+            {
+                "description": "empty string",
+                "data": "",
                 "valid": false
             },
             {
-                "description": "a host name containing illegal characters",
-                "data": "not_a_valid_host_name",
+                "description": "single dot",
+                "data": ".",
                 "valid": false
             },
             {
-                "description": "a host name with a component too long",
-                "data": "a-vvvvvvvvvvvvvvvveeeeeeeeeeeeeeeerrrrrrrrrrrrrrrryyyyyyyyyyyyyyyy-long-host-name-component",
+                "description": "leading dot",
+                "data": ".example",
                 "valid": false
+            },
+            {
+                "description": "trailing dot",
+                "data": "example.",
+                "valid": false
+            },
+            {
+                "description": "IDN label separator",
+                "data": "example\uff0ecom",
+                "valid": false
+            },
+            {
+                "description": "single label with hyphen",
+                "data": "host-name",
+                "valid": true
             },
             {
                 "description": "starts with hyphen",
@@ -32470,28 +34466,258 @@ Map<String, String> specificationTests = {
                 "valid": false
             },
             {
-                "description": "starts with underscore",
-                "data": "_hostname",
-                "valid": false
-            },
-            {
-                "description": "ends with underscore",
-                "data": "hostname_",
-                "valid": false
-            },
-            {
                 "description": "contains underscore",
                 "data": "host_name",
                 "valid": false
             },
             {
-                "description": "maximum label length",
+                "description": "exceeds maximum overall length (256)",
+                "data": "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijk.abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijk.abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijk.abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijk.com",
+                "valid": false
+            },
+            {
+                "description": "maximum label length (63)",
                 "data": "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijk.com",
                 "valid": true
             },
             {
-                "description": "exceeds maximum label length",
+                "description": "exceeds maximum label length (63)",
                 "data": "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijkl.com",
+                "valid": false
+            }
+        ]
+    },
+    {
+        "description": "validation of A-label (punycode) host names",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "format": "hostname"
+        },
+        "tests": [
+            {
+                "description": "invalid Punycode",
+                "comment": "https://tools.ietf.org/html/rfc5891#section-4.4 https://tools.ietf.org/html/rfc5890#section-2.3.2.1",
+                "data": "xn--X",
+                "valid": false
+            },
+            {
+                "description": "a valid host name (example.test in Hangul)",
+                "data": "xn--9n2bp8q.xn--9t4b11yi5a",
+                "valid": true
+            },
+            {
+                "description": "contains illegal char U+302E Hangul single dot tone mark",
+                "data": "xn--07jt112bpxg.xn--9t4b11yi5a",
+                "valid": false
+            },
+            {
+                "description": "Begins with a Spacing Combining Mark",
+                "comment": "https://tools.ietf.org/html/rfc5891#section-4.2.3.2",
+                "data": "xn--hello-txk",
+                "valid": false
+            },
+            {
+                "description": "Begins with a Nonspacing Mark",
+                "comment": "https://tools.ietf.org/html/rfc5891#section-4.2.3.2",
+                "data": "xn--hello-zed",
+                "valid": false
+            },
+            {
+                "description": "Begins with an Enclosing Mark",
+                "comment": "https://tools.ietf.org/html/rfc5891#section-4.2.3.2",
+                "data": "xn--hello-6bf",
+                "valid": false
+            },
+            {
+                "description": "Exceptions that are PVALID, left-to-right chars",
+                "comment": "https://tools.ietf.org/html/rfc5891#section-4.2.2 https://tools.ietf.org/html/rfc5892#section-2.6",
+                "data": "xn--zca29lwxobi7a",
+                "valid": true
+            },
+            {
+                "description": "Exceptions that are PVALID, right-to-left chars",
+                "comment": "https://tools.ietf.org/html/rfc5891#section-4.2.2 https://tools.ietf.org/html/rfc5892#section-2.6",
+                "data": "xn--qmbc",
+                "valid": true
+            },
+            {
+                "description": "Exceptions that are DISALLOWED, right-to-left chars",
+                "comment": "https://tools.ietf.org/html/rfc5891#section-4.2.2 https://tools.ietf.org/html/rfc5892#section-2.6",
+                "data": "xn--chb89f",
+                "valid": false
+            },
+            {
+                "description": "Exceptions that are DISALLOWED, left-to-right chars",
+                "comment": "https://tools.ietf.org/html/rfc5891#section-4.2.2 https://tools.ietf.org/html/rfc5892#section-2.6 Note: The two combining marks (U+302E and U+302F) are in the middle and not at the start",
+                "data": "xn--07jceefgh4c",
+                "valid": false
+            },
+            {
+                "description": "MIDDLE DOT with no preceding 'l'",
+                "comment": "https://tools.ietf.org/html/rfc5891#section-4.2.3.3 https://tools.ietf.org/html/rfc5892#appendix-A.3",
+                "data": "xn--al-0ea",
+                "valid": false
+            },
+            {
+                "description": "MIDDLE DOT with nothing preceding",
+                "comment": "https://tools.ietf.org/html/rfc5891#section-4.2.3.3 https://tools.ietf.org/html/rfc5892#appendix-A.3",
+                "data": "xn--l-fda",
+                "valid": false
+            },
+            {
+                "description": "MIDDLE DOT with no following 'l'",
+                "comment": "https://tools.ietf.org/html/rfc5891#section-4.2.3.3 https://tools.ietf.org/html/rfc5892#appendix-A.3",
+                "data": "xn--la-0ea",
+                "valid": false
+            },
+            {
+                "description": "MIDDLE DOT with nothing following",
+                "comment": "https://tools.ietf.org/html/rfc5891#section-4.2.3.3 https://tools.ietf.org/html/rfc5892#appendix-A.3",
+                "data": "xn--l-gda",
+                "valid": false
+            },
+            {
+                "description": "MIDDLE DOT with surrounding 'l's",
+                "comment": "https://tools.ietf.org/html/rfc5891#section-4.2.3.3 https://tools.ietf.org/html/rfc5892#appendix-A.3",
+                "data": "xn--ll-0ea",
+                "valid": true
+            },
+            {
+                "description": "Greek KERAIA not followed by Greek",
+                "comment": "https://tools.ietf.org/html/rfc5891#section-4.2.3.3 https://tools.ietf.org/html/rfc5892#appendix-A.4",
+                "data": "xn--S-jib3p",
+                "valid": false
+            },
+            {
+                "description": "Greek KERAIA not followed by anything",
+                "comment": "https://tools.ietf.org/html/rfc5891#section-4.2.3.3 https://tools.ietf.org/html/rfc5892#appendix-A.4",
+                "data": "xn--wva3j",
+                "valid": false
+            },
+            {
+                "description": "Greek KERAIA followed by Greek",
+                "comment": "https://tools.ietf.org/html/rfc5891#section-4.2.3.3 https://tools.ietf.org/html/rfc5892#appendix-A.4",
+                "data": "xn--wva3je",
+                "valid": true
+            },
+            {
+                "description": "Hebrew GERESH not preceded by Hebrew",
+                "comment": "https://tools.ietf.org/html/rfc5891#section-4.2.3.3 https://tools.ietf.org/html/rfc5892#appendix-A.5",
+                "data": "xn--A-2hc5h",
+                "valid": false
+            },
+            {
+                "description": "Hebrew GERESH not preceded by anything",
+                "comment": "https://tools.ietf.org/html/rfc5891#section-4.2.3.3 https://tools.ietf.org/html/rfc5892#appendix-A.5",
+                "data": "xn--5db1e",
+                "valid": false
+            },
+            {
+                "description": "Hebrew GERESH preceded by Hebrew",
+                "comment": "https://tools.ietf.org/html/rfc5891#section-4.2.3.3 https://tools.ietf.org/html/rfc5892#appendix-A.5",
+                "data": "xn--4dbc5h",
+                "valid": true
+            },
+            {
+                "description": "Hebrew GERSHAYIM not preceded by Hebrew",
+                "comment": "https://tools.ietf.org/html/rfc5891#section-4.2.3.3 https://tools.ietf.org/html/rfc5892#appendix-A.6",
+                "data": "xn--A-2hc8h",
+                "valid": false
+            },
+            {
+                "description": "Hebrew GERSHAYIM not preceded by anything",
+                "comment": "https://tools.ietf.org/html/rfc5891#section-4.2.3.3 https://tools.ietf.org/html/rfc5892#appendix-A.6",
+                "data": "xn--5db3e",
+                "valid": false
+            },
+            {
+                "description": "Hebrew GERSHAYIM preceded by Hebrew",
+                "comment": "https://tools.ietf.org/html/rfc5891#section-4.2.3.3 https://tools.ietf.org/html/rfc5892#appendix-A.6",
+                "data": "xn--4dbc8h",
+                "valid": true
+            },
+            {
+                "description": "KATAKANA MIDDLE DOT with no Hiragana, Katakana, or Han",
+                "comment": "https://tools.ietf.org/html/rfc5891#section-4.2.3.3 https://tools.ietf.org/html/rfc5892#appendix-A.7",
+                "data": "xn--defabc-k64e",
+                "valid": false
+            },
+            {
+                "description": "KATAKANA MIDDLE DOT with no other characters",
+                "comment": "https://tools.ietf.org/html/rfc5891#section-4.2.3.3 https://tools.ietf.org/html/rfc5892#appendix-A.7",
+                "data": "xn--vek",
+                "valid": false
+            },
+            {
+                "description": "KATAKANA MIDDLE DOT with Hiragana",
+                "comment": "https://tools.ietf.org/html/rfc5891#section-4.2.3.3 https://tools.ietf.org/html/rfc5892#appendix-A.7",
+                "data": "xn--k8j5u",
+                "valid": true
+            },
+            {
+                "description": "KATAKANA MIDDLE DOT with Katakana",
+                "comment": "https://tools.ietf.org/html/rfc5891#section-4.2.3.3 https://tools.ietf.org/html/rfc5892#appendix-A.7",
+                "data": "xn--bck0j",
+                "valid": true
+            },
+            {
+                "description": "KATAKANA MIDDLE DOT with Han",
+                "comment": "https://tools.ietf.org/html/rfc5891#section-4.2.3.3 https://tools.ietf.org/html/rfc5892#appendix-A.7",
+                "data": "xn--vek778f",
+                "valid": true
+            },
+            {
+                "description": "Arabic-Indic digits mixed with Extended Arabic-Indic digits",
+                "comment": "https://tools.ietf.org/html/rfc5891#section-4.2.3.3 https://tools.ietf.org/html/rfc5892#appendix-A.8",
+                "data": "xn--ngb6iyr",
+                "valid": false
+            },
+            {
+                "description": "Arabic-Indic digits not mixed with Extended Arabic-Indic digits",
+                "comment": "https://tools.ietf.org/html/rfc5891#section-4.2.3.3 https://tools.ietf.org/html/rfc5892#appendix-A.8",
+                "data": "xn--ngba1o",
+                "valid": true
+            },
+            {
+                "description": "Extended Arabic-Indic digits not mixed with Arabic-Indic digits",
+                "comment": "https://tools.ietf.org/html/rfc5891#section-4.2.3.3 https://tools.ietf.org/html/rfc5892#appendix-A.9",
+                "data": "xn--0-gyc",
+                "valid": true
+            },
+            {
+                "description": "ZERO WIDTH JOINER not preceded by Virama",
+                "comment": "https://tools.ietf.org/html/rfc5891#section-4.2.3.3 https://tools.ietf.org/html/rfc5892#appendix-A.2 https://www.unicode.org/review/pr-37.pdf",
+                "data": "xn--11b2er09f",
+                "valid": false
+            },
+            {
+                "description": "ZERO WIDTH JOINER not preceded by anything",
+                "comment": "https://tools.ietf.org/html/rfc5891#section-4.2.3.3 https://tools.ietf.org/html/rfc5892#appendix-A.2 https://www.unicode.org/review/pr-37.pdf",
+                "data": "xn--02b508i",
+                "valid": false
+            },
+            {
+                "description": "ZERO WIDTH JOINER preceded by Virama",
+                "comment": "https://tools.ietf.org/html/rfc5891#section-4.2.3.3 https://tools.ietf.org/html/rfc5892#appendix-A.2 https://www.unicode.org/review/pr-37.pdf",
+                "data": "xn--11b2ezcw70k",
+                "valid": true
+            },
+            {
+                "description": "ZERO WIDTH NON-JOINER preceded by Virama",
+                "comment": "https://tools.ietf.org/html/rfc5891#section-4.2.3.3 https://tools.ietf.org/html/rfc5892#appendix-A.1",
+                "data": "xn--11b2ezcs70k",
+                "valid": true
+            },
+            {
+                "description": "ZERO WIDTH NON-JOINER not preceded by Virama but matches regexp",
+                "comment": "https://tools.ietf.org/html/rfc5891#section-4.2.3.3 https://tools.ietf.org/html/rfc5892#appendix-A.1 https://www.w3.org/TR/alreq/#h_disjoining_enforcement",
+                "data": "xn--ngba5hb2804a",
+                "valid": true
+            },
+            {
+                "description": "contains \"--\" in the 3rd and 4th position",
+                "comment": "https://tools.ietf.org/html/rfc5891#section-4.2.3.1 https://tools.ietf.org/html/rfc5890#section-2.3.2.1",
+                "data": "XN--aa---o47jg78q",
                 "valid": false
             }
         ]
@@ -32501,7 +34727,10 @@ Map<String, String> specificationTests = {
   "/draft2020-12/optional/format/idn-email.json": r"""[
     {
         "description": "validation of an internationalized e-mail addresses",
-        "schema": { "format": "idn-email" },
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "format": "idn-email"
+        },
         "tests": [
             {
                 "description": "all string formats ignore integers",
@@ -32539,7 +34768,7 @@ Map<String, String> specificationTests = {
                 "valid": true
             },
             {
-                "description": "an invalid idn e-mail address",
+                "description": "an invalid e-mail/idn e-mail address",
                 "data": "2962",
                 "valid": false
             },
@@ -32549,9 +34778,29 @@ Map<String, String> specificationTests = {
                 "valid": true
             },
             {
-                "description": "an invalid e-mail address",
-                "data": "2962",
+                "description": "a non-ASCII local part with an ASCII domain is valid",
+                "data": "δοκιμή@example.com",
+                "valid": true
+            },
+            {
+                "description": "a non-ASCII quoted local part is valid",
+                "data": "\"δοκιμή\"@example.com",
+                "valid": true
+            },
+            {
+                "description": "a local part with a lone UTF-16 surrogate is invalid",
+                "data": "\ud800@example.com",
                 "valid": false
+            },
+            {
+                "description": "a domain label that is not in Unicode NFC is valid",
+                "data": "user@cafe\u0301.com",
+                "valid": true
+            },
+            {
+                "description": "a local part that is not in Unicode NFC is valid",
+                "data": "cafe\u0301@example.com",
+                "valid": true
             }
         ]
     }
@@ -32560,7 +34809,10 @@ Map<String, String> specificationTests = {
   "/draft2020-12/optional/format/idn-hostname.json": r"""[
     {
         "description": "validation of internationalized host names",
-        "schema": { "format": "idn-hostname" },
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "format": "idn-hostname"
+        },
         "tests": [
             {
                 "description": "all string formats ignore integers",
@@ -32608,8 +34860,13 @@ Map<String, String> specificationTests = {
                 "valid": false
             },
             {
-                "description": "a host name with a component too long",
-                "data": "실실실실실실실실실실실실실실실실실실실실실실실실실실실실실실실실실실실실실실실실실실실실실실실실실실실실례례테스트례례례례례례례례례례례례례례례례례테스트례례례례례례례례례례례례례례례례례례례테스트례례례례례례례례례례례례테스트례례실례.테스트",
+                "description": "a single label of 63 characters is valid",
+                "data": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                "valid": true
+            },
+            {
+                "description": "a single label of 64 characters is too long",
+                "data": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
                 "valid": false
             },
             {
@@ -32813,7 +35070,7 @@ Map<String, String> specificationTests = {
             {
                 "description": "Arabic-Indic digits mixed with Extended Arabic-Indic digits",
                 "comment": "https://tools.ietf.org/html/rfc5891#section-4.2.3.3 https://tools.ietf.org/html/rfc5892#appendix-A.8",
-                "data": "\u0660\u06f0",
+                "data": "\u0628\u0660\u06f0",
                 "valid": false
             },
             {
@@ -32857,6 +35114,219 @@ Map<String, String> specificationTests = {
                 "comment": "https://tools.ietf.org/html/rfc5891#section-4.2.3.3 https://tools.ietf.org/html/rfc5892#appendix-A.1 https://www.w3.org/TR/alreq/#h_disjoining_enforcement",
                 "data": "\u0628\u064a\u200c\u0628\u064a",
                 "valid": true
+            },
+            {
+                "description": "single label",
+                "data": "hostname",
+                "valid": true
+            },
+            {
+                "description": "single label with hyphen",
+                "data": "host-name",
+                "valid": true
+            },
+            {
+                "description": "single label with digits",
+                "data": "h0stn4me",
+                "valid": true
+            },
+            {
+                "description": "single label starting with digit",
+                "data": "1host",
+                "valid": true
+            },
+            {
+                "description": "single label ending with digit",
+                "data": "hostnam3",
+                "valid": true
+            },
+            {
+                "description": "empty string",
+                "data": "",
+                "valid": false
+            },
+            {
+                "description": "zero width non-joiner must pass at every occurrence",
+                "comment": "https://www.rfc-editor.org/rfc/rfc5892#appendix-A.1",
+                "data": "\u0915\u094d\u200c\u0937x\u200cy",
+                "valid": false
+            },
+            {
+                "description": "Bidi domain name with a digit-first label is invalid",
+                "comment": "https://www.rfc-editor.org/rfc/rfc5893#section-2 a label in a Bidi domain name must start with an L, R or AL character",
+                "data": "0a.\u05d0",
+                "valid": false
+            },
+            {
+                "description": "label starting with a digit before a right-to-left letter is invalid",
+                "comment": "https://www.rfc-editor.org/rfc/rfc5893#section-2",
+                "data": "0\u0627",
+                "valid": false
+            },
+            {
+                "description": "left-to-right label containing a right-to-left letter is invalid",
+                "comment": "https://www.rfc-editor.org/rfc/rfc5893#section-2",
+                "data": "a\u05d0",
+                "valid": false
+            },
+            {
+                "description": "right-to-left label mixing both digit types is invalid",
+                "comment": "https://www.rfc-editor.org/rfc/rfc5893#section-2",
+                "data": "\u05d00\u0660",
+                "valid": false
+            },
+            {
+                "description": "A-label that decodes to a disallowed code point is invalid",
+                "comment": "https://www.rfc-editor.org/rfc/rfc5890#section-2.3.2.1 https://www.rfc-editor.org/rfc/rfc5892#section-2.6",
+                "data": "xn--7a",
+                "valid": false
+            },
+            {
+                "description": "A-label that decodes to a Bidi rule violation is invalid",
+                "comment": "https://www.rfc-editor.org/rfc/rfc5890#section-2.3.2.1 https://www.rfc-editor.org/rfc/rfc5893",
+                "data": "xn--0ca24w",
+                "valid": false
+            },
+            {
+                "description": "a U-label whose A-label form is longer than 63 octets is invalid",
+                "comment": "https://www.rfc-editor.org/rfc/rfc5891#section-4.2.4 the 63-octet limit is on the A-label form, not the code point count",
+                "data": "\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc",
+                "valid": false
+            },
+            {
+                "description": "empty label between two dots is invalid",
+                "comment": "https://www.rfc-editor.org/rfc/rfc1034#section-3.1",
+                "data": "a..b",
+                "valid": false
+            },
+            {
+                "description": "a name longer than 253 characters is invalid",
+                "data": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                "valid": false
+            },
+            {
+                "description": "A-label that decodes to only ASCII is invalid",
+                "comment": "https://www.rfc-editor.org/rfc/rfc5890#section-2.3.2.1 a U-label must have at least one non-ASCII character",
+                "data": "xn--example-",
+                "valid": false
+            },
+            {
+                "description": "non-canonical Punycode that does not re-encode to itself is invalid",
+                "comment": "https://www.rfc-editor.org/rfc/rfc5891#section-5.4 a label decoded from Punycode must be identical to the original A-label",
+                "data": "xn---9uc",
+                "valid": false
+            }
+        ]
+    },
+    {
+        "description": "validation of separators in internationalized host names",
+        "specification": [
+            {"rfc3490": "3.1", "quote": "Whenever dots are used as label separators, the following characters MUST be recognized as dots: U+002E (full stop), U+3002 (ideographic full stop), U+FF0E (fullwidth full stop), U+FF61(halfwidth ideographic full stop)"}
+        ],
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "format": "idn-hostname"
+        },
+        "tests": [
+            {
+                "description": "single dot",
+                "data": ".",
+                "valid": false
+            },
+            {
+                "description": "single ideographic full stop",
+                "data": "\u3002",
+                "valid": false
+            },
+            {
+                "description": "single fullwidth full stop",
+                "data": "\uff0e",
+                "valid": false
+            },
+            {
+                "description": "single halfwidth ideographic full stop",
+                "data": "\uff61",
+                "valid": false
+            },
+            {
+                "description": "dot as label separator",
+                "data": "a.b",
+                "valid": true
+            },
+            {
+                "description": "ideographic full stop as label separator",
+                "data": "a\u3002b",
+                "valid": true
+            },
+            {
+                "description": "fullwidth full stop as label separator",
+                "data": "a\uff0eb",
+                "valid": true
+            },
+            {
+                "description": "halfwidth ideographic full stop as label separator",
+                "data": "a\uff61b",
+                "valid": true
+            },
+            {
+                "description": "leading dot",
+                "data": ".example",
+                "valid": false
+            },
+            {
+                "description": "leading ideographic full stop",
+                "data": "\u3002example",
+                "valid": false
+            },
+            {
+                "description": "leading fullwidth full stop",
+                "data": "\uff0eexample",
+                "valid": false
+            },
+            {
+                "description": "leading halfwidth ideographic full stop",
+                "data": "\uff61example",
+                "valid": false
+            },
+            {
+                "description": "trailing dot",
+                "data": "example.",
+                "valid": false
+            },
+            {
+                "description": "trailing ideographic full stop",
+                "data": "example\u3002",
+                "valid": false
+            },
+            {
+                "description": "trailing fullwidth full stop",
+                "data": "example\uff0e",
+                "valid": false
+            },
+            {
+                "description": "trailing halfwidth ideographic full stop",
+                "data": "example\uff61",
+                "valid": false
+            },
+            {
+                "description": "label too long if separator ignored (full stop)",
+                "data": "παράδειγμαπαράδειγμαπαράδειγμαπαράδειγμαπαράδειγμαπα.com",
+                "valid": true
+            },
+            {
+                "description": "label too long if separator ignored (ideographic full stop)",
+                "data": "παράδειγμαπαράδειγμαπαράδειγμαπαράδειγμαπαράδειγμαπα\u3002com",
+                "valid": true
+            },
+            {
+                "description": "label too long if separator ignored (fullwidth full stop)",
+                "data": "παράδειγμαπαράδειγμαπαράδειγμαπαράδειγμαπαράδειγμαπα\uff0ecom",
+                "valid": true
+            },
+            {
+                "description": "label too long if separator ignored (halfwidth ideographic full stop)",
+                "data": "παράδειγμαπαράδειγμαπαράδειγμαπαράδειγμαπαράδειγμαπα\uff61com",
+                "valid": true
             }
         ]
     }
@@ -32865,7 +35335,11 @@ Map<String, String> specificationTests = {
   "/draft2020-12/optional/format/ipv4.json": r"""[
     {
         "description": "validation of IP addresses",
-        "schema": { "format": "ipv4" },
+        "comment": "RFC 2673, Section 3.2: dotted-quad = decbyte \".\" decbyte \".\" decbyte \".\" decbyte. A 'decbyte' (1*3DIGIT) restricts semantic values to 0-255, allows leading zeros, and strictly forbids symbols, alpha/hex, whitespace, and non-ASCII characters.",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "format": "ipv4"
+        },
         "tests": [
             {
                 "description": "all string formats ignore integers",
@@ -32918,6 +35392,16 @@ Map<String, String> specificationTests = {
                 "valid": false
             },
             {
+                "description": "a 2-part address resolving to a routable IP (inet_aton shorthand)",
+                "data": "127.1",
+                "valid": false
+            },
+            {
+                "description": "a 3-part address resolving to a routable IP (inet_aton shorthand)",
+                "data": "127.0.1",
+                "valid": false
+            },
+            {
                 "description": "an IP address as an integer",
                 "data": "0x7f000001",
                 "valid": false
@@ -32928,19 +35412,123 @@ Map<String, String> specificationTests = {
                 "valid": false
             },
             {
-                "description": "leading zeroes should be rejected, as they are treated as octals",
-                "comment": "see https://sick.codes/universal-netmask-npm-package-used-by-270000-projects-vulnerable-to-octal-input-data-server-side-request-forgery-remote-file-inclusion-local-file-inclusion-and-more-cve-2021-28918/",
-                "data": "087.10.0.1",
+                "description": "invalid non-ASCII '২' (a Bengali 2)",
+                "data": "1২7.0.0.1",
                 "valid": false
             },
             {
-                "description": "value without leading zero is valid",
-                "data": "87.10.0.1",
+                "description": "invalid fullwidth digits (non-ASCII)",
+                "data": "１９２.１６８.１.１",
+                "valid": false
+            },
+            {
+                "description": "invalid mathematical bold digits (non-ASCII)",
+                "data": "𝟏𝟗𝟐.𝟏𝟔𝟖.𝟏.𝟏",
+                "valid": false
+            },
+            {
+                "description": "netmask is not a part of ipv4 address",
+                "data": "192.168.1.0/24",
+                "valid": false
+            },
+            {
+                "description": "leading whitespace is invalid",
+                "data": " 192.168.0.1",
+                "valid": false
+            },
+            {
+                "description": "trailing whitespace is invalid",
+                "data": "192.168.0.1 ",
+                "valid": false
+            },
+            {
+                "description": "trailing newline is invalid",
+                "data": "192.168.0.1\n",
+                "valid": false
+            },
+            {
+                "description": "hexadecimal notation is invalid",
+                "data": "0x7f.0.0.1",
+                "valid": false
+            },
+            {
+                "description": "octal notation explicit is invalid",
+                "data": "0o10.0.0.1",
+                "valid": false
+            },
+            {
+                "description": "empty part (double dot) is invalid",
+                "data": "192.168..1",
+                "valid": false
+            },
+            {
+                "description": "leading dot is invalid",
+                "data": ".192.168.0.1",
+                "valid": false
+            },
+            {
+                "description": "trailing dot is invalid",
+                "data": "192.168.0.1.",
+                "valid": false
+            },
+            {
+                "description": "minimum valid IPv4 address",
+                "data": "0.0.0.0",
                 "valid": true
             },
             {
-                "description": "non-ascii digits should be rejected",
-                "data": "1২7.0.0.1",
+                "description": "maximum valid IPv4 address",
+                "data": "255.255.255.255",
+                "valid": true
+            },
+            {
+                "description": "empty string is invalid",
+                "data": "",
+                "valid": false
+            },
+            {
+                "description": "plus sign is invalid",
+                "data": "+1.2.3.4",
+                "valid": false
+            },
+            {
+                "description": "negative sign is invalid",
+                "data": "-1.2.3.4",
+                "valid": false
+            },
+            {
+                "description": "exponential notation is invalid",
+                "data": "1e2.0.0.1",
+                "valid": false
+            },
+            {
+                "description": "alpha characters are invalid",
+                "data": "192.168.a.1",
+                "valid": false
+            },
+            {
+                "description": "internal whitespace is invalid",
+                "data": "192. 168.0.1",
+                "valid": false
+            },
+            {
+                "description": "tab character is invalid",
+                "data": "192.168.0.1\t",
+                "valid": false
+            },
+            {
+                "description": "additional content after an embedded NUL byte",
+                "data": "192.168.0.1\u0000.evil.com",
+                "valid": false
+            },
+            {
+                "description": "with port number is invalid",
+                "data": "192.168.0.1:80",
+                "valid": false
+            },
+            {
+                "description": "single octet out of range in last position",
+                "data": "192.168.0.256",
                 "valid": false
             }
         ]
@@ -32950,7 +35538,10 @@ Map<String, String> specificationTests = {
   "/draft2020-12/optional/format/ipv6.json": r"""[
     {
         "description": "validation of IPv6 addresses",
-        "schema": { "format": "ipv6" },
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "format": "ipv6"
+        },
         "tests": [
             {
                 "description": "all string formats ignore integers",
@@ -32988,7 +35579,7 @@ Map<String, String> specificationTests = {
                 "valid": true
             },
             {
-                "description": "an IPv6 address with out-of-range values",
+                "description": "a group with 5 hex digits is invalid",
                 "data": "12345::",
                 "valid": false
             },
@@ -33143,12 +35734,12 @@ Map<String, String> specificationTests = {
                 "valid": false
             },
             {
-                "description": "non-ascii digits should be rejected",
+                "description": "invalid non-ASCII '৪' (a Bengali 4)",
                 "data": "1:2:3:4:5:6:7:৪",
                 "valid": false
             },
             {
-                "description": "non-ascii digits should be rejected in the ipv4 portion also",
+                "description": "invalid non-ASCII '৪' (a Bengali 4) in the IPv4 portion",
                 "data": "1:2::192.16৪.0.1",
                 "valid": false
             }
@@ -33159,7 +35750,10 @@ Map<String, String> specificationTests = {
   "/draft2020-12/optional/format/iri-reference.json": r"""[
     {
         "description": "validation of IRI References",
-        "schema": { "format": "iri-reference" },
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "format": "iri-reference"
+        },
         "tests": [
             {
                 "description": "all string formats ignore integers",
@@ -33233,7 +35827,10 @@ Map<String, String> specificationTests = {
   "/draft2020-12/optional/format/iri.json": r"""[
     {
         "description": "validation of IRIs",
-        "schema": { "format": "iri" },
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "format": "iri"
+        },
         "tests": [
             {
                 "description": "all string formats ignore integers",
@@ -33291,7 +35888,7 @@ Map<String, String> specificationTests = {
                 "valid": true
             },
             {
-                "description": "an invalid IRI based on IPv6",
+                "description": "an IPv6 address without enclosing brackets is invalid",
                 "data": "http://2001:0db8:85a3:0000:0000:8a2e:0370:7334",
                 "valid": false
             },
@@ -33317,7 +35914,10 @@ Map<String, String> specificationTests = {
   "/draft2020-12/optional/format/json-pointer.json": r"""[
     {
         "description": "validation of JSON-pointers (JSON String Representation)",
-        "schema": { "format": "json-pointer" },
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "format": "json-pointer"
+        },
         "tests": [
             {
                 "description": "all string formats ignore integers",
@@ -33508,6 +36108,16 @@ Map<String, String> specificationTests = {
                 "description": "not a valid JSON-pointer (isn't empty nor starts with /) #3",
                 "data": "a/a",
                 "valid": false
+            },
+            {
+                "description": "valid JSON-pointer (Unicode characters allowed by RFC 6901)",
+                "data": "/foo/bar/😎",
+                "valid": true
+            },
+            {
+                "description": "valid JSON-pointer (control characters allowed after JSON unescaping)",
+                "data": "/foo\u0000bar\n\tbaz",
+                "valid": true
             }
         ]
     }
@@ -33516,7 +36126,10 @@ Map<String, String> specificationTests = {
   "/draft2020-12/optional/format/regex.json": r"""[
     {
         "description": "validation of regular expressions",
-        "schema": { "format": "regex" },
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "format": "regex"
+        },
         "tests": [
             {
                 "description": "all string formats ignore integers",
@@ -33565,7 +36178,10 @@ Map<String, String> specificationTests = {
   "/draft2020-12/optional/format/relative-json-pointer.json": r"""[
     {
         "description": "validation of Relative JSON Pointers (RJP)",
-        "schema": { "format": "relative-json-pointer" },
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "format": "relative-json-pointer"
+        },
         "tests": [
             {
                 "description": "all string formats ignore integers",
@@ -33628,6 +36244,16 @@ Map<String, String> specificationTests = {
                 "valid": false
             },
             {
+                "description": "explicit positive prefix",
+                "data": "+1/foo/bar",
+                "valid": false
+            },
+            {
+                "description": "non-ASCII digit in the prefix is not allowed",
+                "data": "١/foo",
+                "valid": false
+            },
+            {
                 "description": "## is not a valid json-pointer",
                 "data": "0##",
                 "valid": false
@@ -33641,6 +36267,21 @@ Map<String, String> specificationTests = {
                 "description": "zero cannot be followed by other digits, plus octothorpe",
                 "data": "01#",
                 "valid": false
+            },
+            {
+                "description": "empty string",
+                "data": "",
+                "valid": false
+            },
+            {
+                "description": "multi-digit integer prefix",
+                "data": "120/foo/bar",
+                "valid": true
+            },
+            {
+                "description": "multi-digit prefix with a zero followed by another digit",
+                "data": "100",
+                "valid": true
             }
         ]
     }
@@ -33649,7 +36290,10 @@ Map<String, String> specificationTests = {
   "/draft2020-12/optional/format/time.json": r"""[
     {
         "description": "validation of time strings",
-        "schema": { "format": "time" },
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "format": "time"
+        },
         "tests": [
             {
                 "description": "all string formats ignore integers",
@@ -33685,6 +36329,21 @@ Map<String, String> specificationTests = {
                 "description": "a valid time string",
                 "data": "08:30:06Z",
                 "valid": true
+            },
+            {
+                "description": "invalid time string with extra leading zeros",
+                "data": "008:030:006Z",
+                "valid": false
+            },
+            {
+                "description": "invalid time string with no leading zero for single digit",
+                "data": "8:3:6Z",
+                "valid": false
+            },
+            {
+                "description": "hour, minute, second must be two digits",
+                "data": "8:0030:6Z",
+                "valid": false
             },
             {
                 "description": "a valid time string with leap second, Zulu",
@@ -33777,6 +36436,17 @@ Map<String, String> specificationTests = {
                 "valid": true
             },
             {
+                "description": "time with unknown local offset is valid",
+                "comment": "RFC 3339 section 4.3 (unknown local offset)",
+                "data": "12:34:56-00:00",
+                "valid": true
+            },
+            {
+                "description": "hour, minute in time-offset must be two digits",
+                "data": "08:30:06-8:000",
+                "valid": false
+            },
+            {
                 "description": "a valid time string with case-insensitive Z",
                 "data": "08:30:06z",
                 "valid": true
@@ -33837,8 +36507,28 @@ Map<String, String> specificationTests = {
                 "valid": false
             },
             {
-                "description": "non-ascii digits should be rejected",
+                "description": "no time offset with second fraction",
+                "data": "12:00:00.52",
+                "valid": false
+            },
+            {
+                "description": "invalid non-ASCII '২' (a Bengali 2)",
                 "data": "1২:00:00Z",
+                "valid": false
+            },
+            {
+                "description": "offset not starting with plus or minus",
+                "data": "08:30:06#00:20",
+                "valid": false
+            },
+            {
+                "description": "contains letters",
+                "data": "ab:cd:ef",
+                "valid": false
+            },
+            {
+                "description": "an invalid time string in date-time format",
+                "data": "2020-11-28T23:55:45Z",
                 "valid": false
             }
         ]
@@ -33848,7 +36538,10 @@ Map<String, String> specificationTests = {
   "/draft2020-12/optional/format/unknown.json": r"""[
     {
         "description": "unknown format",
-        "schema": { "format": "unknown" },
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "format": "unknown"
+        },
         "tests": [
             {
                 "description": "unknown formats ignore integers",
@@ -33892,7 +36585,10 @@ Map<String, String> specificationTests = {
   "/draft2020-12/optional/format/uri-reference.json": r"""[
     {
         "description": "validation of URI References",
-        "schema": { "format": "uri-reference" },
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "format": "uri-reference"
+        },
         "tests": [
             {
                 "description": "all string formats ignore integers",
@@ -33958,6 +36654,28 @@ Map<String, String> specificationTests = {
                 "description": "an invalid URI fragment",
                 "data": "#frag\\ment",
                 "valid": false
+            },
+            {
+                "description": "unescaped non US-ASCII characters",
+                "data": "/foobar®.txt",
+                "valid": false
+            },
+            {
+                "description": "invalid backslash character",
+                "data": "https://example.org/foobar\\.txt",
+                "valid": false
+            },
+            {
+                "description": "URI with leading-zero IPv4 is structurally valid as a reg-name",
+                "comment": "RFC 3986, Section 3.2.2: If an IP literal fails strict IPv4address parsing, it falls back to reg-name. A string of digits and dots is valid under unreserved characters. JSON Schema format asserts syntax, not scheme-specific DNS semantics.",
+                "data": "http://087.10.0.1/",
+                "valid": true
+            },
+            {
+                "description": "URI with out-of-bounds IPv4 is structurally valid as a reg-name",
+                "comment": "RFC 3986, Section 3.2.2: Fallback to reg-name allows digits and dots.",
+                "data": "http://999.999.999.999/",
+                "valid": true
             }
         ]
     }
@@ -33966,7 +36684,10 @@ Map<String, String> specificationTests = {
   "/draft2020-12/optional/format/uri-template.json": r"""[
     {
         "description": "format: uri-template",
-        "schema": { "format": "uri-template" },
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "format": "uri-template"
+        },
         "tests": [
             {
                 "description": "all string formats ignore integers",
@@ -34025,8 +36746,41 @@ Map<String, String> specificationTests = {
   "/draft2020-12/optional/format/uri.json": r"""[
     {
         "description": "validation of URIs",
-        "schema": { "format": "uri" },
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "format": "uri"
+        },
         "tests": [
+            {
+                "description": "all string formats ignore integers",
+                "data": 12,
+                "valid": true
+            },
+            {
+                "description": "all string formats ignore floats",
+                "data": 13.7,
+                "valid": true
+            },
+            {
+                "description": "all string formats ignore objects",
+                "data": {},
+                "valid": true
+            },
+            {
+                "description": "all string formats ignore arrays",
+                "data": [],
+                "valid": true
+            },
+            {
+                "description": "all string formats ignore booleans",
+                "data": false,
+                "valid": true
+            },
+            {
+                "description": "all string formats ignore nulls",
+                "data": null,
+                "valid": true
+            },
             {
                 "description": "a valid URL with anchor tag",
                 "data": "http://foo.bar/?baz=qux#quux",
@@ -34068,7 +36822,7 @@ Map<String, String> specificationTests = {
                 "valid": true
             },
             {
-                "description": "a valid URL ",
+                "description": "a valid URL",
                 "data": "ldap://[2001:db8::7]/c=GB?objectClass?one",
                 "valid": true
             },
@@ -34126,6 +36880,98 @@ Map<String, String> specificationTests = {
                 "description": "an invalid URI with comma in scheme",
                 "data": "bar,baz:foo",
                 "valid": false
+            },
+            {
+                "description": "invalid userinfo",
+                "data": "https://[@example.org/test.txt",
+                "valid": false
+            },
+            {
+                "description": "unescaped non US-ASCII characters",
+                "data": "https://example.org/foobar®.txt",
+                "valid": false
+            },
+            {
+                "description": "invalid backslash character",
+                "data": "https://example.org/foobar\\.txt",
+                "valid": false
+            },
+            {
+                "description": "invalid \" character",
+                "data": "https://example.org/foobar\".txt",
+                "valid": false
+            },
+            {
+                "description": "invalid <> characters",
+                "data": "https://example.org/foobar<>.txt",
+                "valid": false
+            },
+            {
+                "description": "invalid {} characters",
+                "data": "https://example.org/foobar{}.txt",
+                "valid": false
+            },
+            {
+                "description": "invalid ^ character",
+                "data": "https://example.org/foobar^.txt",
+                "valid": false
+            },
+            {
+                "description": "invalid ` character",
+                "data": "https://example.org/foobar`.txt",
+                "valid": false
+            },
+            {
+                "description": "invalid SPACE character",
+                "data": "https://example.org/foo bar.txt",
+                "valid": false
+            },
+            {
+                "description": "invalid | character",
+                "data": "https://example.org/foobar|.txt",
+                "valid": false
+            },
+            {
+                "description": "URI with leading-zero IPv4 is structurally valid as a reg-name",
+                "comment": "RFC 3986, Section 3.2.2: If an IP literal fails strict IPv4address parsing, it falls back to reg-name. A string of digits and dots is valid under unreserved characters. JSON Schema format asserts syntax, not scheme-specific DNS semantics.",
+                "data": "http://087.10.0.1/",
+                "valid": true
+            },
+            {
+                "description": "URI with out-of-bounds IPv4 is structurally valid as a reg-name",
+                "comment": "RFC 3986, Section 3.2.2: Fallback to reg-name allows digits and dots.",
+                "data": "http://999.999.999.999/",
+                "valid": true
+            },
+            {
+                "description": "invalid percent-encoding with non-hex digits",
+                "data": "http://example.com/%6G",
+                "valid": false
+            },
+            {
+                "description": "incomplete percent-encoding triplet",
+                "data": "http://example.com/%A",
+                "valid": false
+            },
+            {
+                "description": "lone percent sign is invalid",
+                "data": "http://example.com/%",
+                "valid": false
+            },
+            {
+                "description": "scheme must start with a letter",
+                "data": "1http://example.com",
+                "valid": false
+            },
+            {
+                "description": "invalid character in scheme",
+                "data": "ht_tp://example.com",
+                "valid": false
+            },
+            {
+                "description": "non-numeric port is invalid",
+                "data": "http://example.com:abc/path",
+                "valid": false
             }
         ]
     }
@@ -34135,9 +36981,40 @@ Map<String, String> specificationTests = {
     {
         "description": "uuid format",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "format": "uuid"
         },
         "tests": [
+            {
+                "description": "all string formats ignore integers",
+                "data": 12,
+                "valid": true
+            },
+            {
+                "description": "all string formats ignore floats",
+                "data": 13.7,
+                "valid": true
+            },
+            {
+                "description": "all string formats ignore objects",
+                "data": {},
+                "valid": true
+            },
+            {
+                "description": "all string formats ignore arrays",
+                "data": [],
+                "valid": true
+            },
+            {
+                "description": "all string formats ignore booleans",
+                "data": false,
+                "valid": true
+            },
+            {
+                "description": "all string formats ignore nulls",
+                "data": null,
+                "valid": true
+            },
             {
                 "description": "all upper-case",
                 "data": "2EB8AA08-AA98-11EA-B4AA-73B441D16380",
@@ -34194,6 +37071,11 @@ Map<String, String> specificationTests = {
                 "valid": false
             },
             {
+                "description": "shifted dashes",
+                "data": "2eb8aa0-8aa98-11e-ab4aa7-3b441d16380",
+                "valid": false
+            },
+            {
                 "description": "valid version 4",
                 "data": "98d80576-482e-427f-8434-7f86890ab222",
                 "valid": true
@@ -34212,6 +37094,102 @@ Map<String, String> specificationTests = {
                 "description": "hypothetical version 15",
                 "data": "99c17cbb-656f-f64a-940f-1a4568f03487",
                 "valid": true
+            },
+            {
+                "description": "URN prefixed UUID is invalid",
+                "data": "urn:uuid:2eb8aa08-aa98-11ea-b4aa-73b441d16380",
+                "valid": false
+            },
+            {
+                "description": "trailing hyphen after a complete UUID is invalid",
+                "data": "2eb8aa08-aa98-11ea-b4aa-73b441d16380-",
+                "valid": false
+            },
+            {
+                "description": "non-ASCII digit '২' (a Bengali 2) is invalid",
+                "data": "২eb8aa08-aa98-11ea-b4aa-73b441d16380",
+                "valid": false
+            }
+        ]
+    }
+]
+""",
+  "/draft2020-12/optional/id.json": r"""[
+    {
+        "description": "$id inside an enum is not a real identifier",
+        "comment": "the implementation must not be confused by an $id buried in the enum",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$defs": {
+                "id_in_enum": {
+                    "enum": [
+                        {
+                          "$id": "https://localhost:1234/draft2020-12/id/my_identifier.json",
+                          "type": "null"
+                        }
+                    ]
+                },
+                "real_id_in_schema": {
+                    "$id": "https://localhost:1234/draft2020-12/id/my_identifier.json",
+                    "type": "string"
+                },
+                "zzz_id_in_const": {
+                    "const": {
+                        "$id": "https://localhost:1234/draft2020-12/id/my_identifier.json",
+                        "type": "null"
+                    }
+                }
+            },
+            "anyOf": [
+                { "$ref": "#/$defs/id_in_enum" },
+                { "$ref": "https://localhost:1234/draft2020-12/id/my_identifier.json" }
+            ]
+        },
+        "tests": [
+            {
+                "description": "exact match to enum, and type matches",
+                "data": {
+                    "$id": "https://localhost:1234/draft2020-12/id/my_identifier.json",
+                    "type": "null"
+                },
+                "valid": true
+            },
+            {
+                "description": "match $ref to $id",
+                "data": "a string to match #/$defs/id_in_enum",
+                "valid": true
+            },
+            {
+                "description": "no match on enum or $ref to $id",
+                "data": 1,
+                "valid": false
+            }
+        ]
+    }
+]
+""",
+  "/draft2020-12/optional/no-schema.json": r"""[
+    {
+        "description": "validation without $schema",
+        "comment": "minLength is the same across all drafts",
+        "schema": {
+            "minLength": 2
+        },
+        "tests": [
+            {
+                "description": "a 3-character string is valid",
+                "data": "foo",
+                "valid": true
+            },
+            {
+                "description": "a 1-character string is not valid",
+                "data": "a",
+                "valid": false
+            },
+            {
+                "description": "a non-string is valid",
+                "data": 5,
+                "valid": true
             }
         ]
     }
@@ -34221,7 +37199,10 @@ Map<String, String> specificationTests = {
     {
         "description": "Proper UTF-16 surrogate pair handling: pattern",
         "comment": "Optional because .Net doesn't correctly handle 32-bit Unicode characters",
-        "schema": { "pattern": "^🐲*$" },
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "pattern": "^🐲*$"
+        },
         "tests": [
             {
                 "description": "matches empty",
@@ -34264,6 +37245,7 @@ Map<String, String> specificationTests = {
         "description": "Proper UTF-16 surrogate pair handling: patternProperties",
         "comment": "Optional because .Net doesn't correctly handle 32-bit Unicode characters",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "patternProperties": {
                 "^🐲*$": {
                     "type": "integer"
@@ -34304,6 +37286,7 @@ Map<String, String> specificationTests = {
     {
         "description": "reference of a root arbitrary keyword ",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "unknown-keyword": {"type": "integer"},
             "properties": {
                 "bar": {"$ref": "#/unknown-keyword"}
@@ -34323,8 +37306,31 @@ Map<String, String> specificationTests = {
         ]
     },
     {
+        "description": "reference of a root arbitrary keyword with encoded ref",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "unknown/keyword": {"type": "integer"},
+            "properties": {
+                "bar": {"$ref": "#/unknown~1keyword"}
+            }
+        },
+        "tests": [
+            {
+                "description": "match",
+                "data": {"bar": 3},
+                "valid": true
+            },
+            {
+                "description": "mismatch",
+                "data": {"bar": true},
+                "valid": false
+            }
+        ]
+    },
+    {
         "description": "reference of an arbitrary keyword of a sub-schema",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "properties": {
                 "foo": {"unknown-keyword": {"type": "integer"}},
                 "bar": {"$ref": "#/properties/foo/unknown-keyword"}
@@ -34342,13 +37348,118 @@ Map<String, String> specificationTests = {
                 "valid": false
             }
         ]
+    },
+    {
+        "description": "reference internals of known non-applicator",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "examples": [
+              { "type": "string" }
+            ],
+            "$ref": "#/examples/0"
+        },
+        "tests": [
+            {
+                "description": "match",
+                "data": "a string",
+                "valid": true
+            },
+            {
+                "description": "mismatch",
+                "data": 42,
+                "valid": false
+            }
+        ]
+    },
+    {
+        "description": "reference of an arbitrary keyword of a sub-schema with encoded ref",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "properties": {
+                "foo": {"unknown/keyword": {"type": "integer"}},
+                "bar": {"$ref": "#/properties/foo/unknown~1keyword"}
+            }
+        },
+        "tests": [
+            {
+                "description": "match",
+                "data": {"bar": 3},
+                "valid": true
+            },
+            {
+                "description": "mismatch",
+                "data": {"bar": true},
+                "valid": false
+            }
+        ]
+    }
+]
+""",
+  "/draft2020-12/optional/unknownKeyword.json": r"""[
+    {
+        "description": "$id inside an unknown keyword is not a real identifier",
+        "comment": "the implementation must not be confused by an $id in locations we do not know how to parse",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$defs": {
+                "id_in_unknown0": {
+                    "not": {
+                        "array_of_schemas": [
+                            {
+                              "$id": "https://localhost:1234/draft2020-12/unknownKeyword/my_identifier.json",
+                              "type": "null"
+                            }
+                        ]
+                    }
+                },
+                "real_id_in_schema": {
+                    "$id": "https://localhost:1234/draft2020-12/unknownKeyword/my_identifier.json",
+                    "type": "string"
+                },
+                "id_in_unknown1": {
+                    "not": {
+                        "object_of_schemas": {
+                            "foo": {
+                              "$id": "https://localhost:1234/draft2020-12/unknownKeyword/my_identifier.json",
+                              "type": "integer"
+                            }
+                        }
+                    }
+                }
+            },
+            "anyOf": [
+                { "$ref": "#/$defs/id_in_unknown0" },
+                { "$ref": "#/$defs/id_in_unknown1" },
+                { "$ref": "https://localhost:1234/draft2020-12/unknownKeyword/my_identifier.json" }
+            ]
+        },
+        "tests": [
+            {
+                "description": "type matches second anyOf, which has a real schema in it",
+                "data": "a string",
+                "valid": true
+            },
+            {
+                "description": "type matches non-schema in first anyOf",
+                "data": null,
+                "valid": false
+            },
+            {
+                "description": "type matches non-schema in third anyOf",
+                "data": 1,
+                "valid": false
+            }
+        ]
     }
 ]
 """,
   "/draft2020-12/pattern.json": r"""[
     {
         "description": "pattern validation",
-        "schema": {"pattern": "^a*$"},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "pattern": "^a*$"
+        },
         "tests": [
             {
                 "description": "a matching pattern is valid",
@@ -34394,12 +37505,40 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "pattern is not anchored",
-        "schema": {"pattern": "a+"},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "pattern": "a+"
+        },
         "tests": [
             {
                 "description": "matches a substring",
                 "data": "xxaayy",
                 "valid": true
+            }
+        ]
+    },
+    {
+        "description": "pattern with Unicode property escape requires unicode mode",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "string",
+            "pattern": "^\\p{Letter}+$"
+        },
+        "tests": [
+            {
+                "description": "ASCII letters match",
+                "data": "Hello",
+                "valid": true
+            },
+            {
+                "description": "Non-ASCII letters match",
+                "data": "π",
+                "valid": true
+            },
+            {
+                "description": "Digits do not match",
+                "data": "123",
+                "valid": false
             }
         ]
     }
@@ -34410,6 +37549,7 @@ Map<String, String> specificationTests = {
         "description":
             "patternProperties validates properties matching a regex",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "patternProperties": {
                 "f.*o": {"type": "integer"}
             }
@@ -34455,6 +37595,7 @@ Map<String, String> specificationTests = {
     {
         "description": "multiple simultaneous patternProperties are validated",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "patternProperties": {
                 "a*": {"type": "integer"},
                 "aaa*": {"maximum": 20}
@@ -34496,6 +37637,7 @@ Map<String, String> specificationTests = {
     {
         "description": "regexes are not anchored by default and are case sensitive",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "patternProperties": {
                 "[0-9]{2,}": { "type": "boolean" },
                 "X_": { "type": "string" }
@@ -34527,6 +37669,7 @@ Map<String, String> specificationTests = {
     {
         "description": "patternProperties with boolean schemas",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "patternProperties": {
                 "f.*": true,
                 "b.*": false
@@ -34559,6 +37702,50 @@ Map<String, String> specificationTests = {
                 "valid": true
             }
         ]
+    },
+    {
+        "description": "patternProperties with null valued instance properties",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "patternProperties": {
+                "^.*bar$": {"type": "null"}
+            }
+        },
+        "tests": [
+            {
+                "description": "allows null values",
+                "data": {"foobar": null},
+                "valid": true
+            }
+        ]
+    },
+    {
+        "description": "patternProperties with Unicode property escape",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "object",
+            "patternProperties": {
+                "^\\p{Letter}+$": {
+                    "type": "number"
+                }
+            }
+        },
+        "tests": [
+            {
+                "description": "Unicode letter property name matches",
+                "data": {
+                    "π": 1
+                },
+                "valid": true
+            },
+            {
+                "description": "Non-letter property name does not match pattern",
+                "data": {
+                    "123": 1
+                },
+                "valid": true
+            }
+        ]
     }
 ]
 """,
@@ -34566,6 +37753,7 @@ Map<String, String> specificationTests = {
     {
         "description": "a schema given for prefixItems",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "prefixItems": [
                 {"type": "integer"},
                 {"type": "string"}
@@ -34611,6 +37799,7 @@ Map<String, String> specificationTests = {
     {
         "description": "prefixItems with boolean schemas",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "prefixItems": [true, false]
         },
         "tests": [
@@ -34633,11 +37822,32 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "additional items are allowed by default",
-        "schema": {"prefixItems": [{"type": "integer"}]},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "prefixItems": [{"type": "integer"}]
+        },
         "tests": [
             {
                 "description": "only the first item is validated",
                 "data": [1, "foo", false],
+                "valid": true
+            }
+        ]
+    },
+    {
+        "description": "prefixItems with null instance elements",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "prefixItems": [
+                {
+                    "type": "null"
+                }
+            ]
+        },
+        "tests": [
+            {
+                "description": "allows null elements",
+                "data": [ null ],
                 "valid": true
             }
         ]
@@ -34648,6 +37858,7 @@ Map<String, String> specificationTests = {
     {
         "description": "object properties validation",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "properties": {
                 "foo": {"type": "integer"},
                 "bar": {"type": "string"}
@@ -34690,6 +37901,7 @@ Map<String, String> specificationTests = {
         "description":
             "properties, patternProperties, additionalProperties interaction",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "properties": {
                 "foo": {"type": "array", "maxItems": 3},
                 "bar": {"type": "array"}
@@ -34743,6 +37955,7 @@ Map<String, String> specificationTests = {
     {
         "description": "properties with boolean schema",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "properties": {
                 "foo": true,
                 "bar": false
@@ -34774,6 +37987,7 @@ Map<String, String> specificationTests = {
     {
         "description": "properties with escaped characters",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "properties": {
                 "foo\nbar": {"type": "number"},
                 "foo\"bar": {"type": "number"},
@@ -34809,6 +38023,77 @@ Map<String, String> specificationTests = {
                 "valid": false
             }
         ]
+    },
+    {
+        "description": "properties with null valued instance properties",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "properties": {
+                "foo": {"type": "null"}
+            }
+        },
+        "tests": [
+            {
+                "description": "allows null values",
+                "data": {"foo": null},
+                "valid": true
+            }
+        ]
+    },
+    {
+        "description": "properties whose names are Javascript object property names",
+        "comment": "Ensure JS implementations don't universally consider e.g. __proto__ to always be present in an object.",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "properties": {
+                "__proto__": {"type": "number"},
+                "toString": {
+                    "properties": { "length": { "type": "string" } }
+                },
+                "constructor": {"type": "number"}
+            }
+        },
+        "tests": [
+            {
+                "description": "ignores arrays",
+                "data": [],
+                "valid": true
+            },
+            {
+                "description": "ignores other non-objects",
+                "data": 12,
+                "valid": true
+            },
+            {
+                "description": "none of the properties mentioned",
+                "data": {},
+                "valid": true
+            },
+            {
+                "description": "__proto__ not valid",
+                "data": { "__proto__": "foo" },
+                "valid": false
+            },
+            {
+                "description": "toString not valid",
+                "data": { "toString": { "length": 37 } },
+                "valid": false
+            },
+            {
+                "description": "constructor not valid",
+                "data": { "constructor": { "length": 37 } },
+                "valid": false
+            },
+            {
+                "description": "all present and valid",
+                "data": { 
+                    "__proto__": 12,
+                    "toString": { "length": "foo" },
+                    "constructor": 37
+                },
+                "valid": true
+            }
+        ]
     }
 ]
 """,
@@ -34816,6 +38101,7 @@ Map<String, String> specificationTests = {
     {
         "description": "propertyNames validation",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "propertyNames": {"maxLength": 3}
         },
         "tests": [
@@ -34854,12 +38140,55 @@ Map<String, String> specificationTests = {
                 "description": "ignores other non-objects",
                 "data": 12,
                 "valid": true
+            },
+            {
+                "description": "ignores null",
+                "data": null,
+                "valid": true
+            },
+            {
+                "description": "ignores booleans",
+                "data": true,
+                "valid": true
+            }
+        ]
+    },
+    {
+        "description": "propertyNames validation with pattern",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "propertyNames": { "pattern": "^a+$" }
+        },
+        "tests": [
+            {
+                "description": "matching property names valid",
+                "data": {
+                    "a": {},
+                    "aa": {},
+                    "aaa": {}
+                },
+                "valid": true
+            },
+            {
+                "description": "non-matching property name is invalid",
+                "data": {
+                    "aaA": {}
+                },
+                "valid": false
+            },
+            {
+                "description": "object without properties is valid",
+                "data": {},
+                "valid": true
             }
         ]
     },
     {
         "description": "propertyNames with boolean schema true",
-        "schema": {"propertyNames": true},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "propertyNames": true
+        },
         "tests": [
             {
                 "description": "object with any properties is valid",
@@ -34875,11 +38204,67 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "propertyNames with boolean schema false",
-        "schema": {"propertyNames": false},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "propertyNames": false
+        },
         "tests": [
             {
                 "description": "object with any properties is invalid",
                 "data": {"foo": 1},
+                "valid": false
+            },
+            {
+                "description": "empty object is valid",
+                "data": {},
+                "valid": true
+            }
+        ]
+    },
+    {
+        "description": "propertyNames with const",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "propertyNames": {"const": "foo"}
+        },
+        "tests": [
+            {
+                "description": "object with property foo is valid",
+                "data": {"foo": 1},
+                "valid": true
+            },
+            {
+                "description": "object with any other property is invalid",
+                "data": {"bar": 1},
+                "valid": false
+            },
+            {
+                "description": "empty object is valid",
+                "data": {},
+                "valid": true
+            }
+        ]
+    },
+    {
+        "description": "propertyNames with enum",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "propertyNames": {"enum": ["foo", "bar"]}
+        },
+        "tests": [
+            {
+                "description": "object with property foo is valid",
+                "data": {"foo": 1},
+                "valid": true
+            },
+            {
+                "description": "object with property foo and bar is valid",
+                "data": {"foo": 1, "bar": 1},
+                "valid": true
+            },
+            {
+                "description": "object with any other property is invalid",
+                "data": {"baz": 1},
                 "valid": false
             },
             {
@@ -34895,6 +38280,7 @@ Map<String, String> specificationTests = {
     {
         "description": "root pointer ref",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "properties": {
                 "foo": {"$ref": "#"}
             },
@@ -34926,6 +38312,7 @@ Map<String, String> specificationTests = {
     {
         "description": "relative pointer ref to object",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "properties": {
                 "foo": {"type": "integer"},
                 "bar": {"$ref": "#/properties/foo"}
@@ -34947,6 +38334,7 @@ Map<String, String> specificationTests = {
     {
         "description": "relative pointer ref to array",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "prefixItems": [
                 {"type": "integer"},
                 {"$ref": "#/prefixItems/0"}
@@ -34968,6 +38356,7 @@ Map<String, String> specificationTests = {
     {
         "description": "escaped pointer ref",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "$defs": {
                 "tilde~field": {"type": "integer"},
                 "slash/field": {"type": "integer"},
@@ -35015,6 +38404,7 @@ Map<String, String> specificationTests = {
     {
         "description": "nested refs",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "$defs": {
                 "a": {"type": "integer"},
                 "b": {"$ref": "#/$defs/a"},
@@ -35038,6 +38428,7 @@ Map<String, String> specificationTests = {
     {
         "description": "ref applies alongside sibling keywords",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "$defs": {
                 "reffed": {
                     "type": "array"
@@ -35071,6 +38462,7 @@ Map<String, String> specificationTests = {
     {
         "description": "remote ref, containing refs itself",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "$ref": "https://json-schema.org/draft/2020-12/schema"
         },
         "tests": [
@@ -35089,6 +38481,7 @@ Map<String, String> specificationTests = {
     {
         "description": "property named $ref that is not a reference",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "properties": {
                 "$ref": {"type": "string"}
             }
@@ -35109,6 +38502,7 @@ Map<String, String> specificationTests = {
     {
         "description": "property named $ref, containing an actual $ref",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "properties": {
                 "$ref": {"$ref": "#/$defs/is-string"}
             },
@@ -35134,6 +38528,7 @@ Map<String, String> specificationTests = {
     {
         "description": "$ref to boolean schema true",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "$ref": "#/$defs/bool",
             "$defs": {
                 "bool": true
@@ -35150,6 +38545,7 @@ Map<String, String> specificationTests = {
     {
         "description": "$ref to boolean schema false",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "$ref": "#/$defs/bool",
             "$defs": {
                 "bool": false
@@ -35166,7 +38562,8 @@ Map<String, String> specificationTests = {
     {
         "description": "Recursive references between schemas",
         "schema": {
-            "$id": "http://localhost:1234/tree",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "http://localhost:1234/draft2020-12/tree",
             "description": "tree of nodes",
             "type": "object",
             "properties": {
@@ -35179,7 +38576,7 @@ Map<String, String> specificationTests = {
             "required": ["meta", "nodes"],
             "$defs": {
                 "node": {
-                    "$id": "http://localhost:1234/node",
+                    "$id": "http://localhost:1234/draft2020-12/node",
                     "description": "node",
                     "type": "object",
                     "properties": {
@@ -35254,6 +38651,7 @@ Map<String, String> specificationTests = {
     {
         "description": "refs with quote",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "properties": {
                 "foo\"bar": {"$ref": "#/$defs/foo%22bar"}
             },
@@ -35281,6 +38679,7 @@ Map<String, String> specificationTests = {
     {
         "description": "ref creates new scope when adjacent to keywords",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "$defs": {
                 "A": {
                     "unevaluatedProperties": false
@@ -35306,6 +38705,7 @@ Map<String, String> specificationTests = {
     {
         "description": "naive replacement of $ref with its destination is not correct",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "$defs": {
                 "a_string": { "type": "string" }
             },
@@ -35334,6 +38734,7 @@ Map<String, String> specificationTests = {
     {
         "description": "refs with relative uris and defs",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "$id": "http://example.com/schema-relative-uri-defs1.json",
             "properties": {
                 "foo": {
@@ -35386,6 +38787,7 @@ Map<String, String> specificationTests = {
     {
         "description": "relative refs with absolute uris and defs",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "$id": "http://example.com/schema-refs-absolute-uris-defs1.json",
             "properties": {
                 "foo": {
@@ -35438,6 +38840,7 @@ Map<String, String> specificationTests = {
     {
         "description": "$id must be resolved against nearest parent, not just immediate parent",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "$id": "http://example.com/a.json",
             "$defs": {
                 "x": {
@@ -35460,12 +38863,498 @@ Map<String, String> specificationTests = {
         },
         "tests": [
             {
-                "description": "number should pass",
+                "description": "number is valid",
                 "data": 1,
                 "valid": true
             },
             {
-                "description": "non-number should fail",
+                "description": "non-number is invalid",
+                "data": "a",
+                "valid": false
+            }
+        ]
+    },
+    {
+        "description": "order of evaluation: $id and $ref",
+        "schema": {
+            "$comment": "$id must be evaluated before $ref to get the proper $ref destination",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://example.com/draft2020-12/ref-and-id1/base.json",
+            "$ref": "int.json",
+            "$defs": {
+                "bigint": {
+                    "$comment": "canonical uri: https://example.com/ref-and-id1/int.json",
+                    "$id": "int.json",
+                    "maximum": 10
+                },
+                "smallint": {
+                    "$comment": "canonical uri: https://example.com/ref-and-id1-int.json",
+                    "$id": "/draft2020-12/ref-and-id1-int.json",
+                    "maximum": 2
+                }
+            }
+        },
+        "tests": [
+            {
+                "description": "data is valid against first definition",
+                "data": 5,
+                "valid": true
+            },
+            {
+                "description": "data is invalid against first definition",
+                "data": 50,
+                "valid": false
+            }
+        ]
+    },
+    {
+        "description": "order of evaluation: $id and $anchor and $ref",
+        "schema": {
+            "$comment": "$id must be evaluated before $ref to get the proper $ref destination",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://example.com/draft2020-12/ref-and-id2/base.json",
+            "$ref": "#bigint",
+            "$defs": {
+                "bigint": {
+                    "$comment": "canonical uri: /ref-and-id2/base.json#/$defs/bigint; another valid uri for this location: /ref-and-id2/base.json#bigint",
+                    "$anchor": "bigint",
+                    "maximum": 10
+                },
+                "smallint": {
+                    "$comment": "canonical uri: https://example.com/ref-and-id2#/$defs/smallint; another valid uri for this location: https://example.com/ref-and-id2/#bigint",
+                    "$id": "https://example.com/draft2020-12/ref-and-id2/",
+                    "$anchor": "bigint",
+                    "maximum": 2
+                }
+            }
+        },
+        "tests": [
+            {
+                "description": "data is valid against first definition",
+                "data": 5,
+                "valid": true
+            },
+            {
+                "description": "data is invalid against first definition",
+                "data": 50,
+                "valid": false
+            }
+        ]
+    },
+    {
+        "description": "order of evaluation: $id and $ref on nested schema",
+        "schema": {
+            "$comment": "$id must be evaluated before $ref to get the proper $ref destination",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://example.com/draft2020-12/ref-and-id3/base.json",
+            "$ref": "nested/foo.json",
+            "$defs": {
+                "foo": {
+                    "$comment": "canonical uri: https://example.com/draft2020-12/ref-and-id3/nested/foo.json",
+                    "$id": "nested/foo.json",
+                    "$ref": "./bar.json"
+                },
+                "bar": {
+                    "$comment": "canonical uri: https://example.com/draft2020-12/ref-and-id3/nested/bar.json",
+                    "$id": "nested/bar.json",
+                    "type": "number"
+                }
+            }
+        },
+        "tests": [
+            {
+                "description": "data is valid against nested sibling",
+                "data": 5,
+                "valid": true
+            },
+            {
+                "description": "data is invalid against nested sibling",
+                "data": "a",
+                "valid": false
+            }
+        ]
+    },
+    {
+        "description": "simple URN base URI with $ref via the URN",
+        "schema": {
+            "$comment": "URIs do not have to have HTTP(s) schemes",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "urn:uuid:deadbeef-1234-ffff-ffff-4321feebdaed",
+            "minimum": 30,
+            "properties": {
+                "foo": {"$ref": "urn:uuid:deadbeef-1234-ffff-ffff-4321feebdaed"}
+            }
+        },
+        "tests": [
+            {
+                "description": "valid under the URN IDed schema",
+                "data": {"foo": 37},
+                "valid": true
+            },
+            {
+                "description": "invalid under the URN IDed schema",
+                "data": {"foo": 12},
+                "valid": false
+            }
+        ]
+    },
+    {
+        "description": "simple URN base URI with JSON pointer",
+        "schema": {
+            "$comment": "URIs do not have to have HTTP(s) schemes",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "urn:uuid:deadbeef-1234-00ff-ff00-4321feebdaed",
+            "properties": {
+                "foo": {"$ref": "#/$defs/bar"}
+            },
+            "$defs": {
+                "bar": {"type": "string"}
+            }
+        },
+        "tests": [
+            {
+                "description": "a string is valid",
+                "data": {"foo": "bar"},
+                "valid": true
+            },
+            {
+                "description": "a non-string is invalid",
+                "data": {"foo": 12},
+                "valid": false
+            }
+        ]
+    },
+    {
+        "description": "URN base URI with NSS",
+        "schema": {
+            "$comment": "RFC 8141 §2.2",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "urn:example:1/406/47452/2",
+            "properties": {
+                "foo": {"$ref": "#/$defs/bar"}
+            },
+            "$defs": {
+                "bar": {"type": "string"}
+            }
+        },
+        "tests": [
+            {
+                "description": "a string is valid",
+                "data": {"foo": "bar"},
+                "valid": true
+            },
+            {
+                "description": "a non-string is invalid",
+                "data": {"foo": 12},
+                "valid": false
+            }
+        ]
+    },
+    {
+        "description": "URN base URI with r-component",
+        "schema": {
+            "$comment": "RFC 8141 §2.3.1",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "urn:example:foo-bar-baz-qux?+CCResolve:cc=uk",
+            "properties": {
+                "foo": {"$ref": "#/$defs/bar"}
+            },
+            "$defs": {
+                "bar": {"type": "string"}
+            }
+        },
+        "tests": [
+            {
+                "description": "a string is valid",
+                "data": {"foo": "bar"},
+                "valid": true
+            },
+            {
+                "description": "a non-string is invalid",
+                "data": {"foo": 12},
+                "valid": false
+            }
+        ]
+    },
+    {
+        "description": "URN base URI with q-component",
+        "schema": {
+            "$comment": "RFC 8141 §2.3.2",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "urn:example:weather?=op=map&lat=39.56&lon=-104.85&datetime=1969-07-21T02:56:15Z",
+            "properties": {
+                "foo": {"$ref": "#/$defs/bar"}
+            },
+            "$defs": {
+                "bar": {"type": "string"}
+            }
+        },
+        "tests": [
+            {
+                "description": "a string is valid",
+                "data": {"foo": "bar"},
+                "valid": true
+            },
+            {
+                "description": "a non-string is invalid",
+                "data": {"foo": 12},
+                "valid": false
+            }
+        ]
+    },
+    {
+        "description": "URN base URI with URN and JSON pointer ref",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "urn:uuid:deadbeef-1234-0000-0000-4321feebdaed",
+            "properties": {
+                "foo": {"$ref": "urn:uuid:deadbeef-1234-0000-0000-4321feebdaed#/$defs/bar"}
+            },
+            "$defs": {
+                "bar": {"type": "string"}
+            }
+        },
+        "tests": [
+            {
+                "description": "a string is valid",
+                "data": {"foo": "bar"},
+                "valid": true
+            },
+            {
+                "description": "a non-string is invalid",
+                "data": {"foo": 12},
+                "valid": false
+            }
+        ]
+    },
+    {
+        "description": "URN base URI with URN and anchor ref",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "urn:uuid:deadbeef-1234-ff00-00ff-4321feebdaed",
+            "properties": {
+                "foo": {"$ref": "urn:uuid:deadbeef-1234-ff00-00ff-4321feebdaed#something"}
+            },
+            "$defs": {
+                "bar": {
+                    "$anchor": "something",
+                    "type": "string"
+                }
+            }
+        },
+        "tests": [
+            {
+                "description": "a string is valid",
+                "data": {"foo": "bar"},
+                "valid": true
+            },
+            {
+                "description": "a non-string is invalid",
+                "data": {"foo": 12},
+                "valid": false
+            }
+        ]
+    },
+    {
+        "description": "URN ref with nested pointer ref",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$ref": "urn:uuid:deadbeef-4321-ffff-ffff-1234feebdaed",
+            "$defs": {
+                "foo": {
+                    "$id": "urn:uuid:deadbeef-4321-ffff-ffff-1234feebdaed",
+                    "$defs": {"bar": {"type": "string"}},
+                    "$ref": "#/$defs/bar"
+                }
+            }
+        },
+        "tests": [
+            {
+                "description": "a string is valid",
+                "data": "bar",
+                "valid": true
+            },
+            {
+                "description": "a non-string is invalid",
+                "data": 12,
+                "valid": false
+            }
+        ]
+    },
+    {
+        "description": "ref to if",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$ref": "http://example.com/ref/if",
+            "if": {
+                "$id": "http://example.com/ref/if",
+                "type": "integer"
+            }
+        },
+        "tests": [
+            {
+                "description": "a non-integer is invalid due to the $ref",
+                "data": "foo",
+                "valid": false
+            },
+            {
+                "description": "an integer is valid",
+                "data": 12,
+                "valid": true
+            }
+        ]
+    },
+    {
+        "description": "ref to then",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$ref": "http://example.com/ref/then",
+            "then": {
+                "$id": "http://example.com/ref/then",
+                "type": "integer"
+            }
+        },
+        "tests": [
+            {
+                "description": "a non-integer is invalid due to the $ref",
+                "data": "foo",
+                "valid": false
+            },
+            {
+                "description": "an integer is valid",
+                "data": 12,
+                "valid": true
+            }
+        ]
+    },
+    {
+        "description": "ref to else",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$ref": "http://example.com/ref/else",
+            "else": {
+                "$id": "http://example.com/ref/else",
+                "type": "integer"
+            }
+        },
+        "tests": [
+            {
+                "description": "a non-integer is invalid due to the $ref",
+                "data": "foo",
+                "valid": false
+            },
+            {
+                "description": "an integer is valid",
+                "data": 12,
+                "valid": true
+            }
+        ]
+    },
+    {
+        "description": "ref with absolute-path-reference",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "http://example.com/ref/absref.json",
+            "$defs": {
+                "a": {
+                    "$id": "http://example.com/ref/absref/foobar.json",
+                    "type": "number"
+                },
+                "b": {
+                    "$id": "http://example.com/absref/foobar.json",
+                    "type": "string"
+                }
+            },
+            "$ref": "/absref/foobar.json"
+        },
+        "tests": [
+            {
+                "description": "a string is valid",
+                "data": "foo",
+                "valid": true
+            },
+            {
+                "description": "an integer is invalid",
+                "data": 12,
+                "valid": false
+            }
+        ]
+    },
+    {
+        "description": "$id with file URI still resolves pointers - *nix",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "file:///folder/file.json",
+            "$defs": {
+                "foo": {
+                    "type": "number"
+                }
+            },
+            "$ref": "#/$defs/foo"
+        },
+        "tests": [
+            {
+                "description": "number is valid",
+                "data": 1,
+                "valid": true
+            },
+            {
+                "description": "non-number is invalid",
+                "data": "a",
+                "valid": false
+            }
+        ]
+    },
+    {
+        "description": "$id with file URI still resolves pointers - windows",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "file:///c:/folder/file.json",
+            "$defs": {
+                "foo": {
+                    "type": "number"
+                }
+            },
+            "$ref": "#/$defs/foo"
+        },
+        "tests": [
+            {
+                "description": "number is valid",
+                "data": 1,
+                "valid": true
+            },
+            {
+                "description": "non-number is invalid",
+                "data": "a",
+                "valid": false
+            }
+        ]
+    },
+    {
+        "description": "empty tokens in $ref json-pointer",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$defs": {
+                "": {
+                    "$defs": {
+                        "": { "type": "number" }
+                    }
+                } 
+            },
+            "allOf": [
+                {
+                    "$ref": "#/$defs//$defs/"
+                }
+            ]
+        },
+        "tests": [
+            {
+                "description": "number is valid",
+                "data": 1,
+                "valid": true
+            },
+            {
+                "description": "non-number is invalid",
                 "data": "a",
                 "valid": false
             }
@@ -35476,7 +39365,10 @@ Map<String, String> specificationTests = {
   "/draft2020-12/refRemote.json": r"""[
     {
         "description": "remote ref",
-        "schema": {"$ref": "http://localhost:1234/integer.json"},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$ref": "http://localhost:1234/draft2020-12/integer.json"
+        },
         "tests": [
             {
                 "description": "remote ref valid",
@@ -35492,7 +39384,10 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "fragment within remote ref",
-        "schema": {"$ref": "http://localhost:1234/subSchemas-defs.json#/$defs/integer"},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$ref": "http://localhost:1234/draft2020-12/subSchemas.json#/$defs/integer"
+        },
         "tests": [
             {
                 "description": "remote fragment valid",
@@ -35507,9 +39402,29 @@ Map<String, String> specificationTests = {
         ]
     },
     {
+        "description": "anchor within remote ref",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$ref": "http://localhost:1234/draft2020-12/locationIndependentIdentifier.json#foo"
+        },
+        "tests": [
+            {
+                "description": "remote anchor valid",
+                "data": 1,
+                "valid": true
+            },
+            {
+                "description": "remote anchor invalid",
+                "data": "a",
+                "valid": false
+            }
+        ]
+    },
+    {
         "description": "ref within remote ref",
         "schema": {
-            "$ref": "http://localhost:1234/subSchemas-defs.json#/$defs/refToInteger"
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$ref": "http://localhost:1234/draft2020-12/subSchemas.json#/$defs/refToInteger"
         },
         "tests": [
             {
@@ -35527,7 +39442,8 @@ Map<String, String> specificationTests = {
     {
         "description": "base URI change",
         "schema": {
-            "$id": "http://localhost:1234/",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "http://localhost:1234/draft2020-12/",
             "items": {
                 "$id": "baseUriChange/",
                 "items": {"$ref": "folderInteger.json"}
@@ -35549,7 +39465,8 @@ Map<String, String> specificationTests = {
     {
         "description": "base URI change - change folder",
         "schema": {
-            "$id": "http://localhost:1234/scope_change_defs1.json",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "http://localhost:1234/draft2020-12/scope_change_defs1.json",
             "type" : "object",
             "properties": {"list": {"$ref": "baseUriChangeFolder/"}},
             "$defs": {
@@ -35576,7 +39493,8 @@ Map<String, String> specificationTests = {
     {
         "description": "base URI change - change folder in subschema",
         "schema": {
-            "$id": "http://localhost:1234/scope_change_defs2.json",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "http://localhost:1234/draft2020-12/scope_change_defs2.json",
             "type" : "object",
             "properties": {"list": {"$ref": "baseUriChangeFolderInSubschema/#/$defs/bar"}},
             "$defs": {
@@ -35607,7 +39525,8 @@ Map<String, String> specificationTests = {
     {
         "description": "root ref in remote ref",
         "schema": {
-            "$id": "http://localhost:1234/object",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "http://localhost:1234/draft2020-12/object",
             "type": "object",
             "properties": {
                 "name": {"$ref": "name-defs.json#/$defs/orNull"}
@@ -35642,7 +39561,8 @@ Map<String, String> specificationTests = {
     {
         "description": "remote ref with ref to defs",
         "schema": {
-            "$id": "http://localhost:1234/schema-remote-ref-ref-defs1.json",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "http://localhost:1234/draft2020-12/schema-remote-ref-ref-defs1.json",
             "$ref": "ref-and-defs.json"
         },
         "tests": [
@@ -35661,6 +39581,127 @@ Map<String, String> specificationTests = {
                 "valid": true
             }
         ]
+    },
+    {
+        "description": "Location-independent identifier in remote ref",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$ref": "http://localhost:1234/draft2020-12/locationIndependentIdentifier.json#/$defs/refToInteger"
+        },
+        "tests": [
+            {
+                "description": "integer is valid",
+                "data": 1,
+                "valid": true
+            },
+            {
+                "description": "string is invalid",
+                "data": "foo",
+                "valid": false
+            }
+        ]
+    },
+    {
+        "description": "retrieved nested refs resolve relative to their URI not $id",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "http://localhost:1234/draft2020-12/some-id",
+            "properties": {
+                "name": {"$ref": "nested/foo-ref-string.json"}
+            }
+        },
+        "tests": [
+            {
+                "description": "number is invalid",
+                "data": {
+                    "name": {"foo":  1}
+                },
+                "valid": false
+            },
+            {
+                "description": "string is valid",
+                "data": {
+                    "name": {"foo":  "a"}
+                },
+                "valid": true
+            }
+        ]
+    },
+    {
+        "description": "remote HTTP ref with different $id",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$ref": "http://localhost:1234/draft2020-12/different-id-ref-string.json"
+        },
+        "tests": [
+            {
+                "description": "number is invalid",
+                "data": 1,
+                "valid": false
+            },
+            {
+                "description": "string is valid",
+                "data": "foo",
+                "valid": true
+            }
+        ]
+    },
+    {
+        "description": "remote HTTP ref with different URN $id",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$ref": "http://localhost:1234/draft2020-12/urn-ref-string.json"
+        },
+        "tests": [
+            {
+                "description": "number is invalid",
+                "data": 1,
+                "valid": false
+            },
+            {
+                "description": "string is valid",
+                "data": "foo",
+                "valid": true
+            }
+        ]
+    },
+    {
+        "description": "remote HTTP ref with nested absolute ref",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$ref": "http://localhost:1234/draft2020-12/nested-absolute-ref-to-string.json"
+        },
+        "tests": [
+            {
+                "description": "number is invalid",
+                "data": 1,
+                "valid": false
+            },
+            {
+                "description": "string is valid",
+                "data": "foo",
+                "valid": true
+            }
+        ]
+    },
+    {
+        "description": "$ref to $ref finds detached $anchor",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$ref": "http://localhost:1234/draft2020-12/detached-ref.json#/$defs/foo"
+        },
+        "tests": [
+            {
+                "description": "number is valid",
+                "data": 1,
+                "valid": true
+            },
+            {
+                "description": "non-number is invalid",
+                "data": "a",
+                "valid": false
+            }
+        ]
     }
 ]
 """,
@@ -35668,6 +39709,7 @@ Map<String, String> specificationTests = {
     {
         "description": "required validation",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "properties": {
                 "foo": {},
                 "bar": {}
@@ -35699,12 +39741,24 @@ Map<String, String> specificationTests = {
                 "description": "ignores other non-objects",
                 "data": 12,
                 "valid": true
+            },
+            {
+                "description": "ignores null",
+                "data": null,
+                "valid": true
+            },
+            {
+                "description":"ignores boolean",
+                "data": true,
+                "valid": true
+
             }
         ]
     },
     {
         "description": "required default validation",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "properties": {
                 "foo": {}
             }
@@ -35720,6 +39774,7 @@ Map<String, String> specificationTests = {
     {
         "description": "required with empty array",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "properties": {
                 "foo": {}
             },
@@ -35736,6 +39791,7 @@ Map<String, String> specificationTests = {
     {
         "description": "required with escaped characters",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "required": [
                 "foo\nbar",
                 "foo\"bar",
@@ -35767,13 +39823,65 @@ Map<String, String> specificationTests = {
                 "valid": false
             }
         ]
+    },
+    {
+        "description": "required properties whose names are Javascript object property names",
+        "comment": "Ensure JS implementations don't universally consider e.g. __proto__ to always be present in an object.",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "required": ["__proto__", "toString", "constructor"]
+        },
+        "tests": [
+            {
+                "description": "ignores arrays",
+                "data": [],
+                "valid": true
+            },
+            {
+                "description": "ignores other non-objects",
+                "data": 12,
+                "valid": true
+            },
+            {
+                "description": "none of the properties mentioned",
+                "data": {},
+                "valid": false
+            },
+            {
+                "description": "__proto__ present",
+                "data": { "__proto__": "foo" },
+                "valid": false
+            },
+            {
+                "description": "toString present",
+                "data": { "toString": { "length": 37 } },
+                "valid": false
+            },
+            {
+                "description": "constructor present",
+                "data": { "constructor": { "length": 37 } },
+                "valid": false
+            },
+            {
+                "description": "all present",
+                "data": { 
+                    "__proto__": 12,
+                    "toString": { "length": "foo" },
+                    "constructor": 37
+                },
+                "valid": true
+            }
+        ]
     }
 ]
 """,
   "/draft2020-12/type.json": r"""[
     {
         "description": "integer type matches integers",
-        "schema": {"type": "integer"},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "integer"
+        },
         "tests": [
             {
                 "description": "an integer is an integer",
@@ -35824,7 +39932,10 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "number type matches numbers",
-        "schema": {"type": "number"},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "number"
+        },
         "tests": [
             {
                 "description": "an integer is a number",
@@ -35875,7 +39986,10 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "string type matches strings",
-        "schema": {"type": "string"},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "string"
+        },
         "tests": [
             {
                 "description": "1 is not a string",
@@ -35926,7 +40040,10 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "object type matches objects",
-        "schema": {"type": "object"},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "object"
+        },
         "tests": [
             {
                 "description": "an integer is not an object",
@@ -35967,7 +40084,10 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "array type matches arrays",
-        "schema": {"type": "array"},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "array"
+        },
         "tests": [
             {
                 "description": "an integer is not an array",
@@ -36008,7 +40128,10 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "boolean type matches booleans",
-        "schema": {"type": "boolean"},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "boolean"
+        },
         "tests": [
             {
                 "description": "an integer is not a boolean",
@@ -36064,7 +40187,10 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "null type matches only the null object",
-        "schema": {"type": "null"},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "null"
+        },
         "tests": [
             {
                 "description": "an integer is not null",
@@ -36120,7 +40246,10 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "multiple types can be specified in an array",
-        "schema": {"type": ["integer", "string"]},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": ["integer", "string"]
+        },
         "tests": [
             {
                 "description": "an integer is valid",
@@ -36162,6 +40291,7 @@ Map<String, String> specificationTests = {
     {
         "description": "type as array with one item",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": ["string"]
         },
         "tests": [
@@ -36180,6 +40310,7 @@ Map<String, String> specificationTests = {
     {
         "description": "type: array or object",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": ["array", "object"]
         },
         "tests": [
@@ -36213,6 +40344,7 @@ Map<String, String> specificationTests = {
     {
         "description": "type: array, object or null",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": ["array", "object", "null"]
         },
         "tests": [
@@ -36249,7 +40381,7 @@ Map<String, String> specificationTests = {
     {
         "description": "unevaluatedItems true",
         "schema": {
-            "type": "array",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "unevaluatedItems": true
         },
         "tests": [
@@ -36268,7 +40400,7 @@ Map<String, String> specificationTests = {
     {
         "description": "unevaluatedItems false",
         "schema": {
-            "type": "array",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "unevaluatedItems": false
         },
         "tests": [
@@ -36287,7 +40419,7 @@ Map<String, String> specificationTests = {
     {
         "description": "unevaluatedItems as schema",
         "schema": {
-            "type": "array",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "unevaluatedItems": { "type": "string" }
         },
         "tests": [
@@ -36311,7 +40443,7 @@ Map<String, String> specificationTests = {
     {
         "description": "unevaluatedItems with uniform items",
         "schema": {
-            "type": "array",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "items": { "type": "string" },
             "unevaluatedItems": false
         },
@@ -36326,7 +40458,7 @@ Map<String, String> specificationTests = {
     {
         "description": "unevaluatedItems with tuple",
         "schema": {
-            "type": "array",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "prefixItems": [
                 { "type": "string" }
             ],
@@ -36346,9 +40478,9 @@ Map<String, String> specificationTests = {
         ]
     },
     {
-        "description": "unevaluatedItems with items",
+        "description": "unevaluatedItems with items and prefixItems",
         "schema": {
-            "type": "array",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "prefixItems": [
                 { "type": "string" }
             ],
@@ -36364,9 +40496,30 @@ Map<String, String> specificationTests = {
         ]
     },
     {
+        "description": "unevaluatedItems with items",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "items": {"type": "number"},
+            "unevaluatedItems": {"type": "string"}
+        },
+        "tests": [
+            {
+                "description": "valid under items",
+                "comment": "no elements are considered by unevaluatedItems",
+                "data": [5, 6, 7, 8],
+                "valid": true
+            },
+            {
+                "description": "invalid under items",
+                "data": ["foo", "bar", "baz"],
+                "valid": false
+            }
+        ]
+    },
+    {
         "description": "unevaluatedItems with nested tuple",
         "schema": {
-            "type": "array",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "prefixItems": [
                 { "type": "string" }
             ],
@@ -36396,7 +40549,35 @@ Map<String, String> specificationTests = {
     {
         "description": "unevaluatedItems with nested items",
         "schema": {
-            "type": "array",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "unevaluatedItems": {"type": "boolean"},
+            "anyOf": [
+                { "items": {"type": "string"} },
+                true
+            ]
+        },
+        "tests": [
+            {
+                "description": "with only (valid) additional items",
+                "data": [true, false],
+                "valid": true
+            },
+            {
+                "description": "with no additional items",
+                "data": ["yes", "no"],
+                "valid": true
+            },
+            {
+                "description": "with invalid additional item",
+                "data": ["yes", false],
+                "valid": false
+            }
+        ]
+    },
+    {
+        "description": "unevaluatedItems with nested prefixItems and items",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "allOf": [
                 {
                     "prefixItems": [
@@ -36423,16 +40604,14 @@ Map<String, String> specificationTests = {
     {
         "description": "unevaluatedItems with nested unevaluatedItems",
         "schema": {
-            "type": "array",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "allOf": [
                 {
                     "prefixItems": [
                         { "type": "string" }
                     ]
                 },
-                {
-                    "unevaluatedItems": true
-                }
+                { "unevaluatedItems": true }
             ],
             "unevaluatedItems": false
         },
@@ -36452,7 +40631,7 @@ Map<String, String> specificationTests = {
     {
         "description": "unevaluatedItems with anyOf",
         "schema": {
-            "type": "array",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "prefixItems": [
                 { "const": "foo" }
             ],
@@ -36499,7 +40678,7 @@ Map<String, String> specificationTests = {
     {
         "description": "unevaluatedItems with oneOf",
         "schema": {
-            "type": "array",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "prefixItems": [
                 { "const": "foo" }
             ],
@@ -36535,7 +40714,7 @@ Map<String, String> specificationTests = {
     {
         "description": "unevaluatedItems with not",
         "schema": {
-            "type": "array",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "prefixItems": [
                 { "const": "foo" }
             ],
@@ -36560,7 +40739,7 @@ Map<String, String> specificationTests = {
     {
         "description": "unevaluatedItems with if/then/else",
         "schema": {
-            "type": "array",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "prefixItems": [
                 { "const": "foo" }
             ],
@@ -36613,7 +40792,7 @@ Map<String, String> specificationTests = {
     {
         "description": "unevaluatedItems with boolean schemas",
         "schema": {
-            "type": "array",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "allOf": [true],
             "unevaluatedItems": false
         },
@@ -36633,7 +40812,7 @@ Map<String, String> specificationTests = {
     {
         "description": "unevaluatedItems with $ref",
         "schema": {
-            "type": "array",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "$ref": "#/$defs/bar",
             "prefixItems": [
                 { "type": "string" }
@@ -36662,15 +40841,94 @@ Map<String, String> specificationTests = {
         ]
     },
     {
+        "description": "unevaluatedItems before $ref",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "unevaluatedItems": false,
+            "prefixItems": [
+                { "type": "string" }
+            ],
+            "$ref": "#/$defs/bar",
+            "$defs": {
+              "bar": {
+                  "prefixItems": [
+                      true,
+                      { "type": "string" }
+                  ]
+              }
+            }
+        },
+        "tests": [
+            {
+                "description": "with no unevaluated items",
+                "data": ["foo", "bar"],
+                "valid": true
+            },
+            {
+                "description": "with unevaluated items",
+                "data": ["foo", "bar", "baz"],
+                "valid": false
+            }
+        ]
+    },
+    {
+        "description": "unevaluatedItems with $dynamicRef",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://example.com/unevaluated-items-with-dynamic-ref/derived",
+
+            "$ref": "./baseSchema",
+
+            "$defs": {
+                "derived": {
+                    "$dynamicAnchor": "addons",
+                    "prefixItems": [
+                        true,
+                        { "type": "string" }
+                    ]
+                },
+                "baseSchema": {
+                    "$id": "./baseSchema",
+
+                    "$comment": "unevaluatedItems comes first so it's more likely to catch bugs with implementations that are sensitive to keyword ordering",
+                    "unevaluatedItems": false,
+                    "type": "array",
+                    "prefixItems": [
+                        { "type": "string" }
+                    ],
+                    "$dynamicRef": "#addons",
+
+                    "$defs": {
+                        "defaultAddons": {
+                            "$comment": "Needed to satisfy the bookending requirement",
+                            "$dynamicAnchor": "addons"
+                        }
+                    }
+                }
+            }
+        },
+        "tests": [
+            {
+                "description": "with no unevaluated items",
+                "data": ["foo", "bar"],
+                "valid": true
+            },
+            {
+                "description": "with unevaluated items",
+                "data": ["foo", "bar", "baz"],
+                "valid": false
+            }
+        ]
+    },
+    {
         "description": "unevaluatedItems can't see inside cousins",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "allOf": [
                 {
                     "prefixItems": [ true ]
                 },
-                {
-                    "unevaluatedItems": false
-                }
+                { "unevaluatedItems": false }
             ]
         },
         "tests": [
@@ -36684,14 +40942,11 @@ Map<String, String> specificationTests = {
     {
         "description": "item is evaluated in an uncle schema to unevaluatedItems",
         "schema": {
-            "type": "object",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "properties": {
                 "foo": {
-                    "type": "array",
                     "prefixItems": [
-                        {
-                            "type": "string"
-                        }
+                        { "type": "string" }
                     ],
                     "unevaluatedItems": false
                   }
@@ -36702,9 +40957,7 @@ Map<String, String> specificationTests = {
                         "foo": {
                             "prefixItems": [
                                 true,
-                                {
-                                    "type": "string"
-                                }
+                                { "type": "string" }
                             ]
                         }
                     }
@@ -36736,6 +40989,7 @@ Map<String, String> specificationTests = {
     {
         "description": "unevaluatedItems depends on adjacent contains",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "prefixItems": [true],
             "contains": {"type": "string"},
             "unevaluatedItems": false
@@ -36761,6 +41015,7 @@ Map<String, String> specificationTests = {
     {
         "description": "unevaluatedItems depends on multiple nested contains",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "allOf": [
                 { "contains": { "multipleOf": 2 } },
                 { "contains": { "multipleOf": 3 } }
@@ -36783,6 +41038,7 @@ Map<String, String> specificationTests = {
     {
         "description": "unevaluatedItems and contains interact to control item dependency relationship",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "if": {
                 "contains": {"const": "a"}
             },
@@ -36840,6 +41096,139 @@ Map<String, String> specificationTests = {
                 "valid": false
             }
         ]
+    },
+    {
+        "description" : "unevaluatedItems with minContains = 0",
+        "schema" : {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "contains": {"type": "string"},
+            "minContains": 0,
+            "unevaluatedItems": false
+        },
+        "tests" : [
+            {
+                "description": "empty array is valid",
+                "data": [],
+                "valid": true
+            },
+            {
+                "description": "no items evaluated by contains",
+                "data": [0],
+                "valid": false
+            },
+            {
+                "description": "some but not all items evaluated by contains",
+                "data": ["foo", 0],
+                "valid": false
+            },
+            {
+                "description": "all items evaluated by contains",
+                "data": ["foo", "bar"],
+                "valid": true
+            }
+        ]
+    },
+    {
+        "description": "non-array instances are valid",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "unevaluatedItems": false
+        },
+        "tests": [
+            {
+                "description": "ignores booleans",
+                "data": true,
+                "valid": true
+            },
+            {
+                "description": "ignores integers",
+                "data": 123,
+                "valid": true
+            },
+            {
+                "description": "ignores floats",
+                "data": 1.0,
+                "valid": true
+            },
+            {
+                "description": "ignores objects",
+                "data": {},
+                "valid": true
+            },
+            {
+                "description": "ignores strings",
+                "data": "foo",
+                "valid": true
+            },
+            {
+                "description": "ignores null",
+                "data": null,
+                "valid": true
+            }
+        ]
+    },
+    {
+        "description": "unevaluatedItems with null instance elements",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "unevaluatedItems": {
+                "type": "null"
+            }
+        },
+        "tests": [
+            {
+                "description": "allows null elements",
+                "data": [ null ],
+                "valid": true
+            }
+        ]
+    },
+    {
+        "description": "unevaluatedItems can see annotations from if without then and else",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "if": {
+                "prefixItems": [{"const": "a"}]
+            },
+            "unevaluatedItems": false
+        },
+        "tests": [
+            {
+                "description": "valid in case if is evaluated",
+                "data": [ "a" ],
+                "valid": true
+            },
+            {
+                "description": "invalid in case if is evaluated",
+                "data": [ "b" ],
+                "valid": false
+            }
+        ]
+    },
+    {
+        "description": "Evaluated items collection needs to consider instance location",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "prefixItems": [
+                {
+                    "prefixItems": [
+                        true,
+                        { "type": "string" }
+                    ]
+                }
+            ],
+            "unevaluatedItems": false
+        },
+        "tests": [
+            {
+                "description": "with an unevaluated item that exists at another location",
+                "data": [
+                    ["foo", "bar"],
+                    "bar"
+                ],
+                "valid": false
+            }
+        ]
     }
 ]
 """,
@@ -36847,7 +41236,7 @@ Map<String, String> specificationTests = {
     {
         "description": "unevaluatedProperties true",
         "schema": {
-            "type": "object",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "unevaluatedProperties": true
         },
         "tests": [
@@ -36868,7 +41257,7 @@ Map<String, String> specificationTests = {
     {
         "description": "unevaluatedProperties schema",
         "schema": {
-            "type": "object",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "unevaluatedProperties": {
                 "type": "string",
                 "minLength": 3
@@ -36899,7 +41288,7 @@ Map<String, String> specificationTests = {
     {
         "description": "unevaluatedProperties false",
         "schema": {
-            "type": "object",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "unevaluatedProperties": false
         },
         "tests": [
@@ -36920,7 +41309,7 @@ Map<String, String> specificationTests = {
     {
         "description": "unevaluatedProperties with adjacent properties",
         "schema": {
-            "type": "object",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "properties": {
                 "foo": { "type": "string" }
             },
@@ -36947,7 +41336,7 @@ Map<String, String> specificationTests = {
     {
         "description": "unevaluatedProperties with adjacent patternProperties",
         "schema": {
-            "type": "object",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "patternProperties": {
                 "^foo": { "type": "string" }
             },
@@ -36972,8 +41361,9 @@ Map<String, String> specificationTests = {
         ]
     },
     {
-        "description": "unevaluatedProperties with adjacent additionalProperties",
+        "description": "unevaluatedProperties with adjacent bool additionalProperties",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "object",
             "properties": {
                 "foo": { "type": "string" }
@@ -37000,9 +41390,38 @@ Map<String, String> specificationTests = {
         ]
     },
     {
+        "description": "unevaluatedProperties with adjacent non-bool additionalProperties",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "object",
+            "properties": {
+                "foo": { "type": "string" }
+            },
+            "additionalProperties": {"type": "string"},
+            "unevaluatedProperties": false
+        },
+        "tests": [
+            {
+                "description": "with no additional properties",
+                "data": {
+                    "foo": "foo"
+                },
+                "valid": true
+            },
+            {
+                "description": "with additional properties",
+                "data": {
+                    "foo": "foo",
+                    "bar": "bar"
+                },
+                "valid": true
+            }
+        ]
+    },
+    {
         "description": "unevaluatedProperties with nested properties",
         "schema": {
-            "type": "object",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "properties": {
                 "foo": { "type": "string" }
             },
@@ -37038,7 +41457,7 @@ Map<String, String> specificationTests = {
     {
         "description": "unevaluatedProperties with nested patternProperties",
         "schema": {
-            "type": "object",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "properties": {
                 "foo": { "type": "string" }
             },
@@ -37074,7 +41493,7 @@ Map<String, String> specificationTests = {
     {
         "description": "unevaluatedProperties with nested additionalProperties",
         "schema": {
-            "type": "object",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "properties": {
                 "foo": { "type": "string" }
             },
@@ -37106,7 +41525,7 @@ Map<String, String> specificationTests = {
     {
         "description": "unevaluatedProperties with nested unevaluatedProperties",
         "schema": {
-            "type": "object",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "properties": {
                 "foo": { "type": "string" }
             },
@@ -37141,7 +41560,7 @@ Map<String, String> specificationTests = {
     {
         "description": "unevaluatedProperties with anyOf",
         "schema": {
-            "type": "object",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "properties": {
                 "foo": { "type": "string" }
             },
@@ -37209,7 +41628,7 @@ Map<String, String> specificationTests = {
     {
         "description": "unevaluatedProperties with oneOf",
         "schema": {
-            "type": "object",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "properties": {
                 "foo": { "type": "string" }
             },
@@ -37252,7 +41671,7 @@ Map<String, String> specificationTests = {
     {
         "description": "unevaluatedProperties with not",
         "schema": {
-            "type": "object",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "properties": {
                 "foo": { "type": "string" }
             },
@@ -37280,7 +41699,7 @@ Map<String, String> specificationTests = {
     {
         "description": "unevaluatedProperties with if/then/else",
         "schema": {
-            "type": "object",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "if": {
                 "properties": {
                     "foo": { "const": "then" }
@@ -37339,7 +41758,7 @@ Map<String, String> specificationTests = {
     {
         "description": "unevaluatedProperties with if/then/else, then not defined",
         "schema": {
-            "type": "object",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "if": {
                 "properties": {
                     "foo": { "const": "then" }
@@ -37358,17 +41777,15 @@ Map<String, String> specificationTests = {
             {
                 "description": "when if is true and has no unevaluated properties",
                 "data": {
-                    "foo": "then",
-                    "bar": "bar"
+                    "foo": "then"
                 },
-                "valid": false
+                "valid": true
             },
             {
                 "description": "when if is true and has unevaluated properties",
                 "data": {
                     "foo": "then",
-                    "bar": "bar",
-                    "baz": "baz"
+                    "bar": "bar"
                 },
                 "valid": false
             },
@@ -37392,7 +41809,7 @@ Map<String, String> specificationTests = {
     {
         "description": "unevaluatedProperties with if/then/else, else not defined",
         "schema": {
-            "type": "object",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "if": {
                 "properties": {
                     "foo": { "const": "then" }
@@ -37445,7 +41862,7 @@ Map<String, String> specificationTests = {
     {
         "description": "unevaluatedProperties with dependentSchemas",
         "schema": {
-            "type": "object",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "properties": {
                 "foo": { "type": "string" }
             },
@@ -37480,7 +41897,7 @@ Map<String, String> specificationTests = {
     {
         "description": "unevaluatedProperties with boolean schemas",
         "schema": {
-            "type": "object",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "properties": {
                 "foo": { "type": "string" }
             },
@@ -37507,7 +41924,7 @@ Map<String, String> specificationTests = {
     {
         "description": "unevaluatedProperties with $ref",
         "schema": {
-            "type": "object",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "$ref": "#/$defs/bar",
             "properties": {
                 "foo": { "type": "string" }
@@ -37542,8 +41959,100 @@ Map<String, String> specificationTests = {
         ]
     },
     {
+        "description": "unevaluatedProperties before $ref",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "unevaluatedProperties": false,
+            "properties": {
+                "foo": { "type": "string" }
+            },
+            "$ref": "#/$defs/bar",
+            "$defs": {
+                "bar": {
+                    "properties": {
+                        "bar": { "type": "string" }
+                    }
+                }
+            }
+        },
+        "tests": [
+            {
+                "description": "with no unevaluated properties",
+                "data": {
+                    "foo": "foo",
+                    "bar": "bar"
+                },
+                "valid": true
+            },
+            {
+                "description": "with unevaluated properties",
+                "data": {
+                    "foo": "foo",
+                    "bar": "bar",
+                    "baz": "baz"
+                },
+                "valid": false
+            }
+        ]
+    },
+    {
+        "description": "unevaluatedProperties with $dynamicRef",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://example.com/unevaluated-properties-with-dynamic-ref/derived",
+
+            "$ref": "./baseSchema",
+
+            "$defs": {
+                "derived": {
+                    "$dynamicAnchor": "addons",
+                    "properties": {
+                        "bar": { "type": "string" }
+                    }
+                },
+                "baseSchema": {
+                    "$id": "./baseSchema",
+
+                    "$comment": "unevaluatedProperties comes first so it's more likely to catch bugs with implementations that are sensitive to keyword ordering",
+                    "unevaluatedProperties": false,
+                    "properties": {
+                        "foo": { "type": "string" }
+                    },
+                    "$dynamicRef": "#addons",
+
+                    "$defs": {
+                        "defaultAddons": {
+                            "$comment": "Needed to satisfy the bookending requirement",
+                            "$dynamicAnchor": "addons"
+                        }
+                    }
+                }
+            }
+        },
+        "tests": [
+            {
+                "description": "with no unevaluated properties",
+                "data": {
+                    "foo": "foo",
+                    "bar": "bar"
+                },
+                "valid": true
+            },
+            {
+                "description": "with unevaluated properties",
+                "data": {
+                    "foo": "foo",
+                    "bar": "bar",
+                    "baz": "baz"
+                },
+                "valid": false
+            }
+        ]
+    },
+    {
         "description": "unevaluatedProperties can't see inside cousins",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "allOf": [
                 {
                     "properties": {
@@ -37566,9 +42075,34 @@ Map<String, String> specificationTests = {
         ]
     },
     {
+        "description": "unevaluatedProperties can't see inside cousins (reverse order)",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "allOf": [
+                {
+                    "unevaluatedProperties": false
+                },
+                {
+                    "properties": {
+                        "foo": true
+                    }
+                }
+            ]
+        },
+        "tests": [
+            {
+                "description": "always fails",
+                "data": {
+                    "foo": 1
+                },
+                "valid": false
+            }
+        ]
+    },
+    {
         "description": "nested unevaluatedProperties, outer false, inner true, properties outside",
         "schema": {
-            "type": "object",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "properties": {
                 "foo": { "type": "string" }
             },
@@ -37600,7 +42134,7 @@ Map<String, String> specificationTests = {
     {
         "description": "nested unevaluatedProperties, outer false, inner true, properties inside",
         "schema": {
-            "type": "object",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "allOf": [
                 {
                     "properties": {
@@ -37632,7 +42166,7 @@ Map<String, String> specificationTests = {
     {
         "description": "nested unevaluatedProperties, outer true, inner false, properties outside",
         "schema": {
-            "type": "object",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "properties": {
                 "foo": { "type": "string" }
             },
@@ -37664,7 +42198,7 @@ Map<String, String> specificationTests = {
     {
         "description": "nested unevaluatedProperties, outer true, inner false, properties inside",
         "schema": {
-            "type": "object",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "allOf": [
                 {
                     "properties": {
@@ -37696,7 +42230,7 @@ Map<String, String> specificationTests = {
     {
         "description": "cousin unevaluatedProperties, true and false, true with properties",
         "schema": {
-            "type": "object",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "allOf": [
                 {
                     "properties": {
@@ -37730,7 +42264,7 @@ Map<String, String> specificationTests = {
     {
         "description": "cousin unevaluatedProperties, true and false, false with properties",
         "schema": {
-            "type": "object",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "allOf": [
                 {
                     "unevaluatedProperties": true
@@ -37765,10 +42299,9 @@ Map<String, String> specificationTests = {
         "description": "property is evaluated in an uncle schema to unevaluatedProperties",
         "comment": "see https://stackoverflow.com/questions/66936884/deeply-nested-unevaluatedproperties-and-their-expectations",
         "schema": {
-            "type": "object",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "properties": {
                 "foo": {
-                    "type": "object",
                     "properties": {
                         "bar": {
                             "type": "string"
@@ -37816,7 +42349,7 @@ Map<String, String> specificationTests = {
     {
         "description": "in-place applicator siblings, allOf has unevaluated",
         "schema": {
-            "type": "object",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "allOf": [
                 {
                     "properties": {
@@ -37861,7 +42394,7 @@ Map<String, String> specificationTests = {
     {
         "description": "in-place applicator siblings, anyOf has unevaluated",
         "schema": {
-            "type": "object",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "allOf": [
                 {
                     "properties": {
@@ -37906,7 +42439,7 @@ Map<String, String> specificationTests = {
     {
         "description": "unevaluatedProperties + single cyclic ref",
         "schema": {
-            "type": "object",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "properties": {
                 "x": { "$ref": "#" }
             },
@@ -37953,6 +42486,7 @@ Map<String, String> specificationTests = {
     {
         "description": "unevaluatedProperties + ref inside allOf / oneOf",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "$defs": {
                 "one": {
                     "properties": { "a": true }
@@ -38023,6 +42557,7 @@ Map<String, String> specificationTests = {
     {
         "description": "dynamic evalation inside nested refs",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "$defs": {
                 "one": {
                     "oneOf": [
@@ -38154,28 +42689,238 @@ Map<String, String> specificationTests = {
         ]
     },
     {
-      "description": "additionalProperties",
-      "schema": {
-        "type": "object",
-        "additionalProperties": {"type": "object"},
-        "unevaluatedProperties": false
-      },
-      "tests": [
-       {
-          "description": "are evaluated",
-          "data": {
-            "anyKey": {}
-          },
-          "valid": true
-       }
-    ]
-  }
+        "description": "non-object instances are valid",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "unevaluatedProperties": false
+        },
+        "tests": [
+            {
+                "description": "ignores booleans",
+                "data": true,
+                "valid": true
+            },
+            {
+                "description": "ignores integers",
+                "data": 123,
+                "valid": true
+            },
+            {
+                "description": "ignores floats",
+                "data": 1.0,
+                "valid": true
+            },
+            {
+                "description": "ignores arrays",
+                "data": [],
+                "valid": true
+            },
+            {
+                "description": "ignores strings",
+                "data": "foo",
+                "valid": true
+            },
+            {
+                "description": "ignores null",
+                "data": null,
+                "valid": true
+            }
+        ]
+    },
+    {
+        "description": "unevaluatedProperties with null valued instance properties",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "unevaluatedProperties": {
+                "type": "null"
+            }
+        },
+        "tests": [
+            {
+                "description": "allows null valued properties",
+                "data": {"foo": null},
+                "valid": true
+            }
+        ]
+    },
+    {
+        "description": "unevaluatedProperties not affected by propertyNames",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "propertyNames": {"maxLength": 1},
+            "unevaluatedProperties": {
+                "type": "number"
+            }
+        },
+        "tests": [
+            {
+                "description": "allows only number properties",
+                "data": {"a": 1},
+                "valid": true
+            },
+            {
+                "description": "string property is invalid",
+                "data": {"a": "b"},
+                "valid": false
+            }
+        ]
+    },
+    {
+        "description": "unevaluatedProperties can see annotations from if without then and else",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "if": {
+                "patternProperties": {
+                    "foo": {
+                        "type": "string"
+                    }
+                }
+            },
+            "unevaluatedProperties": false
+        },
+        "tests": [
+            {
+                "description": "valid in case if is evaluated",
+                "data": {
+                    "foo": "a"
+                },
+                "valid": true
+            },
+            {
+                "description": "invalid in case if is evaluated",
+                "data": {
+                    "bar": "a"
+                },
+                "valid": false
+            }
+        ]
+    },
+    {
+        "description": "dependentSchemas with unevaluatedProperties",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "properties": {"foo2": {}},
+            "dependentSchemas": {
+                "foo" : {},
+                "foo2": {
+                    "properties": {
+                        "bar":{}
+                    }
+                }
+            },
+            "unevaluatedProperties": false
+        },
+        "tests": [
+            {
+                "description": "unevaluatedProperties doesn't consider dependentSchemas",
+                "data": {"foo": ""},
+                "valid": false
+            },
+            {
+                "description": "unevaluatedProperties doesn't see bar when foo2 is absent",
+                "data": {"bar": ""},
+                "valid": false
+            },
+            {
+                "description": "unevaluatedProperties sees bar when foo2 is present",
+                "data": { "foo2": "", "bar": ""},
+                "valid": true
+            }
+        ]
+    },
+    {
+        "description": "Evaluated properties collection needs to consider instance location",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "properties": {
+                "foo": {
+                    "properties": {
+                        "bar": { "type": "string" }
+                    }
+                }
+            },
+            "unevaluatedProperties": false
+        },
+        "tests": [
+            {
+                "description": "with an unevaluated property that exists at another location",
+                "data": {
+                    "foo": { "bar": "foo" },
+                    "bar": "bar"
+                },
+                "valid": false
+            }
+        ]
+    },
+    {
+        "description": "Evaluated properties collection needs to consider instance location with patternProperties",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "properties": {
+                "foo": {
+                    "patternProperties": {
+                        "^bar$": { "type": "string" }
+                    }
+                }
+            },
+            "unevaluatedProperties": false
+        },
+        "tests": [
+            {
+                "description": "with only the nested evaluated property",
+                "data": {
+                    "foo": { "bar": "foo" }
+                },
+                "valid": true
+            },
+            {
+                "description": "with an unevaluated property that exists at another location",
+                "data": {
+                    "foo": { "bar": "foo" },
+                    "bar": "bar"
+                },
+                "valid": false
+            }
+        ]
+    },
+    {
+        "description": "Evaluated properties collection needs to consider instance location with additionalProperties",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "properties": {
+                "foo": {
+                    "additionalProperties": { "type": "string" }
+                }
+            },
+            "unevaluatedProperties": false
+        },
+        "tests": [
+            {
+                "description": "with only the nested evaluated property",
+                "data": {
+                    "foo": { "bar": "foo" }
+                },
+                "valid": true
+            },
+            {
+                "description": "with an unevaluated property that exists at another location",
+                "data": {
+                    "foo": { "bar": "foo" },
+                    "bar": "bar"
+                },
+                "valid": false
+            }
+        ]
+    }
 ]
 """,
   "/draft2020-12/uniqueItems.json": r"""[
     {
         "description": "uniqueItems validation",
-        "schema": {"uniqueItems": true},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "uniqueItems": true
+        },
         "tests": [
             {
                 "description": "unique array of integers is valid",
@@ -38225,6 +42970,11 @@ Map<String, String> specificationTests = {
             {
                 "description": "non-unique array of objects is invalid",
                 "data": [{"foo": "bar"}, {"foo": "bar"}],
+                "valid": false
+            },
+            {
+                "description": "property order of array of objects is ignored",
+                "data": [{"foo": "bar", "bar": "foo"}, {"bar": "foo", "foo": "bar"}],
                 "valid": false
             },
             {
@@ -38323,6 +43073,7 @@ Map<String, String> specificationTests = {
     {
         "description": "uniqueItems with an array of items",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "prefixItems": [{"type": "boolean"}, {"type": "boolean"}],
             "uniqueItems": true
         },
@@ -38372,6 +43123,7 @@ Map<String, String> specificationTests = {
     {
         "description": "uniqueItems with an array of items and additionalItems=false",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "prefixItems": [{"type": "boolean"}, {"type": "boolean"}],
             "uniqueItems": true,
             "items": false
@@ -38406,7 +43158,10 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "uniqueItems=false validation",
-        "schema": { "uniqueItems": false },
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "uniqueItems": false
+        },
         "tests": [
             {
                 "description": "unique array of integers is valid",
@@ -38494,6 +43249,7 @@ Map<String, String> specificationTests = {
     {
         "description": "uniqueItems=false with an array of items",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "prefixItems": [{"type": "boolean"}, {"type": "boolean"}],
             "uniqueItems": false
         },
@@ -38543,6 +43299,7 @@ Map<String, String> specificationTests = {
     {
         "description": "uniqueItems=false with an array of items and additionalItems=false",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "prefixItems": [{"type": "boolean"}, {"type": "boolean"}],
             "uniqueItems": false,
             "items": false
@@ -38571,63 +43328,6 @@ Map<String, String> specificationTests = {
             {
                 "description": "extra items are invalid even if unique",
                 "data": [false, true, null],
-                "valid": false
-            }
-        ]
-    }
-]
-""",
-  "/draft2020-12/unknownKeyword.json": r"""[
-    {
-        "description": "$id inside an unknown keyword is not a real identifier",
-        "comment": "the implementation must not be confused by an $id in locations we do not know how to parse",
-        "schema": {
-            "$defs": {
-                "id_in_unknown0": {
-                    "not": {
-                        "array_of_schemas": [
-                            {
-                              "$id": "https://localhost:1234/unknownKeyword/my_identifier.json",
-                              "type": "null"
-                            }
-                        ]
-                    }
-                },
-                "real_id_in_schema": {
-                    "$id": "https://localhost:1234/unknownKeyword/my_identifier.json",
-                    "type": "string"
-                },
-                "id_in_unknown1": {
-                    "not": {
-                        "object_of_schemas": {
-                            "foo": {
-                              "$id": "https://localhost:1234/unknownKeyword/my_identifier.json",
-                              "type": "integer"
-                            }
-                        }
-                    }
-                }
-            },
-            "anyOf": [
-                { "$ref": "#/$defs/id_in_unknown0" },
-                { "$ref": "#/$defs/id_in_unknown1" },
-                { "$ref": "https://localhost:1234/unknownKeyword/my_identifier.json" }
-            ]
-        },
-        "tests": [
-            {
-                "description": "type matches second anyOf, which has a real schema in it",
-                "data": "a string",
-                "valid": true
-            },
-            {
-                "description": "type matches non-schema in first anyOf",
-                "data": null,
-                "valid": false
-            },
-            {
-                "description": "type matches non-schema in third anyOf",
-                "data": 1,
                 "valid": false
             }
         ]
@@ -38667,6 +43367,25 @@ Map<String, String> specificationTests = {
                 "data": {
                     "numberProperty": 1
                 },
+                "valid": true
+            }
+        ]
+    },
+    {
+        "description": "ignore unrecognized optional vocabulary",
+        "schema": {
+            "$schema": "http://localhost:1234/draft2020-12/metaschema-optional-vocabulary.json",
+            "type": "number"
+        },
+        "tests": [
+            {
+                "description": "string value",
+                "data": "foobar",
+                "valid": false
+            },
+            {
+                "description": "number value",
+                "data": 20,
                 "valid": true
             }
         ]
@@ -65790,7 +70509,9 @@ Map<String, String> specificationTests = {
     {
         "description":
             "additionalProperties being false does not allow other properties",
+        "specification": [ { "core":"10.3.2.3", "quote": "The value of \"additionalProperties\" MUST be a valid JSON Schema. Boolean \"false\" forbids everything." } ],
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "properties": {"foo": {}, "bar": {}},
             "patternProperties": { "^v": {} },
             "additionalProperties": false
@@ -65830,7 +70551,9 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "non-ASCII pattern with additionalProperties",
+        "specification": [ { "core":"10.3.2.3"} ],
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "patternProperties": {"^á": {}},
             "additionalProperties": false
         },
@@ -65848,9 +70571,10 @@ Map<String, String> specificationTests = {
         ]
     },
     {
-        "description":
-            "additionalProperties allows a schema which should validate",
+        "description": "additionalProperties with schema",
+        "specification": [ { "core":"10.3.2.3", "quote": "The value of \"additionalProperties\" MUST be a valid JSON Schema." } ],
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "properties": {"foo": {}, "bar": {}},
             "additionalProperties": {"type": "boolean"}
         },
@@ -65873,9 +70597,10 @@ Map<String, String> specificationTests = {
         ]
     },
     {
-        "description":
-            "additionalProperties can exist by itself",
+        "description": "additionalProperties can exist by itself",
+        "specification": [ { "core":"10.3.2.3", "quote": "With no other applicator applying to object instances. This validates all the instance values irrespective of their property names" } ],
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "additionalProperties": {"type": "boolean"}
         },
         "tests": [
@@ -65893,7 +70618,11 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "additionalProperties are allowed by default",
-        "schema": {"properties": {"foo": {}, "bar": {}}},
+        "specification": [ { "core":"10.3.2.3", "quote": "Omitting this keyword has the same assertion behavior as an empty schema." } ],
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "properties": {"foo": {}, "bar": {}}
+        },
         "tests": [
             {
                 "description": "additional properties are allowed",
@@ -65903,8 +70632,10 @@ Map<String, String> specificationTests = {
         ]
     },
     {
-        "description": "additionalProperties should not look in applicators",
+        "description": "additionalProperties does not look in applicators",
+        "specification":[ { "core": "10.2", "quote": "Subschemas of applicator keywords evaluate the instance completely independently such that the results of one such subschema MUST NOT impact the results of sibling subschemas." } ],
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "allOf": [
                 {"properties": {"foo": {}}}
             ],
@@ -65917,6 +70648,80 @@ Map<String, String> specificationTests = {
                 "valid": false
             }
         ]
+    },
+    {
+        "description": "additionalProperties with null valued instance properties",
+        "specification": [ { "core":"10.3.2.3" } ],
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": {
+                "type": "null"
+            }
+        },
+        "tests": [
+            {
+                "description": "allows null values",
+                "data": {"foo": null},
+                "valid": true
+            }
+        ]
+    },
+    {
+        "description": "additionalProperties with propertyNames",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "propertyNames": {
+                "maxLength": 5
+            },
+            "additionalProperties": {
+                "type": "number"
+            }
+        },
+        "tests": [
+            {
+                "description": "Valid against both keywords",
+                "data": { "apple": 4 },
+                "valid": true
+            },
+            {
+                "description": "Valid against propertyNames, but not additionalProperties",
+                "data": { "fig": 2, "pear": "available" },
+                "valid": false
+            }
+        ]
+    },
+    {
+        "description": "dependentSchemas with additionalProperties",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "properties": {"foo2": {}},
+            "dependentSchemas": {
+                "foo" : {},
+                "foo2": {
+                    "properties": {
+                        "bar": {}
+                    }
+                }
+            },
+            "additionalProperties": false
+        },
+        "tests": [
+            {
+                "description": "additionalProperties doesn't consider dependentSchemas",
+                "data": {"foo": ""},
+                "valid": false
+            },
+            {
+                "description": "additionalProperties can't see bar",
+                "data": {"bar": ""},
+                "valid": false
+            },
+            {
+                "description": "additionalProperties can't see bar even when foo2 is present",
+                "data": {"foo2": "", "bar": ""},
+                "valid": false
+            }
+        ]
     }
 ]
 """,
@@ -65924,6 +70729,7 @@ Map<String, String> specificationTests = {
     {
         "description": "allOf",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "allOf": [
                 {
                     "properties": {
@@ -65965,6 +70771,7 @@ Map<String, String> specificationTests = {
     {
         "description": "allOf with base schema",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "properties": {"bar": {"type": "integer"}},
             "required": ["bar"],
             "allOf" : [
@@ -66013,6 +70820,7 @@ Map<String, String> specificationTests = {
     {
         "description": "allOf simple types",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "allOf": [
                 {"maximum": 30},
                 {"minimum": 20}
@@ -66033,7 +70841,10 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "allOf with boolean schemas, all true",
-        "schema": {"allOf": [true, true]},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "allOf": [true, true]
+        },
         "tests": [
             {
                 "description": "any value is valid",
@@ -66044,7 +70855,10 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "allOf with boolean schemas, some false",
-        "schema": {"allOf": [true, false]},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "allOf": [true, false]
+        },
         "tests": [
             {
                 "description": "any value is invalid",
@@ -66055,7 +70869,10 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "allOf with boolean schemas, all false",
-        "schema": {"allOf": [false, false]},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "allOf": [false, false]
+        },
         "tests": [
             {
                 "description": "any value is invalid",
@@ -66067,6 +70884,7 @@ Map<String, String> specificationTests = {
     {
         "description": "allOf with one empty schema",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "allOf": [
                 {}
             ]
@@ -66082,6 +70900,7 @@ Map<String, String> specificationTests = {
     {
         "description": "allOf with two empty schemas",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "allOf": [
                 {},
                 {}
@@ -66098,6 +70917,7 @@ Map<String, String> specificationTests = {
     {
         "description": "allOf with the first empty schema",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "allOf": [
                 {},
                 { "type": "number" }
@@ -66119,6 +70939,7 @@ Map<String, String> specificationTests = {
     {
         "description": "allOf with the last empty schema",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "allOf": [
                 { "type": "number" },
                 {}
@@ -66140,6 +70961,7 @@ Map<String, String> specificationTests = {
     {
         "description": "nested allOf, to check validation semantics",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "allOf": [
                 {
                     "allOf": [
@@ -66166,6 +70988,7 @@ Map<String, String> specificationTests = {
     {
         "description": "allOf combined with anyOf, oneOf",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "allOf": [ { "multipleOf": 2 } ],
             "anyOf": [ { "multipleOf": 3 } ],
             "oneOf": [ { "multipleOf": 5 } ]
@@ -66219,6 +71042,7 @@ Map<String, String> specificationTests = {
     {
         "description": "Location-independent identifier",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "$ref": "#foo",
             "$defs": {
                 "A": {
@@ -66243,10 +71067,11 @@ Map<String, String> specificationTests = {
     {
         "description": "Location-independent identifier with absolute URI",
         "schema": {
-            "$ref": "http://localhost:1234/bar#foo",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$ref": "http://localhost:1234/draft2020-12/bar#foo",
             "$defs": {
                 "A": {
-                    "$id": "http://localhost:1234/bar",
+                    "$id": "http://localhost:1234/draft2020-12/bar",
                     "$anchor": "foo",
                     "type": "integer"
                 }
@@ -66268,8 +71093,9 @@ Map<String, String> specificationTests = {
     {
         "description": "Location-independent identifier with base URI change in subschema",
         "schema": {
-            "$id": "http://localhost:1234/root",
-            "$ref": "http://localhost:1234/nested.json#foo",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "http://localhost:1234/draft2020-12/root",
+            "$ref": "http://localhost:1234/draft2020-12/nested.json#foo",
             "$defs": {
                 "A": {
                     "$id": "nested.json",
@@ -66296,66 +71122,10 @@ Map<String, String> specificationTests = {
         ]
     },
     {
-        "description": "$anchor inside an enum is not a real identifier",
-        "comment": "the implementation must not be confused by an $anchor buried in the enum",
-        "schema": {
-            "$defs": {
-                "anchor_in_enum": {
-                    "enum": [
-                        {
-                            "$anchor": "my_anchor",
-                            "type": "null"
-                        }
-                    ]
-                },
-                "real_identifier_in_schema": {
-                    "$anchor": "my_anchor",
-                    "type": "string"
-                },
-                "zzz_anchor_in_const": {
-                    "const": {
-                        "$anchor": "my_anchor",
-                        "type": "null"
-                    }
-                }
-            },
-            "anyOf": [
-                { "$ref": "#/$defs/anchor_in_enum" },
-                { "$ref": "#my_anchor" }
-            ]
-        },
-        "tests": [
-            {
-                "description": "exact match to enum, and type matches",
-                "data": {
-                    "$anchor": "my_anchor",
-                    "type": "null"
-                },
-                "valid": true
-            },
-            {
-                "description": "in implementations that strip $anchor, this may match either $def",
-                "data": {
-                    "type": "null"
-                },
-                "valid": false
-            },
-            {
-                "description": "match $ref to $anchor",
-                "data": "a string to match #/$defs/anchor_in_enum",
-                "valid": true
-            },
-            {
-                "description": "no match on enum or $ref to $anchor",
-                "data": 1,
-                "valid": false
-            }
-        ]
-    },
-    {
         "description": "same $anchor with different base uri",
         "schema": {
-            "$id": "http://localhost:1234/foobar",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "http://localhost:1234/draft2020-12/foobar",
             "$defs": {
                 "A": {
                     "$id": "child1",
@@ -66376,12 +71146,12 @@ Map<String, String> specificationTests = {
         },
         "tests": [
             {
-                "description": "$ref should resolve to /$defs/A/allOf/1",
+                "description": "$ref resolves to /$defs/A/allOf/1",
                 "data": "a",
                 "valid": true
             },
             {
-                "description": "$ref should not resolve to /$defs/A/allOf/0",
+                "description": "$ref does not resolve to /$defs/A/allOf/0",
                 "data": 1,
                 "valid": false
             }
@@ -66393,6 +71163,7 @@ Map<String, String> specificationTests = {
     {
         "description": "anyOf",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "anyOf": [
                 {
                     "type": "integer"
@@ -66428,6 +71199,7 @@ Map<String, String> specificationTests = {
     {
         "description": "anyOf with base schema",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "string",
             "anyOf" : [
                 {
@@ -66458,7 +71230,10 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "anyOf with boolean schemas, all true",
-        "schema": {"anyOf": [true, true]},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "anyOf": [true, true]
+        },
         "tests": [
             {
                 "description": "any value is valid",
@@ -66469,7 +71244,10 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "anyOf with boolean schemas, some true",
-        "schema": {"anyOf": [true, false]},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "anyOf": [true, false]
+        },
         "tests": [
             {
                 "description": "any value is valid",
@@ -66480,7 +71258,10 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "anyOf with boolean schemas, all false",
-        "schema": {"anyOf": [false, false]},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "anyOf": [false, false]
+        },
         "tests": [
             {
                 "description": "any value is invalid",
@@ -66492,6 +71273,7 @@ Map<String, String> specificationTests = {
     {
         "description": "anyOf complex types",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "anyOf": [
                 {
                     "properties": {
@@ -66533,6 +71315,7 @@ Map<String, String> specificationTests = {
     {
         "description": "anyOf with one empty schema",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "anyOf": [
                 { "type": "number" },
                 {}
@@ -66554,6 +71337,7 @@ Map<String, String> specificationTests = {
     {
         "description": "nested anyOf, to check validation semantics",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "anyOf": [
                 {
                     "anyOf": [
@@ -66687,7 +71471,10 @@ Map<String, String> specificationTests = {
   "/latest/const.json": r"""[
     {
         "description": "const validation",
-        "schema": {"const": 2},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "const": 2
+        },
         "tests": [
             {
                 "description": "same value is valid",
@@ -66708,7 +71495,10 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "const with object",
-        "schema": {"const": {"foo": "bar", "baz": "bax"}},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "const": {"foo": "bar", "baz": "bax"}
+        },
         "tests": [
             {
                 "description": "same object is valid",
@@ -66734,7 +71524,10 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "const with array",
-        "schema": {"const": [{ "foo": "bar" }]},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "const": [{ "foo": "bar" }]
+        },
         "tests": [
             {
                 "description": "same array is valid",
@@ -66755,7 +71548,10 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "const with null",
-        "schema": {"const": null},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "const": null
+        },
         "tests": [
             {
                 "description": "null is valid",
@@ -66771,7 +71567,10 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "const with false does not match 0",
-        "schema": {"const": false},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "const": false
+        },
         "tests": [
             {
                 "description": "false is valid",
@@ -66792,7 +71591,10 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "const with true does not match 1",
-        "schema": {"const": true},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "const": true
+        },
         "tests": [
             {
                 "description": "true is valid",
@@ -66813,7 +71615,10 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "const with [false] does not match [0]",
-        "schema": {"const": [false]},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "const": [false]
+        },
         "tests": [
             {
                 "description": "[false] is valid",
@@ -66834,7 +71639,10 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "const with [true] does not match [1]",
-        "schema": {"const": [true]},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "const": [true]
+        },
         "tests": [
             {
                 "description": "[true] is valid",
@@ -66855,7 +71663,10 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "const with {\"a\": false} does not match {\"a\": 0}",
-        "schema": {"const": {"a": false}},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "const": {"a": false}
+        },
         "tests": [
             {
                 "description": "{\"a\": false} is valid",
@@ -66876,7 +71687,10 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "const with {\"a\": true} does not match {\"a\": 1}",
-        "schema": {"const": {"a": true}},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "const": {"a": true}
+        },
         "tests": [
             {
                 "description": "{\"a\": true} is valid",
@@ -66897,7 +71711,10 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "const with 0 does not match other zero-like types",
-        "schema": {"const": 0},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "const": 0
+        },
         "tests": [
             {
                 "description": "false is invalid",
@@ -66933,7 +71750,10 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "const with 1 does not match true",
-        "schema": {"const": 1},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "const": 1
+        },
         "tests": [
             {
                 "description": "true is invalid",
@@ -66954,7 +71774,10 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "const with -2.0 matches integer and float types",
-        "schema": {"const": -2.0},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "const": -2.0
+        },
         "tests": [
             {
                 "description": "integer -2 is valid",
@@ -66985,7 +71808,10 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "float and integers are equal up to 64-bit representation limits",
-        "schema": {"const": 9007199254740992},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "const": 9007199254740992
+        },
         "tests": [
             {
                 "description": "integer is valid",
@@ -67011,7 +71837,10 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "nul characters in strings",
-        "schema": { "const": "hello\u0000there" },
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "const": "hello\u0000there"
+        },
         "tests": [
             {
                 "description": "match string with nul",
@@ -67024,6 +71853,50 @@ Map<String, String> specificationTests = {
                 "valid": false
             }
         ]
+    },
+    {
+        "description": "characters with the same visual representation but different codepoint",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "const": "μ",
+            "$comment": "U+03BC"
+        },
+        "tests": [
+            {
+                "description": "character uses the same codepoint",
+                "data": "μ",
+                "comment": "U+03BC",
+                "valid": true
+            },
+            {
+                "description": "character looks the same but uses a different codepoint",
+                "data": "µ",
+                "comment": "U+00B5",
+                "valid": false
+            }
+        ]
+    },
+    {
+        "description": "characters with the same visual representation, but different number of codepoints",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "const": "ä",
+            "$comment": "U+00E4"
+        },
+        "tests": [
+            {
+                "description": "character uses the same codepoint",
+                "data": "ä",
+                "comment": "U+00E4",
+                "valid": true
+            },
+            {
+                "description": "character looks the same but uses combining marks",
+                "data": "ä",
+                "comment": "a, U+0308",
+                "valid": false
+            }
+        ]
     }
 ]
 """,
@@ -67031,6 +71904,7 @@ Map<String, String> specificationTests = {
     {
         "description": "contains keyword validation",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "contains": {"minimum": 5}
         },
         "tests": [
@@ -67069,6 +71943,7 @@ Map<String, String> specificationTests = {
     {
         "description": "contains keyword with const keyword",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "contains": { "const": 5 }
         },
         "tests": [
@@ -67091,7 +71966,10 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "contains keyword with boolean schema true",
-        "schema": {"contains": true},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "contains": true
+        },
         "tests": [
             {
                 "description": "any non-empty array is valid",
@@ -67107,7 +71985,10 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "contains keyword with boolean schema false",
-        "schema": {"contains": false},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "contains": false
+        },
         "tests": [
             {
                 "description": "any non-empty array is invalid",
@@ -67129,6 +72010,7 @@ Map<String, String> specificationTests = {
     {
         "description": "items + contains",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "items": { "multipleOf": 2 },
             "contains": { "multipleOf": 3 }
         },
@@ -67158,6 +72040,7 @@ Map<String, String> specificationTests = {
     {
         "description": "contains with false if subschema",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "contains": {
                 "if": false,
                 "else": true
@@ -67175,6 +72058,22 @@ Map<String, String> specificationTests = {
                 "valid": false
             }
         ]
+    },
+    {
+        "description": "contains with null instance elements",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "contains": {
+                "type": "null"
+            }
+        },
+        "tests": [
+            {
+                "description": "allows null items",
+                "data": [ null ],
+                "valid": true
+            }
+        ]
     }
 ]
 """,
@@ -67182,6 +72081,7 @@ Map<String, String> specificationTests = {
     {
         "description": "validation of string-encoded content based on media type",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "contentMediaType": "application/json"
         },
         "tests": [
@@ -67205,6 +72105,7 @@ Map<String, String> specificationTests = {
     {
         "description": "validation of binary string-encoding",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "contentEncoding": "base64"
         },
         "tests": [
@@ -67228,6 +72129,7 @@ Map<String, String> specificationTests = {
     {
         "description": "validation of binary-encoded media type documents",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "contentMediaType": "application/json",
             "contentEncoding": "base64"
         },
@@ -67257,9 +72159,10 @@ Map<String, String> specificationTests = {
     {
         "description": "validation of binary-encoded media type documents with schema",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "contentMediaType": "application/json",
             "contentEncoding": "base64",
-            "contentSchema": { "required": ["foo"], "properties": { "foo": { "type": "string" } } }
+            "contentSchema": { "type": "object", "required": ["foo"], "properties": { "foo": { "type": "string" } } }
         },
         "tests": [
             {
@@ -67310,6 +72213,7 @@ Map<String, String> specificationTests = {
     {
         "description": "invalid type for default",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "properties": {
                 "foo": {
                     "type": "integer",
@@ -67333,6 +72237,7 @@ Map<String, String> specificationTests = {
     {
         "description": "invalid string value for default",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "properties": {
                 "bar": {
                     "type": "string",
@@ -67357,6 +72262,7 @@ Map<String, String> specificationTests = {
     {
         "description": "the default keyword does not do anything if the property is missing",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "object",
             "properties": {
                 "alpha": {
@@ -67390,6 +72296,7 @@ Map<String, String> specificationTests = {
     {
         "description": "validate definition against metaschema",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "$ref": "https://json-schema.org/draft/2020-12/schema"
         },
         "tests": [
@@ -67410,7 +72317,10 @@ Map<String, String> specificationTests = {
   "/latest/dependentRequired.json": r"""[
     {
         "description": "single dependency",
-        "schema": {"dependentRequired": {"bar": ["foo"]}},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "dependentRequired": {"bar": ["foo"]}
+        },
         "tests": [
             {
                 "description": "neither",
@@ -67451,7 +72361,10 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "empty dependents",
-        "schema": {"dependentRequired": {"bar": []}},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "dependentRequired": {"bar": []}
+        },
         "tests": [
             {
                 "description": "empty object",
@@ -67472,7 +72385,10 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "multiple dependents required",
-        "schema": {"dependentRequired": {"quux": ["foo", "bar"]}},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "dependentRequired": {"quux": ["foo", "bar"]}
+        },
         "tests": [
             {
                 "description": "neither",
@@ -67509,6 +72425,7 @@ Map<String, String> specificationTests = {
     {
         "description": "dependencies with escaped characters",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "dependentRequired": {
                 "foo\nbar": ["foo\rbar"],
                 "foo\"bar": ["foo'bar"]
@@ -67554,6 +72471,7 @@ Map<String, String> specificationTests = {
     {
         "description": "single dependency",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "dependentSchemas": {
                 "bar": {
                     "properties": {
@@ -67609,6 +72527,7 @@ Map<String, String> specificationTests = {
     {
         "description": "boolean subschemas",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "dependentSchemas": {
                 "foo": true,
                 "bar": false
@@ -67640,6 +72559,7 @@ Map<String, String> specificationTests = {
     {
         "description": "dependencies with escaped characters",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "dependentSchemas": {
                 "foo\tbar": {"minProperties": 4},
                 "foo'bar": {"required": ["foo\"bar"]}
@@ -67677,13 +72597,53 @@ Map<String, String> specificationTests = {
                 "valid": false
             }
         ]
+    },
+    {
+        "description": "dependent subschema incompatible with root",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "properties": {
+                "foo": {}
+            },
+            "dependentSchemas": {
+                "foo": {
+                    "properties": {
+                        "bar": {}
+                    },
+                    "additionalProperties": false
+                }
+            }
+        },
+        "tests": [
+            {
+                "description": "matches root",
+                "data": {"foo": 1},
+                "valid": false
+            },
+            {
+                "description": "matches dependency",
+                "data": {"bar": 1},
+                "valid": true
+            },
+            {
+                "description": "matches both",
+                "data": {"foo": 1, "bar": 2},
+                "valid": false
+            },
+            {
+                "description": "no dependency",
+                "data": {"baz": 1},
+                "valid": true
+            }
+        ]
     }
 ]
 """,
   "/latest/dynamicRef.json": r"""[
     {
-        "description": "A $dynamicRef to a $dynamicAnchor in the same schema resource should behave like a normal $ref to an $anchor",
+        "description": "A $dynamicRef to a $dynamicAnchor in the same schema resource behaves like a normal $ref to an $anchor",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "$id": "https://test.json-schema.org/dynamicRef-dynamicAnchor-same-schema/root",
             "type": "array",
             "items": { "$dynamicRef": "#items" },
@@ -67708,8 +72668,9 @@ Map<String, String> specificationTests = {
         ]
     },
     {
-        "description": "A $dynamicRef to an $anchor in the same schema resource should behave like a normal $ref to an $anchor",
+        "description": "A $dynamicRef to an $anchor in the same schema resource behaves like a normal $ref to an $anchor",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "$id": "https://test.json-schema.org/dynamicRef-anchor-same-schema/root",
             "type": "array",
             "items": { "$dynamicRef": "#items" },
@@ -67734,8 +72695,9 @@ Map<String, String> specificationTests = {
         ]
     },
     {
-        "description": "A $ref to a $dynamicAnchor in the same schema resource should behave like a normal $ref to an $anchor",
+        "description": "A $ref to a $dynamicAnchor in the same schema resource behaves like a normal $ref to an $anchor",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "$id": "https://test.json-schema.org/ref-dynamicAnchor-same-schema/root",
             "type": "array",
             "items": { "$ref": "#items" },
@@ -67760,8 +72722,9 @@ Map<String, String> specificationTests = {
         ]
     },
     {
-        "description": "A $dynamicRef should resolve to the first $dynamicAnchor still in scope that is encountered when the schema is evaluated",
+        "description": "A $dynamicRef resolves to the first $dynamicAnchor still in scope that is encountered when the schema is evaluated",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "$id": "https://test.json-schema.org/typical-dynamic-resolution/root",
             "$ref": "list",
             "$defs": {
@@ -67796,8 +72759,47 @@ Map<String, String> specificationTests = {
         ]
     },
     {
-        "description": "A $dynamicRef with intermediate scopes that don't include a matching $dynamicAnchor should not affect dynamic scope resolution",
+        "description": "A $dynamicRef without anchor in fragment behaves identical to $ref",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://test.json-schema.org/dynamicRef-without-anchor/root",
+            "$ref": "list",
+            "$defs": {
+                "foo": {
+                    "$dynamicAnchor": "items",
+                    "type": "string"
+                },
+                "list": {
+                    "$id": "list",
+                    "type": "array",
+                    "items": { "$dynamicRef": "#/$defs/items" },
+                    "$defs": {
+                      "items": {
+                          "$comment": "This is only needed to satisfy the bookending requirement",
+                          "$dynamicAnchor": "items",
+                          "type": "number"
+                      }
+                    }
+                }
+            }
+        },
+        "tests": [
+            {
+                "description": "An array of strings is invalid",
+                "data": ["foo", "bar"],
+                "valid": false
+            },
+            {
+                "description": "An array of numbers is valid",
+                "data": [24, 42],
+                "valid": true
+            }
+        ]
+    },
+    {
+        "description": "A $dynamicRef with intermediate scopes that don't include a matching $dynamicAnchor does not affect dynamic scope resolution",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "$id": "https://test.json-schema.org/dynamic-resolution-with-intermediate-scopes/root",
             "$ref": "intermediate-scope",
             "$defs": {
@@ -67836,8 +72838,9 @@ Map<String, String> specificationTests = {
         ]
     },
     {
-        "description": "An $anchor with the same name as a $dynamicAnchor should not be used for dynamic scope resolution",
+        "description": "An $anchor with the same name as a $dynamicAnchor is not used for dynamic scope resolution",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "$id": "https://test.json-schema.org/dynamic-resolution-ignores-anchors/root",
             "$ref": "list",
             "$defs": {
@@ -67867,8 +72870,9 @@ Map<String, String> specificationTests = {
         ]
     },
     {
-        "description": "A $dynamicRef without a matching $dynamicAnchor in the same schema resource should behave like a normal $ref to $anchor",
+        "description": "A $dynamicRef without a matching $dynamicAnchor in the same schema resource behaves like a normal $ref to $anchor",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "$id": "https://test.json-schema.org/dynamic-resolution-without-bookend/root",
             "$ref": "list",
             "$defs": {
@@ -67898,8 +72902,9 @@ Map<String, String> specificationTests = {
         ]
     },
     {
-        "description": "A $dynamicRef with a non-matching $dynamicAnchor in the same schema resource should behave like a normal $ref to $anchor",
+        "description": "A $dynamicRef with a non-matching $dynamicAnchor in the same schema resource behaves like a normal $ref to $anchor",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "$id": "https://test.json-schema.org/unmatched-dynamic-anchor/root",
             "$ref": "list",
             "$defs": {
@@ -67930,8 +72935,9 @@ Map<String, String> specificationTests = {
         ]
     },
     {
-        "description": "A $dynamicRef that initially resolves to a schema with a matching $dynamicAnchor should resolve to the first $dynamicAnchor in the dynamic scope",
+        "description": "A $dynamicRef that initially resolves to a schema with a matching $dynamicAnchor resolves to the first $dynamicAnchor in the dynamic scope",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "$id": "https://test.json-schema.org/relative-dynamic-reference/root",
             "$dynamicAnchor": "meta",
             "type": "object",
@@ -67981,8 +72987,9 @@ Map<String, String> specificationTests = {
         ]
     },
     {
-        "description": "A $dynamicRef that initially resolves to a schema without a matching $dynamicAnchor should behave like a normal $ref to $anchor",
+        "description": "A $dynamicRef that initially resolves to a schema without a matching $dynamicAnchor behaves like a normal $ref to $anchor",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "$id": "https://test.json-schema.org/relative-dynamic-reference-without-bookend/root",
             "$dynamicAnchor": "meta",
             "type": "object",
@@ -68024,52 +73031,93 @@ Map<String, String> specificationTests = {
     {
         "description": "multiple dynamic paths to the $dynamicRef keyword",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "$id": "https://test.json-schema.org/dynamic-ref-with-multiple-paths/main",
-            "$defs": {
-                "inner": {
-                    "$id": "inner",
-                    "$dynamicAnchor": "foo",
-                    "title": "inner",
-                    "additionalProperties": {
-                        "$dynamicRef": "#foo"
-                    }
-                }
-            },
             "if": {
-                "propertyNames": {
-                    "pattern": "^[a-m]"
+                "properties": {
+                    "kindOfList": { "const": "numbers" }
+                },
+                "required": ["kindOfList"]
+            },
+            "then": { "$ref": "numberList" },
+            "else": { "$ref": "stringList" },
+
+            "$defs": {
+                "genericList": {
+                    "$id": "genericList",
+                    "properties": {
+                        "list": {
+                            "items": { "$dynamicRef": "#itemType" }
+                        }
+                    },
+                    "$defs": {
+                        "defaultItemType": {
+                            "$comment": "Only needed to satisfy bookending requirement",
+                            "$dynamicAnchor": "itemType"
+                        }
+                    }
+                },
+                "numberList": {
+                    "$id": "numberList",
+                    "$defs": {
+                        "itemType": {
+                            "$dynamicAnchor": "itemType",
+                            "type": "number"
+                        }
+                    },
+                    "$ref": "genericList"
+                },
+                "stringList": {
+                    "$id": "stringList",
+                    "$defs": {
+                        "itemType": {
+                            "$dynamicAnchor": "itemType",
+                            "type": "string"
+                        }
+                    },
+                    "$ref": "genericList"
                 }
-            },
-            "then": {
-                "title": "any type of node",
-                "$id": "anyLeafNode",
-                "$dynamicAnchor": "foo",
-                "$ref": "inner"
-            },
-            "else": {
-                "title": "integer node",
-                "$id": "integerNode",
-                "$dynamicAnchor": "foo",
-                "type": [ "object", "integer" ],
-                "$ref": "inner"
             }
         },
         "tests": [
             {
-                "description": "recurse to anyLeafNode - floats are allowed",
-                "data": { "alpha": 1.1 },
+                "description": "number list with number values",
+                "data": {
+                    "kindOfList": "numbers",
+                    "list": [1.1]
+                },
                 "valid": true
             },
             {
-                "description": "recurse to integerNode - floats are not allowed",
-                "data": { "november": 1.1 },
+                "description": "number list with string values",
+                "data": {
+                    "kindOfList": "numbers",
+                    "list": ["foo"]
+                },
                 "valid": false
+            },
+            {
+                "description": "string list with number values",
+                "data": {
+                    "kindOfList": "strings",
+                    "list": [1.1]
+                },
+                "valid": false
+            },
+            {
+                "description": "string list with string values",
+                "data": {
+                    "kindOfList": "strings",
+                    "list": ["foo"]
+                },
+                "valid": true
             }
         ]
     },
     {
-        "description": "after leaving a dynamic scope, it should not be used by a $dynamicRef",
+        "description": "after leaving a dynamic scope, it is not used by a $dynamicRef",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "$id": "https://test.json-schema.org/dynamic-ref-leaving-dynamic-scope/main",
             "if": {
                 "$id": "first_scope",
@@ -68127,7 +73175,8 @@ Map<String, String> specificationTests = {
     {
         "description": "strict-tree schema, guards against misspelled properties",
         "schema": {
-            "$id": "http://localhost:1234/strict-tree.json",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "http://localhost:1234/draft2020-12/strict-tree.json",
             "$dynamicAnchor": "node",
 
             "$ref": "tree.json",
@@ -68157,7 +73206,8 @@ Map<String, String> specificationTests = {
     {
         "description": "tests for implementation dynamic anchor and reference link",
         "schema": {
-            "$id": "http://localhost:1234/strict-extendible.json",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "http://localhost:1234/draft2020-12/strict-extendible.json",
             "$ref": "extendible-dynamic-ref.json",
             "$defs": {
                 "elements": {
@@ -68199,9 +73249,10 @@ Map<String, String> specificationTests = {
         ]
     },
     {
-        "description": "Tests for implementation dynamic anchor and reference link. Reference should be independent of any possible ordering.",
+        "description": "$ref and $dynamicAnchor are independent of order - $defs first",
         "schema": {
-            "$id": "http://localhost:1234/strict-extendible-allof-defs-first.json",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "http://localhost:1234/draft2020-12/strict-extendible-allof-defs-first.json",
             "allOf": [
                 {
                     "$ref": "extendible-dynamic-ref.json"
@@ -68249,9 +73300,10 @@ Map<String, String> specificationTests = {
         ]
     },
     {
-        "description": "Tests for implementation dynamic anchor and reference link. Reference should be independent of any possible ordering.",
+        "description": "$ref and $dynamicAnchor are independent of order - $ref first",
         "schema": {
-            "$id": "http://localhost:1234/strict-extendible-allof-ref-first.json",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "http://localhost:1234/draft2020-12/strict-extendible-allof-ref-first.json",
             "allOf": [
                 {
                     "$defs": {
@@ -68297,13 +73349,177 @@ Map<String, String> specificationTests = {
                 "valid": true
             }
         ]
+    },
+    {
+        "description": "$ref to $dynamicRef finds detached $dynamicAnchor",
+        "schema": {
+            "$ref": "http://localhost:1234/draft2020-12/detached-dynamicref.json#/$defs/foo"
+        },
+        "tests": [
+            {
+                "description": "number is valid",
+                "data": 1,
+                "valid": true
+            },
+            {
+                "description": "non-number is invalid",
+                "data": "a",
+                "valid": false
+            }
+        ]
+    },
+    {
+        "description": "$dynamicRef points to a boolean schema",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$defs": {
+                "true": true,
+                "false": false
+            },
+            "properties": {
+                "true": {
+                    "$dynamicRef": "#/$defs/true"
+                },
+                "false": {
+                    "$dynamicRef": "#/$defs/false"
+                }
+            }
+        },
+        "tests": [
+            {
+                "description": "follow $dynamicRef to a true schema",
+                "data": { "true": 1 },
+                "valid": true
+            },
+            {
+                "description": "follow $dynamicRef to a false schema",
+                "data": { "false": 1 },
+                "valid": false
+            }
+        ]
+    },
+    {
+        "description": "$dynamicRef skips over intermediate resources - direct reference",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://test.json-schema.org/dynamic-ref-skips-intermediate-resource/main",
+            "type": "object",
+            "properties": {
+                "bar-item": {
+                    "$ref": "item"
+                }
+            },
+            "$defs": {
+                "bar": {
+                    "$id": "bar",
+                    "type": "array",
+                    "items": {
+                        "$ref": "item"
+                    },
+                    "$defs": {
+                        "item": {
+                            "$id": "item",
+                            "type": "object",
+                            "properties": {
+                                "content": {
+                                    "$dynamicRef": "#content"
+                                }
+                            },
+                            "$defs": {
+                                "defaultContent": {
+                                    "$dynamicAnchor": "content",
+                                    "type": "integer"
+                                }
+                            }
+                        },
+                        "content": {
+                            "$dynamicAnchor": "content",
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "tests": [
+            {
+                "description": "integer property passes",
+                "data": { "bar-item": { "content": 42 } },
+                "valid": true
+            },
+            {
+                "description": "string property fails",
+                "data": { "bar-item": { "content": "value" } },
+                "valid": false
+            }
+        ]
+    },
+    {
+        "description": "$dynamicRef avoids the root of each schema, but scopes are still registered",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://test.json-schema.org/dynamic-ref-avoids-root-of-each-schema/base",
+            "$ref": "first#/$defs/stuff",
+            "$defs": {
+                "first": {
+                    "$id": "first",
+                    "$defs": {
+                        "stuff": {
+                            "$ref": "second#/$defs/stuff"
+                        },
+                        "length": {
+                            "$comment": "unused, because there is no $dynamicAnchor here",
+                            "maxLength": 1
+                        }
+                    }
+                },
+                "second": {
+                    "$id": "second",
+                    "$defs": {
+                        "stuff": {
+                            "$ref": "third#/$defs/stuff"
+                        },
+                        "length": {
+                            "$dynamicAnchor": "length",
+                            "maxLength": 2
+                        }
+                    }
+                },
+                "third": {
+                    "$id": "third",
+                    "$defs": {
+                        "stuff": {
+                            "$dynamicRef": "#length"
+                        },
+                        "length": {
+                            "$dynamicAnchor": "length",
+                            "maxLength": 3
+                        }
+                    }
+                }
+            }
+        },
+        "tests": [
+            {
+                "description": "data is sufficient for schema at second#/$defs/length",
+                "data": "hi",
+                "valid": true
+            },
+            {
+                "description": "data is not sufficient for schema at second#/$defs/length",
+                "data": "hey",
+                "valid": false
+            }
+        ]
     }
 ]
 """,
   "/latest/enum.json": r"""[
     {
         "description": "simple enum validation",
-        "schema": {"enum": [1, 2, 3]},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "enum": [1, 2, 3]
+        },
         "tests": [
             {
                 "description": "one of the enum is valid",
@@ -68319,7 +73535,10 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "heterogeneous enum validation",
-        "schema": {"enum": [6, "foo", [], true, {"foo": 12}]},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "enum": [6, "foo", [], true, {"foo": 12}]
+        },
         "tests": [
             {
                 "description": "one of the enum is valid",
@@ -68350,7 +73569,10 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "heterogeneous enum-with-null validation",
-        "schema": { "enum": [6, null] },
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "enum": [6, null]
+        },
         "tests": [
             {
                 "description": "null is valid",
@@ -68372,6 +73594,7 @@ Map<String, String> specificationTests = {
     {
         "description": "enums in properties",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type":"object",
             "properties": {
                 "foo": {"enum":["foo"]},
@@ -68415,6 +73638,7 @@ Map<String, String> specificationTests = {
     {
         "description": "enum with escaped characters",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "enum": ["foo\nbar", "foo\rbar"]
         },
         "tests": [
@@ -68437,7 +73661,10 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "enum with false does not match 0",
-        "schema": {"enum": [false]},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "enum": [false]
+        },
         "tests": [
             {
                 "description": "false is valid",
@@ -68457,8 +73684,35 @@ Map<String, String> specificationTests = {
         ]
     },
     {
+        "description": "enum with [false] does not match [0]",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "enum": [[false]]
+        },
+        "tests": [
+            {
+                "description": "[false] is valid",
+                "data": [false],
+                "valid": true
+            },
+            {
+                "description": "[0] is invalid",
+                "data": [0],
+                "valid": false
+            },
+            {
+                "description": "[0.0] is invalid",
+                "data": [0.0],
+                "valid": false
+            }
+        ]
+    },
+    {
         "description": "enum with true does not match 1",
-        "schema": {"enum": [true]},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "enum": [true]
+        },
         "tests": [
             {
                 "description": "true is valid",
@@ -68478,8 +73732,35 @@ Map<String, String> specificationTests = {
         ]
     },
     {
+        "description": "enum with [true] does not match [1]",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "enum": [[true]]
+        },
+        "tests": [
+            {
+                "description": "[true] is valid",
+                "data": [true],
+                "valid": true
+            },
+            {
+                "description": "[1] is invalid",
+                "data": [1],
+                "valid": false
+            },
+            {
+                "description": "[1.0] is invalid",
+                "data": [1.0],
+                "valid": false
+            }
+        ]
+    },
+    {
         "description": "enum with 0 does not match false",
-        "schema": {"enum": [0]},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "enum": [0]
+        },
         "tests": [
             {
                 "description": "false is invalid",
@@ -68499,8 +73780,35 @@ Map<String, String> specificationTests = {
         ]
     },
     {
+        "description": "enum with [0] does not match [false]",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "enum": [[0]]
+        },
+        "tests": [
+            {
+                "description": "[false] is invalid",
+                "data": [false],
+                "valid": false
+            },
+            {
+                "description": "[0] is valid",
+                "data": [0],
+                "valid": true
+            },
+            {
+                "description": "[0.0] is valid",
+                "data": [0.0],
+                "valid": true
+            }
+        ]
+    },
+    {
         "description": "enum with 1 does not match true",
-        "schema": {"enum": [1]},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "enum": [1]
+        },
         "tests": [
             {
                 "description": "true is invalid",
@@ -68520,8 +73828,35 @@ Map<String, String> specificationTests = {
         ]
     },
     {
+        "description": "enum with [1] does not match [true]",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "enum": [[1]]
+        },
+        "tests": [
+            {
+                "description": "[true] is invalid",
+                "data": [true],
+                "valid": false
+            },
+            {
+                "description": "[1] is valid",
+                "data": [1],
+                "valid": true
+            },
+            {
+                "description": "[1.0] is valid",
+                "data": [1.0],
+                "valid": true
+            }
+        ]
+    },
+    {
         "description": "nul characters in strings",
-        "schema": { "enum": [ "hello\u0000there" ] },
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "enum": [ "hello\u0000there" ]
+        },
         "tests": [
             {
                 "description": "match string with nul",
@@ -68534,6 +73869,45 @@ Map<String, String> specificationTests = {
                 "valid": false
             }
         ]
+    },
+    {
+        "description": "empty enum",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "enum": []
+        },
+        "tests": [
+            {
+                "description": "string is invalid",
+                "data": "foo",
+                "valid": false
+            },
+            {
+                "description": "number is invalid",
+                "data": 42,
+                "valid": false
+            },
+            {
+                "description": "null is invalid",
+                "data": null,
+                "valid": false
+            },
+            {
+                "description": "object is invalid",
+                "data": {},
+                "valid": false
+            },
+            {
+                "description": "array is invalid",
+                "data": [],
+                "valid": false
+            },
+            {
+                "description": "boolean is invalid",
+                "data": false,
+                "valid": false
+            }
+        ]
     }
 ]
 """,
@@ -68541,6 +73915,7 @@ Map<String, String> specificationTests = {
     {
         "description": "exclusiveMaximum validation",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "exclusiveMaximum": 3.0
         },
         "tests": [
@@ -68572,6 +73947,7 @@ Map<String, String> specificationTests = {
     {
         "description": "exclusiveMinimum validation",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "exclusiveMinimum": 1.1
         },
         "tests": [
@@ -68602,7 +73978,10 @@ Map<String, String> specificationTests = {
   "/latest/format.json": r"""[
     {
         "description": "email format",
-        "schema": { "format": "email" },
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "format": "email"
+        },
         "tests": [
             {
                 "description": "all string formats ignore integers",
@@ -68632,13 +74011,21 @@ Map<String, String> specificationTests = {
             {
                 "description": "all string formats ignore nulls",
                 "data": null,
+                "valid": true
+            },
+            {
+                "description": "invalid email string is only an annotation by default",
+                "data": "2962",
                 "valid": true
             }
         ]
     },
     {
         "description": "idn-email format",
-        "schema": { "format": "idn-email" },
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "format": "idn-email"
+        },
         "tests": [
             {
                 "description": "all string formats ignore integers",
@@ -68668,13 +74055,21 @@ Map<String, String> specificationTests = {
             {
                 "description": "all string formats ignore nulls",
                 "data": null,
+                "valid": true
+            },
+            {
+                "description": "invalid idn-email string is only an annotation by default",
+                "data": "2962",
                 "valid": true
             }
         ]
     },
     {
         "description": "regex format",
-        "schema": { "format": "regex" },
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "format": "regex"
+        },
         "tests": [
             {
                 "description": "all string formats ignore integers",
@@ -68704,13 +74099,21 @@ Map<String, String> specificationTests = {
             {
                 "description": "all string formats ignore nulls",
                 "data": null,
+                "valid": true
+            },
+            {
+                "description": "invalid regex string is only an annotation by default",
+                "data": "^(abc]",
                 "valid": true
             }
         ]
     },
     {
         "description": "ipv4 format",
-        "schema": { "format": "ipv4" },
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "format": "ipv4"
+        },
         "tests": [
             {
                 "description": "all string formats ignore integers",
@@ -68740,13 +74143,21 @@ Map<String, String> specificationTests = {
             {
                 "description": "all string formats ignore nulls",
                 "data": null,
+                "valid": true
+            },
+            {
+                "description": "invalid ipv4 string is only an annotation by default",
+                "data": "127.0.0.0.1",
                 "valid": true
             }
         ]
     },
     {
         "description": "ipv6 format",
-        "schema": { "format": "ipv6" },
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "format": "ipv6"
+        },
         "tests": [
             {
                 "description": "all string formats ignore integers",
@@ -68776,13 +74187,21 @@ Map<String, String> specificationTests = {
             {
                 "description": "all string formats ignore nulls",
                 "data": null,
+                "valid": true
+            },
+            {
+                "description": "invalid ipv6 string is only an annotation by default",
+                "data": "12345::",
                 "valid": true
             }
         ]
     },
     {
         "description": "idn-hostname format",
-        "schema": { "format": "idn-hostname" },
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "format": "idn-hostname"
+        },
         "tests": [
             {
                 "description": "all string formats ignore integers",
@@ -68812,13 +74231,21 @@ Map<String, String> specificationTests = {
             {
                 "description": "all string formats ignore nulls",
                 "data": null,
+                "valid": true
+            },
+            {
+                "description": "invalid idn-hostname string is only an annotation by default",
+                "data": "〮실례.테스트",
                 "valid": true
             }
         ]
     },
     {
         "description": "hostname format",
-        "schema": { "format": "hostname" },
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "format": "hostname"
+        },
         "tests": [
             {
                 "description": "all string formats ignore integers",
@@ -68848,13 +74275,21 @@ Map<String, String> specificationTests = {
             {
                 "description": "all string formats ignore nulls",
                 "data": null,
+                "valid": true
+            },
+            {
+                "description": "invalid hostname string is only an annotation by default",
+                "data": "-a-host-name-that-starts-with--",
                 "valid": true
             }
         ]
     },
     {
         "description": "date format",
-        "schema": { "format": "date" },
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "format": "date"
+        },
         "tests": [
             {
                 "description": "all string formats ignore integers",
@@ -68884,13 +74319,21 @@ Map<String, String> specificationTests = {
             {
                 "description": "all string formats ignore nulls",
                 "data": null,
+                "valid": true
+            },
+            {
+                "description": "invalid date string is only an annotation by default",
+                "data": "06/19/1963",
                 "valid": true
             }
         ]
     },
     {
         "description": "date-time format",
-        "schema": { "format": "date-time" },
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "format": "date-time"
+        },
         "tests": [
             {
                 "description": "all string formats ignore integers",
@@ -68920,13 +74363,21 @@ Map<String, String> specificationTests = {
             {
                 "description": "all string formats ignore nulls",
                 "data": null,
+                "valid": true
+            },
+            {
+                "description": "invalid date-time string is only an annotation by default",
+                "data": "1990-02-31T15:59:60.123-08:00",
                 "valid": true
             }
         ]
     },
     {
         "description": "time format",
-        "schema": { "format": "time" },
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "format": "time"
+        },
         "tests": [
             {
                 "description": "all string formats ignore integers",
@@ -68956,13 +74407,21 @@ Map<String, String> specificationTests = {
             {
                 "description": "all string formats ignore nulls",
                 "data": null,
+                "valid": true
+            },
+            {
+                "description": "invalid time string is only an annotation by default",
+                "data": "08:30:06 PST",
                 "valid": true
             }
         ]
     },
     {
         "description": "json-pointer format",
-        "schema": { "format": "json-pointer" },
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "format": "json-pointer"
+        },
         "tests": [
             {
                 "description": "all string formats ignore integers",
@@ -68992,13 +74451,21 @@ Map<String, String> specificationTests = {
             {
                 "description": "all string formats ignore nulls",
                 "data": null,
+                "valid": true
+            },
+            {
+                "description": "invalid json-pointer string is only an annotation by default",
+                "data": "/foo/bar~",
                 "valid": true
             }
         ]
     },
     {
         "description": "relative-json-pointer format",
-        "schema": { "format": "relative-json-pointer" },
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "format": "relative-json-pointer"
+        },
         "tests": [
             {
                 "description": "all string formats ignore integers",
@@ -69028,13 +74495,21 @@ Map<String, String> specificationTests = {
             {
                 "description": "all string formats ignore nulls",
                 "data": null,
+                "valid": true
+            },
+            {
+                "description": "invalid relative-json-pointer string is only an annotation by default",
+                "data": "/foo/bar",
                 "valid": true
             }
         ]
     },
     {
         "description": "iri format",
-        "schema": { "format": "iri" },
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "format": "iri"
+        },
         "tests": [
             {
                 "description": "all string formats ignore integers",
@@ -69064,13 +74539,21 @@ Map<String, String> specificationTests = {
             {
                 "description": "all string formats ignore nulls",
                 "data": null,
+                "valid": true
+            },
+            {
+                "description": "invalid iri string is only an annotation by default",
+                "data": "http://2001:0db8:85a3:0000:0000:8a2e:0370:7334",
                 "valid": true
             }
         ]
     },
     {
         "description": "iri-reference format",
-        "schema": { "format": "iri-reference" },
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "format": "iri-reference"
+        },
         "tests": [
             {
                 "description": "all string formats ignore integers",
@@ -69100,13 +74583,21 @@ Map<String, String> specificationTests = {
             {
                 "description": "all string formats ignore nulls",
                 "data": null,
+                "valid": true
+            },
+            {
+                "description": "invalid iri-reference string is only an annotation by default",
+                "data": "\\\\WINDOWS\\filëßåré",
                 "valid": true
             }
         ]
     },
     {
         "description": "uri format",
-        "schema": { "format": "uri" },
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "format": "uri"
+        },
         "tests": [
             {
                 "description": "all string formats ignore integers",
@@ -69136,13 +74627,21 @@ Map<String, String> specificationTests = {
             {
                 "description": "all string formats ignore nulls",
                 "data": null,
+                "valid": true
+            },
+            {
+                "description": "invalid uri string is only an annotation by default",
+                "data": "//foo.bar/?baz=qux#quux",
                 "valid": true
             }
         ]
     },
     {
         "description": "uri-reference format",
-        "schema": { "format": "uri-reference" },
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "format": "uri-reference"
+        },
         "tests": [
             {
                 "description": "all string formats ignore integers",
@@ -69172,13 +74671,21 @@ Map<String, String> specificationTests = {
             {
                 "description": "all string formats ignore nulls",
                 "data": null,
+                "valid": true
+            },
+            {
+                "description": "invalid uri-reference string is only an annotation by default",
+                "data": "\\\\WINDOWS\\fileshare",
                 "valid": true
             }
         ]
     },
     {
         "description": "uri-template format",
-        "schema": { "format": "uri-template" },
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "format": "uri-template"
+        },
         "tests": [
             {
                 "description": "all string formats ignore integers",
@@ -69208,13 +74715,21 @@ Map<String, String> specificationTests = {
             {
                 "description": "all string formats ignore nulls",
                 "data": null,
+                "valid": true
+            },
+            {
+                "description": "invalid uri-template string is only an annotation by default",
+                "data": "http://example.com/dictionary/{term:1}/{term",
                 "valid": true
             }
         ]
     },
     {
         "description": "uuid format",
-        "schema": { "format": "uuid" },
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "format": "uuid"
+        },
         "tests": [
             {
                 "description": "all string formats ignore integers",
@@ -69244,13 +74759,21 @@ Map<String, String> specificationTests = {
             {
                 "description": "all string formats ignore nulls",
                 "data": null,
+                "valid": true
+            },
+            {
+                "description": "invalid uuid string is only an annotation by default",
+                "data": "2eb8aa08-aa98-11ea-b4aa-73b441d1638",
                 "valid": true
             }
         ]
     },
     {
         "description": "duration format",
-        "schema": { "format": "duration" },
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "format": "duration"
+        },
         "tests": [
             {
                 "description": "all string formats ignore integers",
@@ -69281,265 +74804,11 @@ Map<String, String> specificationTests = {
                 "description": "all string formats ignore nulls",
                 "data": null,
                 "valid": true
-            }
-        ]
-    }
-]
-""",
-  "/latest/id.json": r"""[
-    {
-        "description": "Invalid use of fragments in location-independent $id",
-        "schema": {
-            "$ref": "https://json-schema.org/draft/2020-12/schema"
-        },
-        "tests": [
-            {
-                "description": "Identifier name",
-                "data": {
-                    "$ref": "#foo",
-                    "$defs": {
-                        "A": {
-                            "$id": "#foo",
-                            "type": "integer"
-                        }
-                    }
-                },
-                "valid": false
             },
             {
-                "description": "Identifier name and no ref",
-                "data": {
-                    "$defs": {
-                        "A": { "$id": "#foo" }
-                    }
-                },
-                "valid": false
-            },
-            {
-                "description": "Identifier path",
-                "data": {
-                    "$ref": "#/a/b",
-                    "$defs": {
-                        "A": {
-                            "$id": "#/a/b",
-                            "type": "integer"
-                        }
-                    }
-                },
-                "valid": false
-            },
-            {
-                "description": "Identifier name with absolute URI",
-                "data": {
-                    "$ref": "http://localhost:1234/bar#foo",
-                    "$defs": {
-                        "A": {
-                            "$id": "http://localhost:1234/bar#foo",
-                            "type": "integer"
-                        }
-                    }
-                },
-                "valid": false
-            },
-            {
-                "description": "Identifier path with absolute URI",
-                "data": {
-                    "$ref": "http://localhost:1234/bar#/a/b",
-                    "$defs": {
-                        "A": {
-                            "$id": "http://localhost:1234/bar#/a/b",
-                            "type": "integer"
-                        }
-                    }
-                },
-                "valid": false
-            },
-            {
-                "description": "Identifier name with base URI change in subschema",
-                "data": {
-                    "$id": "http://localhost:1234/root",
-                    "$ref": "http://localhost:1234/nested.json#foo",
-                    "$defs": {
-                        "A": {
-                            "$id": "nested.json",
-                            "$defs": {
-                                "B": {
-                                    "$id": "#foo",
-                                    "type": "integer"
-                                }
-                            }
-                        }
-                    }
-                },
-                "valid": false
-            },
-            {
-                "description": "Identifier path with base URI change in subschema",
-                "data": {
-                    "$id": "http://localhost:1234/root",
-                    "$ref": "http://localhost:1234/nested.json#/a/b",
-                    "$defs": {
-                        "A": {
-                            "$id": "nested.json",
-                            "$defs": {
-                                "B": {
-                                    "$id": "#/a/b",
-                                    "type": "integer"
-                                }
-                            }
-                        }
-                    }
-                },
-                "valid": false
-            }
-        ]
-    },
-    {
-        "description": "Valid use of empty fragments in location-independent $id",
-        "comment": "These are allowed but discouraged",
-        "schema": {
-            "$ref": "https://json-schema.org/draft/2020-12/schema"
-        },
-        "tests": [
-            {
-                "description": "Identifier name with absolute URI",
-                "data": {
-                    "$ref": "http://localhost:1234/bar",
-                    "$defs": {
-                        "A": {
-                            "$id": "http://localhost:1234/bar#",
-                            "type": "integer"
-                        }
-                    }
-                },
+                "description": "invalid duration string is only an annotation by default",
+                "data": "PT1D",
                 "valid": true
-            },
-            {
-                "description": "Identifier name with base URI change in subschema",
-                "data": {
-                    "$id": "http://localhost:1234/root",
-                    "$ref": "http://localhost:1234/nested.json#/$defs/B",
-                    "$defs": {
-                        "A": {
-                            "$id": "nested.json",
-                            "$defs": {
-                                "B": {
-                                    "$id": "#",
-                                    "type": "integer"
-                                }
-                            }
-                        }
-                    }
-                },
-                "valid": true
-            }
-        ]
-    },
-    {
-        "description": "Unnormalized $ids are allowed but discouraged",
-        "schema": {
-            "$ref": "https://json-schema.org/draft/2020-12/schema"
-        },
-        "tests": [
-            {
-                "description": "Unnormalized identifier",
-                "data": {
-                    "$ref": "http://localhost:1234/foo/baz",
-                    "$defs": {
-                        "A": {
-                            "$id": "http://localhost:1234/foo/bar/../baz",
-                            "type": "integer"
-                        }
-                    }
-                },
-                "valid": true
-            },
-            {
-                "description": "Unnormalized identifier and no ref",
-                "data": {
-                    "$defs": {
-                        "A": {
-                            "$id": "http://localhost:1234/foo/bar/../baz",
-                            "type": "integer"
-                        }
-                    }
-                },
-                "valid": true
-            },
-            {
-                "description": "Unnormalized identifier with empty fragment",
-                "data": {
-                    "$ref": "http://localhost:1234/foo/baz",
-                    "$defs": {
-                        "A": {
-                            "$id": "http://localhost:1234/foo/bar/../baz#",
-                            "type": "integer"
-                        }
-                    }
-                },
-                "valid": true
-            },
-            {
-                "description": "Unnormalized identifier with empty fragment and no ref",
-                "data": {
-                    "$defs": {
-                        "A": {
-                            "$id": "http://localhost:1234/foo/bar/../baz#",
-                            "type": "integer"
-                        }
-                    }
-                },
-                "valid": true
-            }
-        ]
-    },
-    {
-        "description": "$id inside an enum is not a real identifier",
-        "comment": "the implementation must not be confused by an $id buried in the enum",
-        "schema": {
-            "$defs": {
-                "id_in_enum": {
-                    "enum": [
-                        {
-                          "$id": "https://localhost:1234/id/my_identifier.json",
-                          "type": "null"
-                        }
-                    ]
-                },
-                "real_id_in_schema": {
-                    "$id": "https://localhost:1234/id/my_identifier.json",
-                    "type": "string"
-                },
-                "zzz_id_in_const": {
-                    "const": {
-                        "$id": "https://localhost:1234/id/my_identifier.json",
-                        "type": "null"
-                    }
-                }
-            },
-            "anyOf": [
-                { "$ref": "#/$defs/id_in_enum" },
-                { "$ref": "https://localhost:1234/id/my_identifier.json" }
-            ]
-        },
-        "tests": [
-            {
-                "description": "exact match to enum, and type matches",
-                "data": {
-                    "$id": "https://localhost:1234/id/my_identifier.json",
-                    "type": "null"
-                },
-                "valid": true
-            },
-            {
-                "description": "match $ref to $id",
-                "data": "a string to match #/$defs/id_in_enum",
-                "valid": true
-            },
-            {
-                "description": "no match on enum or $ref to $id",
-                "data": 1,
-                "valid": false
             }
         ]
     }
@@ -69549,6 +74818,7 @@ Map<String, String> specificationTests = {
     {
         "description": "ignore if without then or else",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "if": {
                 "const": 0
             }
@@ -69569,6 +74839,7 @@ Map<String, String> specificationTests = {
     {
         "description": "ignore then without if",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "then": {
                 "const": 0
             }
@@ -69589,6 +74860,7 @@ Map<String, String> specificationTests = {
     {
         "description": "ignore else without if",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "else": {
                 "const": 0
             }
@@ -69609,6 +74881,7 @@ Map<String, String> specificationTests = {
     {
         "description": "if and then without else",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "if": {
                 "exclusiveMaximum": 0
             },
@@ -69637,6 +74910,7 @@ Map<String, String> specificationTests = {
     {
         "description": "if and else without then",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "if": {
                 "exclusiveMaximum": 0
             },
@@ -69665,6 +74939,7 @@ Map<String, String> specificationTests = {
     {
         "description": "validate against correct branch, then vs else",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "if": {
                 "exclusiveMaximum": 0
             },
@@ -69701,6 +74976,7 @@ Map<String, String> specificationTests = {
     {
         "description": "non-interference across combined schemas",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "allOf": [
                 {
                     "if": {
@@ -69735,6 +75011,7 @@ Map<String, String> specificationTests = {
     {
         "description": "if with boolean schema true",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "if": true,
             "then": { "const": "then" },
             "else": { "const": "else" }
@@ -69755,6 +75032,7 @@ Map<String, String> specificationTests = {
     {
         "description": "if with boolean schema false",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "if": false,
             "then": { "const": "then" },
             "else": { "const": "else" }
@@ -69775,6 +75053,7 @@ Map<String, String> specificationTests = {
     {
         "description": "if appears at the end when serialized (keyword processing sequence)",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "then": { "const": "yes" },
             "else": { "const": "other" },
             "if": { "maxLength": 4 }
@@ -69801,6 +75080,44 @@ Map<String, String> specificationTests = {
                 "valid": false
             }
         ]
+    },
+    {
+        "description": "then: false fails when condition matches",
+        "schema": {
+            "if": { "const": 1 },
+            "then": false
+        },
+        "tests": [
+            {
+                "description": "matches if → then=false → invalid",
+                "data": 1,
+                "valid": false
+            },
+            {
+                "description": "does not match if → then ignored → valid",
+                "data": 2,
+                "valid": true
+            }
+        ]
+    },
+    {
+        "description": "else: false fails when condition does not match",
+        "schema": {
+            "if": { "const": 1 },
+            "else": false
+        },
+        "tests": [
+            {
+               "description": "matches if → else ignored → valid",
+               "data": 1,
+               "valid": true
+            },
+            {
+                "description": "does not match if → else executes → invalid",
+                "data": 2,
+                "valid": false
+            }
+        ]
     }
 ]
 """,
@@ -69808,6 +75125,7 @@ Map<String, String> specificationTests = {
     {
         "description": "evaluating the same schema location against the same data location twice is not a sign of an infinite loop",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "$defs": {
                 "int": { "type": "integer" }
             },
@@ -69845,6 +75163,7 @@ Map<String, String> specificationTests = {
     {
         "description": "a schema given for items",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "items": {"type": "integer"}
         },
         "tests": [
@@ -69875,7 +75194,10 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "items with boolean schema (true)",
-        "schema": {"items": true},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "items": true
+        },
         "tests": [
             {
                 "description": "any array is valid",
@@ -69891,7 +75213,10 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "items with boolean schema (false)",
-        "schema": {"items": false},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "items": false
+        },
         "tests": [
             {
                 "description": "any non-empty array is invalid",
@@ -69908,6 +75233,7 @@ Map<String, String> specificationTests = {
     {
         "description": "items and subitems",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "$defs": {
                 "item": {
                     "type": "array",
@@ -69990,6 +75316,7 @@ Map<String, String> specificationTests = {
     {
         "description": "nested items",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "array",
             "items": {
                 "type": "array",
@@ -70025,6 +75352,7 @@ Map<String, String> specificationTests = {
     {
         "description": "prefixItems with no additional items allowed",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "prefixItems": [{}, {}, {}],
             "items": false
         },
@@ -70057,8 +75385,9 @@ Map<String, String> specificationTests = {
         ]
     },
     {
-        "description": "items should not look in applicators, valid case",
+        "description": "items does not look in applicators, valid case",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "allOf": [
                 { "prefixItems": [ { "minimum": 3 } ] }
             ],
@@ -70066,12 +75395,12 @@ Map<String, String> specificationTests = {
         },
         "tests": [
             {
-                "description": "prefixItems in allOf should not constrain items, invalid case",
+                "description": "prefixItems in allOf does not constrain items, invalid case",
                 "data": [ 3, 5 ],
                 "valid": false
             },
             {
-                "description": "prefixItems in allOf should not constrain items, valid case",
+                "description": "prefixItems in allOf does not constrain items, valid case",
                 "data": [ 5, 5 ],
                 "valid": true
             }
@@ -70080,6 +75409,7 @@ Map<String, String> specificationTests = {
     {
         "description": "prefixItems validation adjusts the starting index for items",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "prefixItems": [ { "type": "string" } ],
             "items": { "type": "integer" }
         },
@@ -70095,6 +75425,42 @@ Map<String, String> specificationTests = {
                 "valid": false
             }
         ]
+    },
+    {
+        "description": "items with heterogeneous array",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "prefixItems": [{}],
+            "items": false
+        },
+        "tests": [
+            {
+                "description": "heterogeneous invalid instance",
+                "data": [ "foo", "bar", 37 ],
+                "valid": false
+            },
+            {
+                "description": "valid instance",
+                "data": [ null ],
+                "valid": true
+            }
+        ]
+    },
+    {
+        "description": "items with null instance elements",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "items": {
+                "type": "null"
+            }
+        },
+        "tests": [
+            {
+                "description": "allows null elements",
+                "data": [ null ],
+                "valid": true
+            }
+        ]
     }
 ]
 """,
@@ -70102,6 +75468,7 @@ Map<String, String> specificationTests = {
     {
         "description": "maxContains without contains is ignored",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "maxContains": 1
         },
         "tests": [
@@ -70120,6 +75487,7 @@ Map<String, String> specificationTests = {
     {
         "description": "maxContains with contains",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "contains": {"const": 1},
             "maxContains": 1
         },
@@ -70152,8 +75520,29 @@ Map<String, String> specificationTests = {
         ]
     },
     {
+        "description": "maxContains with contains, value with a decimal",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "contains": {"const": 1},
+            "maxContains": 1.0
+        },
+        "tests": [
+            {
+                "description": "one element matches, valid maxContains",
+                "data": [ 1 ],
+                "valid": true
+            },
+            {
+                "description": "too many elements match, invalid maxContains",
+                "data": [ 1, 1 ],
+                "valid": false
+            }
+        ]
+    },
+    {
         "description": "minContains < maxContains",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "contains": {"const": 1},
             "minContains": 1,
             "maxContains": 3
@@ -70175,13 +75564,37 @@ Map<String, String> specificationTests = {
                 "valid": false
             }
         ]
+    },
+    {
+        "description": "maxContains = 0 with minContains = 0",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "contains": {"const": 1},
+            "minContains": 0,
+            "maxContains": 0
+        },
+        "tests": [
+            {
+                "description": "empty array",
+                "data": [ ],
+                "valid": true
+            },
+            {
+                "description": "one matching item",
+                "data": [ 1 ],
+                "valid": false
+            }
+        ]
     }
 ]
 """,
   "/latest/maxItems.json": r"""[
     {
         "description": "maxItems validation",
-        "schema": {"maxItems": 2},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "maxItems": 2
+        },
         "tests": [
             {
                 "description": "shorter is valid",
@@ -70204,13 +75617,35 @@ Map<String, String> specificationTests = {
                 "valid": true
             }
         ]
+    },
+    {
+        "description": "maxItems validation with a decimal",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "maxItems": 2.0
+        },
+        "tests": [
+            {
+                "description": "shorter is valid",
+                "data": [1],
+                "valid": true
+            },
+            {
+                "description": "too long is invalid",
+                "data": [1, 2, 3],
+                "valid": false
+            }
+        ]
     }
 ]
 """,
   "/latest/maxLength.json": r"""[
     {
         "description": "maxLength validation",
-        "schema": {"maxLength": 2},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "maxLength": 2
+        },
         "tests": [
             {
                 "description": "shorter is valid",
@@ -70233,9 +75668,28 @@ Map<String, String> specificationTests = {
                 "valid": true
             },
             {
-                "description": "two supplementary Unicode code points is long enough",
+                "description": "two graphemes is long enough",
                 "data": "\uD83D\uDCA9\uD83D\uDCA9",
                 "valid": true
+            }
+        ]
+    },
+    {
+        "description": "maxLength validation with a decimal",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "maxLength": 2.0
+        },
+        "tests": [
+            {
+                "description": "shorter is valid",
+                "data": "f",
+                "valid": true
+            },
+            {
+                "description": "too long is invalid",
+                "data": "foo",
+                "valid": false
             }
         ]
     }
@@ -70244,7 +75698,15 @@ Map<String, String> specificationTests = {
   "/latest/maxProperties.json": r"""[
     {
         "description": "maxProperties validation",
-        "schema": {"maxProperties": 2},
+        "specification": [
+            {
+                "validation": "6.5.1"
+            }
+        ],
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "maxProperties": 2
+        },
         "tests": [
             {
                 "description": "shorter is valid",
@@ -70279,8 +75741,40 @@ Map<String, String> specificationTests = {
         ]
     },
     {
+        "description": "maxProperties validation with a decimal",
+        "specification": [
+            {
+                "validation": "6.5.1"
+            }
+        ],
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "maxProperties": 2.0
+        },
+        "tests": [
+            {
+                "description": "shorter is valid",
+                "data": {"foo": 1},
+                "valid": true
+            },
+            {
+                "description": "too long is invalid",
+                "data": {"foo": 1, "bar": 2, "baz": 3},
+                "valid": false
+            }
+        ]
+    },
+    {
         "description": "maxProperties = 0 means the object is empty",
-        "schema": { "maxProperties": 0 },
+        "specification": [
+            {
+                "validation": "6.5.1"
+            }
+        ],
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "maxProperties": 0
+        },
         "tests": [
             {
                 "description": "no properties is valid",
@@ -70299,7 +75793,10 @@ Map<String, String> specificationTests = {
   "/latest/maximum.json": r"""[
     {
         "description": "maximum validation",
-        "schema": {"maximum": 3.0},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "maximum": 3.0
+        },
         "tests": [
             {
                 "description": "below the maximum is valid",
@@ -70325,10 +75822,13 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "maximum validation with unsigned integer",
-        "schema": {"maximum": 300},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "maximum": 300
+        },
         "tests":  [
             {
-                "description": "below the maximum is invalid",
+                "description": "below the maximum is valid",
                 "data": 299.97,
                 "valid": true
             },
@@ -70355,6 +75855,7 @@ Map<String, String> specificationTests = {
     {
         "description": "minContains without contains is ignored",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "minContains": 1
         },
         "tests": [
@@ -70373,6 +75874,7 @@ Map<String, String> specificationTests = {
     {
         "description": "minContains=1 with contains",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "contains": {"const": 1},
             "minContains": 1
         },
@@ -70407,6 +75909,7 @@ Map<String, String> specificationTests = {
     {
         "description": "minContains=2 with contains",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "contains": {"const": 1},
             "minContains": 2
         },
@@ -70444,8 +75947,29 @@ Map<String, String> specificationTests = {
         ]
     },
     {
+        "description": "minContains=2 with contains with a decimal value",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "contains": {"const": 1},
+            "minContains": 2.0
+        },
+        "tests": [
+            {
+                "description": "one element matches, invalid minContains",
+                "data": [ 1 ],
+                "valid": false
+            },
+            {
+                "description": "both elements match, valid minContains",
+                "data": [ 1, 1 ],
+                "valid": true
+            }
+        ]
+    },
+    {
         "description": "maxContains = minContains",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "contains": {"const": 1},
             "maxContains": 2,
             "minContains": 2
@@ -70476,6 +76000,7 @@ Map<String, String> specificationTests = {
     {
         "description": "maxContains < minContains",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "contains": {"const": 1},
             "maxContains": 1,
             "minContains": 3
@@ -70506,6 +76031,7 @@ Map<String, String> specificationTests = {
     {
         "description": "minContains = 0",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "contains": {"const": 1},
             "minContains": 0
         },
@@ -70525,6 +76051,7 @@ Map<String, String> specificationTests = {
     {
         "description": "minContains = 0 with maxContains",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "contains": {"const": 1},
             "minContains": 0,
             "maxContains": 1
@@ -70552,7 +76079,10 @@ Map<String, String> specificationTests = {
   "/latest/minItems.json": r"""[
     {
         "description": "minItems validation",
-        "schema": {"minItems": 1},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "minItems": 1
+        },
         "tests": [
             {
                 "description": "longer is valid",
@@ -70575,13 +76105,35 @@ Map<String, String> specificationTests = {
                 "valid": true
             }
         ]
+    },
+    {
+        "description": "minItems validation with a decimal",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "minItems": 1.0
+        },
+        "tests": [
+            {
+                "description": "longer is valid",
+                "data": [1, 2],
+                "valid": true
+            },
+            {
+                "description": "too short is invalid",
+                "data": [],
+                "valid": false
+            }
+        ]
     }
 ]
 """,
   "/latest/minLength.json": r"""[
     {
         "description": "minLength validation",
-        "schema": {"minLength": 2},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "minLength": 2
+        },
         "tests": [
             {
                 "description": "longer is valid",
@@ -70604,8 +76156,27 @@ Map<String, String> specificationTests = {
                 "valid": true
             },
             {
-                "description": "one supplementary Unicode code point is not long enough",
+                "description": "one grapheme is not long enough",
                 "data": "\uD83D\uDCA9",
+                "valid": false
+            }
+        ]
+    },
+    {
+        "description": "minLength validation with a decimal",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "minLength": 2.0
+        },
+        "tests": [
+            {
+                "description": "longer is valid",
+                "data": "foo",
+                "valid": true
+            },
+            {
+                "description": "too short is invalid",
+                "data": "f",
                 "valid": false
             }
         ]
@@ -70615,7 +76186,10 @@ Map<String, String> specificationTests = {
   "/latest/minProperties.json": r"""[
     {
         "description": "minProperties validation",
-        "schema": {"minProperties": 1},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "minProperties": 1
+        },
         "tests": [
             {
                 "description": "longer is valid",
@@ -70646,6 +76220,35 @@ Map<String, String> specificationTests = {
                 "description": "ignores other non-objects",
                 "data": 12,
                 "valid": true
+            },
+            {
+                "description": "ignores null",
+                "data": null,
+                "valid": true
+            },
+            {
+                "description": "ignores booleans",
+                "data": true,
+                "valid": true
+            }
+        ]
+    },
+    {
+        "description": "minProperties validation with a decimal",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "minProperties": 1.0
+        },
+        "tests": [
+            {
+                "description": "longer is valid",
+                "data": {"foo": 1, "bar": 2},
+                "valid": true
+            },
+            {
+                "description": "too short is invalid",
+                "data": {},
+                "valid": false
             }
         ]
     }
@@ -70654,7 +76257,10 @@ Map<String, String> specificationTests = {
   "/latest/minimum.json": r"""[
     {
         "description": "minimum validation",
-        "schema": {"minimum": 1.1},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "minimum": 1.1
+        },
         "tests": [
             {
                 "description": "above the minimum is valid",
@@ -70680,7 +76286,10 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "minimum validation with signed integer",
-        "schema": {"minimum": -2},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "minimum": -2
+        },
         "tests": [
             {
                 "description": "negative above the minimum is valid",
@@ -70724,7 +76333,10 @@ Map<String, String> specificationTests = {
   "/latest/multipleOf.json": r"""[
     {
         "description": "by int",
-        "schema": {"multipleOf": 2},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "multipleOf": 2
+        },
         "tests": [
             {
                 "description": "int by int",
@@ -70745,7 +76357,10 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "by number",
-        "schema": {"multipleOf": 1.5},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "multipleOf": 1.5
+        },
         "tests": [
             {
                 "description": "zero is multiple of anything",
@@ -70758,6 +76373,11 @@ Map<String, String> specificationTests = {
                 "valid": true
             },
             {
+                "description": "-4.5 is multiple of 1.5",
+                "data": -4.5,
+                "valid": true
+            },
+            {
                 "description": "35 is not multiple of 1.5",
                 "data": 35,
                 "valid": false
@@ -70766,7 +76386,10 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "by small number",
-        "schema": {"multipleOf": 0.0001},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "multipleOf": 0.0001
+        },
         "tests": [
             {
                 "description": "0.0075 is multiple of 0.0001",
@@ -70781,13 +76404,30 @@ Map<String, String> specificationTests = {
         ]
     },
     {
-        "description": "invalid instance should not raise error when float division = inf",
-        "schema": {"type": "integer", "multipleOf": 0.123456789},
+        "description": "float division = inf",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "integer", "multipleOf": 0.123456789
+        },
         "tests": [
             {
                 "description": "always invalid, but naive implementations may raise an overflow error",
                 "data": 1e308,
                 "valid": false
+            }
+        ]
+    },
+    {
+        "description": "small multiple of large integer",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "integer", "multipleOf": 1e-8
+        },
+        "tests": [
+            {
+                "description": "any integer is a multiple of 1e-8",
+                "data": 12391239123,
+                "valid": true
             }
         ]
     }
@@ -70797,6 +76437,7 @@ Map<String, String> specificationTests = {
     {
         "description": "not",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "not": {"type": "integer"}
         },
         "tests": [
@@ -70815,6 +76456,7 @@ Map<String, String> specificationTests = {
     {
         "description": "not multiple types",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "not": {"type": ["integer", "boolean"]}
         },
         "tests": [
@@ -70838,6 +76480,7 @@ Map<String, String> specificationTests = {
     {
         "description": "not more complex schema",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "not": {
                 "type": "object",
                 "properties": {
@@ -70868,6 +76511,7 @@ Map<String, String> specificationTests = {
     {
         "description": "forbidden property",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "properties": {
                 "foo": { 
                     "not": {}
@@ -70888,19 +76532,173 @@ Map<String, String> specificationTests = {
         ]
     },
     {
-        "description": "not with boolean schema true",
-        "schema": {"not": true},
+        "description": "forbid everything with empty schema",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "not": {}
+        },
         "tests": [
             {
-                "description": "any value is invalid",
+                "description": "number is invalid",
+                "data": 1,
+                "valid": false
+            },
+            {
+                "description": "string is invalid",
                 "data": "foo",
+                "valid": false
+            },
+            {
+                "description": "boolean true is invalid",
+                "data": true,
+                "valid": false
+            },
+            {
+                "description": "boolean false is invalid",
+                "data": false,
+                "valid": false
+            },
+            {
+                "description": "null is invalid",
+                "data": null,
+                "valid": false
+            },
+            {
+                "description": "object is invalid",
+                "data": {"foo": "bar"},
+                "valid": false
+            },
+            {
+                "description": "empty object is invalid",
+                "data": {},
+                "valid": false
+            },
+            {
+                "description": "array is invalid",
+                "data": ["foo"],
+                "valid": false
+            },
+            {
+                "description": "empty array is invalid",
+                "data": [],
                 "valid": false
             }
         ]
     },
     {
-        "description": "not with boolean schema false",
-        "schema": {"not": false},
+        "description": "forbid everything with boolean schema true",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "not": true
+        },
+        "tests": [
+            {
+                "description": "number is invalid",
+                "data": 1,
+                "valid": false
+            },
+            {
+                "description": "string is invalid",
+                "data": "foo",
+                "valid": false
+            },
+            {
+                "description": "boolean true is invalid",
+                "data": true,
+                "valid": false
+            },
+            {
+                "description": "boolean false is invalid",
+                "data": false,
+                "valid": false
+            },
+            {
+                "description": "null is invalid",
+                "data": null,
+                "valid": false
+            },
+            {
+                "description": "object is invalid",
+                "data": {"foo": "bar"},
+                "valid": false
+            },
+            {
+                "description": "empty object is invalid",
+                "data": {},
+                "valid": false
+            },
+            {
+                "description": "array is invalid",
+                "data": ["foo"],
+                "valid": false
+            },
+            {
+                "description": "empty array is invalid",
+                "data": [],
+                "valid": false
+            }
+        ]
+    },
+    {
+        "description": "allow everything with boolean schema false",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "not": false
+        },
+        "tests": [
+            {
+                "description": "number is valid",
+                "data": 1,
+                "valid": true
+            },
+            {
+                "description": "string is valid",
+                "data": "foo",
+                "valid": true
+            },
+            {
+                "description": "boolean true is valid",
+                "data": true,
+                "valid": true
+            },
+            {
+                "description": "boolean false is valid",
+                "data": false,
+                "valid": true
+            },
+            {
+                "description": "null is valid",
+                "data": null,
+                "valid": true
+            },
+            {
+                "description": "object is valid",
+                "data": {"foo": "bar"},
+                "valid": true
+            },
+            {
+                "description": "empty object is valid",
+                "data": {},
+                "valid": true
+            },
+            {
+                "description": "array is valid",
+                "data": ["foo"],
+                "valid": true
+            },
+            {
+                "description": "empty array is valid",
+                "data": [],
+                "valid": true
+            }
+        ]
+    },
+    {
+        "description": "double negation",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "not": { "not": {} }
+        },
         "tests": [
             {
                 "description": "any value is valid",
@@ -70908,13 +76706,40 @@ Map<String, String> specificationTests = {
                 "valid": true
             }
         ]
-    }
+    },
+    {
+        "description": "collect annotations inside a 'not', even if collection is disabled",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "not": {
+                "$comment": "this subschema must still produce annotations internally, even though the 'not' will ultimately discard them",
+                "anyOf": [
+                    true,
+                    { "properties": { "foo": true } }
+                ],
+                "unevaluatedProperties": false
+            }
+        },
+        "tests": [
+            {
+                "description": "unevaluated property",
+                "data": { "bar": 1 },
+                "valid": true
+            },
+            {
+                "description": "annotations are still collected inside a 'not'",
+                "data": { "foo": 1 },
+                "valid": false
+            }
+        ]
+     }
 ]
 """,
   "/latest/oneOf.json": r"""[
     {
         "description": "oneOf",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "oneOf": [
                 {
                     "type": "integer"
@@ -70950,6 +76775,7 @@ Map<String, String> specificationTests = {
     {
         "description": "oneOf with base schema",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "string",
             "oneOf" : [
                 {
@@ -70980,7 +76806,10 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "oneOf with boolean schemas, all true",
-        "schema": {"oneOf": [true, true, true]},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "oneOf": [true, true, true]
+        },
         "tests": [
             {
                 "description": "any value is invalid",
@@ -70991,7 +76820,10 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "oneOf with boolean schemas, one true",
-        "schema": {"oneOf": [true, false, false]},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "oneOf": [true, false, false]
+        },
         "tests": [
             {
                 "description": "any value is valid",
@@ -71002,7 +76834,10 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "oneOf with boolean schemas, more than one true",
-        "schema": {"oneOf": [true, true, false]},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "oneOf": [true, true, false]
+        },
         "tests": [
             {
                 "description": "any value is invalid",
@@ -71013,7 +76848,10 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "oneOf with boolean schemas, all false",
-        "schema": {"oneOf": [false, false, false]},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "oneOf": [false, false, false]
+        },
         "tests": [
             {
                 "description": "any value is invalid",
@@ -71025,6 +76863,7 @@ Map<String, String> specificationTests = {
     {
         "description": "oneOf complex types",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "oneOf": [
                 {
                     "properties": {
@@ -71066,6 +76905,7 @@ Map<String, String> specificationTests = {
     {
         "description": "oneOf with empty schema",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "oneOf": [
                 { "type": "number" },
                 {}
@@ -71087,6 +76927,7 @@ Map<String, String> specificationTests = {
     {
         "description": "oneOf with required",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "object",
             "oneOf": [
                 { "required": ["foo", "bar"] },
@@ -71116,9 +76957,10 @@ Map<String, String> specificationTests = {
             }
         ]
     },
-	{
+    {
         "description": "oneOf with missing optional property",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "oneOf": [
                 {
                     "properties": {
@@ -71161,6 +77003,7 @@ Map<String, String> specificationTests = {
     {
         "description": "nested oneOf, to check validation semantics",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "oneOf": [
                 {
                     "oneOf": [
@@ -71186,10 +77029,74 @@ Map<String, String> specificationTests = {
     }
 ]
 """,
+  "/latest/optional/anchor.json": r"""[
+    {
+        "description": "$anchor inside an enum is not a real identifier",
+        "comment": "the implementation must not be confused by an $anchor buried in the enum",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$defs": {
+                "anchor_in_enum": {
+                    "enum": [
+                        {
+                            "$anchor": "my_anchor",
+                            "type": "null"
+                        }
+                    ]
+                },
+                "real_identifier_in_schema": {
+                    "$anchor": "my_anchor",
+                    "type": "string"
+                },
+                "zzz_anchor_in_const": {
+                    "const": {
+                        "$anchor": "my_anchor",
+                        "type": "null"
+                    }
+                }
+            },
+            "anyOf": [
+                { "$ref": "#/$defs/anchor_in_enum" },
+                { "$ref": "#my_anchor" }
+            ]
+        },
+        "tests": [
+            {
+                "description": "exact match to enum, and type matches",
+                "data": {
+                    "$anchor": "my_anchor",
+                    "type": "null"
+                },
+                "valid": true
+            },
+            {
+                "description": "in implementations that strip $anchor, this may match either $def",
+                "data": {
+                    "type": "null"
+                },
+                "valid": false
+            },
+            {
+                "description": "match $ref to $anchor",
+                "data": "a string to match #/$defs/anchor_in_enum",
+                "valid": true
+            },
+            {
+                "description": "no match on enum or $ref to $anchor",
+                "data": 1,
+                "valid": false
+            }
+        ]
+    }
+]
+""",
   "/latest/optional/bignum.json": r"""[
     {
         "description": "integer",
-        "schema": { "type": "integer" },
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "integer"
+        },
         "tests": [
             {
                 "description": "a bignum is an integer",
@@ -71205,7 +77112,10 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "number",
-        "schema": { "type": "number" },
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "number"
+        },
         "tests": [
             {
                 "description": "a bignum is a number",
@@ -71221,7 +77131,10 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "string",
-        "schema": { "type": "string" },
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "string"
+        },
         "tests": [
             {
                 "description": "a bignum is not a string",
@@ -71231,8 +77144,11 @@ Map<String, String> specificationTests = {
         ]
     },
     {
-        "description": "integer comparison",
-        "schema": { "maximum": 18446744073709551615 },
+        "description": "maximum integer comparison",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "maximum": 18446744073709551615
+        },
         "tests": [
             {
                 "description": "comparison works for high numbers",
@@ -71244,6 +77160,7 @@ Map<String, String> specificationTests = {
     {
         "description": "float comparison with high precision",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "exclusiveMaximum": 972783798187987123879878123.18878137
         },
         "tests": [
@@ -71255,8 +77172,11 @@ Map<String, String> specificationTests = {
         ]
     },
     {
-        "description": "integer comparison",
-        "schema": { "minimum": -18446744073709551615 },
+        "description": "minimum integer comparison",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "minimum": -18446744073709551615
+        },
         "tests": [
             {
                 "description": "comparison works for very negative numbers",
@@ -71268,6 +77188,7 @@ Map<String, String> specificationTests = {
     {
         "description": "float comparison with high precision on negative numbers",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "exclusiveMinimum": -972783798187987123879878123.18878137
         },
         "tests": [
@@ -71280,21 +77201,380 @@ Map<String, String> specificationTests = {
     }
 ]
 """,
+  "/latest/optional/cross-draft.json": r"""[
+    {
+        "description": "refs to historic drafts are processed as historic drafts",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "array",
+            "$ref": "http://localhost:1234/draft2019-09/ignore-prefixItems.json"
+        },
+        "tests": [
+            {
+                "description": "first item not a string is valid",
+                "comment": "if the implementation is not processing the $ref as a 2019-09 schema, this test will fail",
+                "data": [1, 2, 3],
+                "valid": true
+            }
+        ]
+    }
+]
+""",
+  "/latest/optional/dependencies-compatibility.json": r"""[
+    {
+        "description": "single dependency",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "dependencies": {"bar": ["foo"]}
+        },
+        "tests": [
+            {
+                "description": "neither",
+                "data": {},
+                "valid": true
+            },
+            {
+                "description": "nondependant",
+                "data": {"foo": 1},
+                "valid": true
+            },
+            {
+                "description": "with dependency",
+                "data": {"foo": 1, "bar": 2},
+                "valid": true
+            },
+            {
+                "description": "missing dependency",
+                "data": {"bar": 2},
+                "valid": false
+            },
+            {
+                "description": "ignores arrays",
+                "data": ["bar"],
+                "valid": true
+            },
+            {
+                "description": "ignores strings",
+                "data": "foobar",
+                "valid": true
+            },
+            {
+                "description": "ignores other non-objects",
+                "data": 12,
+                "valid": true
+            }
+        ]
+    },
+    {
+        "description": "empty dependents",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "dependencies": {"bar": []}
+        },
+        "tests": [
+            {
+                "description": "empty object",
+                "data": {},
+                "valid": true
+            },
+            {
+                "description": "object with one property",
+                "data": {"bar": 2},
+                "valid": true
+            },
+            {
+                "description": "non-object is valid",
+                "data": 1,
+                "valid": true
+            }
+        ]
+    },
+    {
+        "description": "multiple dependents required",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "dependencies": {"quux": ["foo", "bar"]}
+        },
+        "tests": [
+            {
+                "description": "neither",
+                "data": {},
+                "valid": true
+            },
+            {
+                "description": "nondependants",
+                "data": {"foo": 1, "bar": 2},
+                "valid": true
+            },
+            {
+                "description": "with dependencies",
+                "data": {"foo": 1, "bar": 2, "quux": 3},
+                "valid": true
+            },
+            {
+                "description": "missing dependency",
+                "data": {"foo": 1, "quux": 2},
+                "valid": false
+            },
+            {
+                "description": "missing other dependency",
+                "data": {"bar": 1, "quux": 2},
+                "valid": false
+            },
+            {
+                "description": "missing both dependencies",
+                "data": {"quux": 1},
+                "valid": false
+            }
+        ]
+    },
+    {
+        "description": "dependencies with escaped characters",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "dependencies": {
+                "foo\nbar": ["foo\rbar"],
+                "foo\"bar": ["foo'bar"]
+            }
+        },
+        "tests": [
+            {
+                "description": "CRLF",
+                "data": {
+                    "foo\nbar": 1,
+                    "foo\rbar": 2
+                },
+                "valid": true
+            },
+            {
+                "description": "quoted quotes",
+                "data": {
+                    "foo'bar": 1,
+                    "foo\"bar": 2
+                },
+                "valid": true
+            },
+            {
+                "description": "CRLF missing dependent",
+                "data": {
+                    "foo\nbar": 1,
+                    "foo": 2
+                },
+                "valid": false
+            },
+            {
+                "description": "quoted quotes missing dependent",
+                "data": {
+                    "foo\"bar": 2
+                },
+                "valid": false
+            }
+        ]
+    },
+    {
+        "description": "single schema dependency",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "dependencies": {
+                "bar": {
+                    "properties": {
+                        "foo": {"type": "integer"},
+                        "bar": {"type": "integer"}
+                    }
+                }
+            }
+        },
+        "tests": [
+            {
+                "description": "valid",
+                "data": {"foo": 1, "bar": 2},
+                "valid": true
+            },
+            {
+                "description": "no dependency",
+                "data": {"foo": "quux"},
+                "valid": true
+            },
+            {
+                "description": "wrong type",
+                "data": {"foo": "quux", "bar": 2},
+                "valid": false
+            },
+            {
+                "description": "wrong type other",
+                "data": {"foo": 2, "bar": "quux"},
+                "valid": false
+            },
+            {
+                "description": "wrong type both",
+                "data": {"foo": "quux", "bar": "quux"},
+                "valid": false
+            },
+            {
+                "description": "ignores arrays",
+                "data": ["bar"],
+                "valid": true
+            },
+            {
+                "description": "ignores strings",
+                "data": "foobar",
+                "valid": true
+            },
+            {
+                "description": "ignores other non-objects",
+                "data": 12,
+                "valid": true
+            }
+        ]
+    },
+    {
+        "description": "boolean subschemas",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "dependencies": {
+                "foo": true,
+                "bar": false
+            }
+        },
+        "tests": [
+            {
+                "description": "object with property having schema true is valid",
+                "data": {"foo": 1},
+                "valid": true
+            },
+            {
+                "description": "object with property having schema false is invalid",
+                "data": {"bar": 2},
+                "valid": false
+            },
+            {
+                "description": "object with both properties is invalid",
+                "data": {"foo": 1, "bar": 2},
+                "valid": false
+            },
+            {
+                "description": "empty object is valid",
+                "data": {},
+                "valid": true
+            }
+        ]
+    },
+    {
+        "description": "schema dependencies with escaped characters",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "dependencies": {
+                "foo\tbar": {"minProperties": 4},
+                "foo'bar": {"required": ["foo\"bar"]}
+            }
+        },
+        "tests": [
+            {
+                "description": "quoted tab",
+                "data": {
+                    "foo\tbar": 1,
+                    "a": 2,
+                    "b": 3,
+                    "c": 4
+                },
+                "valid": true
+            },
+            {
+                "description": "quoted quote",
+                "data": {
+                    "foo'bar": {"foo\"bar": 1}
+                },
+                "valid": false
+            },
+            {
+                "description": "quoted tab invalid under dependent schema",
+                "data": {
+                    "foo\tbar": 1,
+                    "a": 2
+                },
+                "valid": false
+            },
+            {
+                "description": "quoted quote invalid under dependent schema",
+                "data": {"foo'bar": 1},
+                "valid": false
+            }
+        ]
+    }
+]
+""",
+  "/latest/optional/dynamicRef.json": r"""[
+  {
+      "description": "$dynamicRef skips over intermediate resources - pointer reference across resource boundary",
+      "schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "$id": "https://test.json-schema.org/dynamic-ref-skips-intermediate-resource/optional/main",
+        "type": "object",
+          "properties": {
+              "bar-item": {
+                  "$ref": "bar#/$defs/item"
+              }
+          },
+          "$defs": {
+              "bar": {
+                  "$id": "bar",
+                  "type": "array",
+                  "items": {
+                      "$ref": "item"
+                  },
+                  "$defs": {
+                      "item": {
+                          "$id": "item",
+                          "type": "object",
+                          "properties": {
+                              "content": {
+                                  "$dynamicRef": "#content"
+                              }
+                          },
+                          "$defs": {
+                              "defaultContent": {
+                                  "$dynamicAnchor": "content",
+                                  "type": "integer"
+                              }
+                          }
+                      },
+                      "content": {
+                          "$dynamicAnchor": "content",
+                          "type": "string"
+                      }
+                  }
+              }
+          }
+      },
+      "tests": [
+          {
+              "description": "integer property passes",
+              "data": { "bar-item": { "content": 42 } },
+              "valid": true
+          },
+          {
+              "description": "string property fails",
+              "data": { "bar-item": { "content": "value" } },
+              "valid": false
+          }
+      ]
+  }]""",
   "/latest/optional/ecmascript-regex.json": r"""[
     {
         "description": "ECMA 262 regex $ does not match trailing newline",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "string",
             "pattern": "^abc$"
         },
         "tests": [
             {
-                "description": "matches in Python, but should not in jsonschema",
+                "description": "matches in Python, but not in ECMA 262",
                 "data": "abc\\n",
                 "valid": false
             },
             {
-                "description": "should match",
+                "description": "matches",
                 "data": "abc",
                 "valid": true
             }
@@ -71303,6 +77583,7 @@ Map<String, String> specificationTests = {
     {
         "description": "ECMA 262 regex converts \\t to horizontal tab",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "string",
             "pattern": "^\\t$"
         },
@@ -71322,6 +77603,7 @@ Map<String, String> specificationTests = {
     {
         "description": "ECMA 262 regex escapes control codes with \\c and upper letter",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "string",
             "pattern": "^\\cC$"
         },
@@ -71341,6 +77623,7 @@ Map<String, String> specificationTests = {
     {
         "description": "ECMA 262 regex escapes control codes with \\c and lower letter",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "string",
             "pattern": "^\\cc$"
         },
@@ -71360,6 +77643,7 @@ Map<String, String> specificationTests = {
     {
         "description": "ECMA 262 \\d matches ascii digits only",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "string",
             "pattern": "^\\d$"
         },
@@ -71384,6 +77668,7 @@ Map<String, String> specificationTests = {
     {
         "description": "ECMA 262 \\D matches everything but ascii digits",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "string",
             "pattern": "^\\D$"
         },
@@ -71408,6 +77693,7 @@ Map<String, String> specificationTests = {
     {
         "description": "ECMA 262 \\w matches ascii letters only",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "string",
             "pattern": "^\\w$"
         },
@@ -71427,6 +77713,7 @@ Map<String, String> specificationTests = {
     {
         "description": "ECMA 262 \\W matches everything but ascii letters",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "string",
             "pattern": "^\\W$"
         },
@@ -71446,6 +77733,7 @@ Map<String, String> specificationTests = {
     {
         "description": "ECMA 262 \\s matches whitespace",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "string",
             "pattern": "^\\s$"
         },
@@ -71510,6 +77798,7 @@ Map<String, String> specificationTests = {
     {
         "description": "ECMA 262 \\S matches everything but whitespace",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "string",
             "pattern": "^\\S$"
         },
@@ -71572,8 +77861,11 @@ Map<String, String> specificationTests = {
         ]
     },
     {
-        "description": "unicode semantics should be used for all pattern matching",
-        "schema": { "pattern": "\\p{Letter}cole" },
+        "description": "patterns always use unicode semantics with pattern",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "pattern": "\\p{Letter}cole"
+        },
         "tests": [
             {
                 "description": "ascii character in json string",
@@ -71599,7 +77891,10 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "\\w in patterns matches [A-Za-z0-9_], not unicode letters",
-        "schema": { "pattern": "\\wcole" },
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "pattern": "\\wcole"
+        },
         "tests": [
             {
                 "description": "ascii character in json string",
@@ -71624,8 +77919,11 @@ Map<String, String> specificationTests = {
         ]
     },
     {
-        "description": "unicode characters do not match ascii ranges",
-        "schema": { "pattern": "[a-z]cole" },
+        "description": "pattern with ASCII ranges",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "pattern": "[a-z]cole"
+        },
         "tests": [
             {
                 "description": "literal unicode character in json string",
@@ -71646,49 +77944,56 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "\\d in pattern matches [0-9], not unicode digits",
-        "schema": { "pattern": "^\\d+$" },
-        "tests": [
-            {
-                "description": "ascii digits",
-                "data": "42",
-                "valid": true
-            },
-            {
-                "description": "ascii non-digits",
-                "data": "-%#",
-                "valid": false
-            },
-            {
-                "description": "non-ascii digits (BENGALI DIGIT FOUR, BENGALI DIGIT TWO)",
-                "data": "৪২",
-                "valid": false
-            }
-        ]
-    },
-    {
-        "description": "unicode digits are more than 0 through 9",
-        "schema": { "pattern": "^\\p{digit}+$" },
-        "tests": [
-            {
-                "description": "ascii digits",
-                "data": "42",
-                "valid": true
-            },
-            {
-                "description": "ascii non-digits",
-                "data": "-%#",
-                "valid": false
-            },
-            {
-                "description": "non-ascii digits (BENGALI DIGIT FOUR, BENGALI DIGIT TWO)",
-                "data": "৪২",
-                "valid": true
-            }
-        ]
-    },
-    {
-        "description": "unicode semantics should be used for all patternProperties matching",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "pattern": "^\\d+$"
+        },
+        "tests": [
+            {
+                "description": "ascii digits",
+                "data": "42",
+                "valid": true
+            },
+            {
+                "description": "ascii non-digits",
+                "data": "-%#",
+                "valid": false
+            },
+            {
+                "description": "non-ascii digits (BENGALI DIGIT FOUR, BENGALI DIGIT TWO)",
+                "data": "৪২",
+                "valid": false
+            }
+        ]
+    },
+    {
+        "description": "pattern with non-ASCII digits",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "pattern": "^\\p{digit}+$"
+        },
+        "tests": [
+            {
+                "description": "ascii digits",
+                "data": "42",
+                "valid": true
+            },
+            {
+                "description": "ascii non-digits",
+                "data": "-%#",
+                "valid": false
+            },
+            {
+                "description": "non-ascii digits (BENGALI DIGIT FOUR, BENGALI DIGIT TWO)",
+                "data": "৪২",
+                "valid": true
+            }
+        ]
+    },
+    {
+        "description": "patterns always use unicode semantics with patternProperties",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "object",
             "patternProperties": {
                 "\\p{Letter}cole": true
@@ -71721,6 +78026,7 @@ Map<String, String> specificationTests = {
     {
         "description": "\\w in patternProperties matches [A-Za-z0-9_], not unicode letters",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "object",
             "patternProperties": {
                 "\\wcole": true
@@ -71751,8 +78057,9 @@ Map<String, String> specificationTests = {
         ]
     },
     {
-        "description": "unicode characters do not match ascii ranges",
+        "description": "patternProperties with ASCII ranges",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "object",
             "patternProperties": {
                 "[a-z]cole": true
@@ -71780,6 +78087,7 @@ Map<String, String> specificationTests = {
     {
         "description": "\\d in patternProperties matches [0-9], not unicode digits",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "object",
             "patternProperties": {
                 "^\\d+$": true
@@ -71805,8 +78113,9 @@ Map<String, String> specificationTests = {
         ]
     },
     {
-        "description": "unicode digits are more than 0 through 9",
+        "description": "patternProperties with non-ASCII digits",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "object",
             "patternProperties": {
                 "^\\p{digit}+$": true
@@ -71836,7 +78145,11 @@ Map<String, String> specificationTests = {
   "/latest/optional/float-overflow.json": r"""[
     {
         "description": "all integers are multiples of 0.5, if overflow is handled",
-        "schema": {"type": "integer", "multipleOf": 0.5},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "integer",
+            "multipleOf": 0.5
+        },
         "tests": [
             {
                 "description": "valid if optional overflow handling is implemented",
@@ -71850,6 +78163,7 @@ Map<String, String> specificationTests = {
   "/latest/optional/format-assertion.json": r"""[
     {
         "description": "schema that uses custom metaschema with format-assertion: false",
+        "comment": "The true/false boolean in $vocabulary only controls behavior for implementations that do not recognize the vocabulary. For implementations that do understand format-assertion, the boolean has no impact on validation behavior — hence both test groups produce identical results.",
         "schema": {
             "$id": "https://schema/using/format-assertion/false",
             "$schema": "http://localhost:1234/draft2020-12/format-assertion-false.json",
@@ -71863,6 +78177,7 @@ Map<String, String> specificationTests = {
             },
             {
                 "description": "format-assertion: false: invalid string",
+                "comment": "valid: false is intentional — the false value in $vocabulary only affects unknown vocabulary handling, not validation behavior itself",
                 "data": "not-an-ipv4",
                 "valid": false
             }
@@ -71893,7 +78208,10 @@ Map<String, String> specificationTests = {
   "/latest/optional/format/date-time.json": r"""[
     {
         "description": "validation of date-time strings",
-        "schema": { "format": "date-time" },
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "format": "date-time"
+        },
         "tests": [
             {
                 "description": "all string formats ignore integers",
@@ -71986,6 +78304,21 @@ Map<String, String> specificationTests = {
                 "valid": false
             },
             {
+                "description": "an invalid hour in date-time string",
+                "data": "1990-12-31T24:00:00Z",
+                "valid": false
+            },
+            {
+                "description": "an invalid minute in date-time string",
+                "data": "1990-12-31T15:60:00Z",
+                "valid": false
+            },
+            {
+                "description": "an invalid offset minute in date-time string",
+                "data": "1990-12-31T10:00:00+10:60",
+                "valid": false
+            },
+            {
                 "description": "an invalid date-time string",
                 "data": "06/19/1963 08:30:06 PST",
                 "valid": false
@@ -72011,13 +78344,18 @@ Map<String, String> specificationTests = {
                 "valid": false
             },
             {
-                "description": "non-ascii digits should be rejected in the date portion",
+                "description": "invalid non-ASCII '৪' (a Bengali 4) in date portion",
                 "data": "1963-06-1৪T00:00:00Z",
                 "valid": false
             },
             {
-                "description": "non-ascii digits should be rejected in the time portion",
+                "description": "invalid non-ASCII '৪' (a Bengali 4) in time portion",
                 "data": "1963-06-11T0৪:00:00Z",
+                "valid": false
+            },
+            {
+                "description": "invalid extended year",
+                "data": "+11963-06-19T08:30:06.283185Z",
                 "valid": false
             }
         ]
@@ -72027,7 +78365,10 @@ Map<String, String> specificationTests = {
   "/latest/optional/format/date.json": r"""[
     {
         "description": "validation of date strings",
-        "schema": { "format": "date" },
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "format": "date"
+        },
         "tests": [
             {
                 "description": "all string formats ignore integers",
@@ -72077,16 +78418,6 @@ Map<String, String> specificationTests = {
             {
                 "description": "a valid date string with 28 days in February (normal)",
                 "data": "2021-02-28",
-                "valid": true
-            },
-            {
-                "description": "a invalid date string with 29 days in February (normal)",
-                "data": "2021-02-29",
-                "valid": false
-            },
-            {
-                "description": "a valid date string with 29 days in February (leap)",
-                "data": "2020-02-29",
                 "valid": true
             },
             {
@@ -72195,11 +78526,6 @@ Map<String, String> specificationTests = {
                 "valid": false
             },
             {
-                "description": "a invalid date string with invalid month",
-                "data": "2020-13-01",
-                "valid": false
-            },
-            {
                 "description": "an invalid date string",
                 "data": "06/19/1963",
                 "valid": false
@@ -72225,11 +78551,6 @@ Map<String, String> specificationTests = {
                 "valid": false
             },
             {
-                "description": "invalid month-day combination",
-                "data": "1998-04-31",
-                "valid": false
-            },
-            {
                 "description": "2021 is not a leap year",
                 "data": "2021-02-29",
                 "valid": false
@@ -72240,8 +78561,195 @@ Map<String, String> specificationTests = {
                 "valid": true
             },
             {
-                "description": "non-ascii digits should be rejected",
+                "description": "invalid non-ASCII '৪' (a Bengali 4)",
                 "data": "1963-06-1৪",
+                "valid": false
+            },
+            {
+                "description": "invalid: non-ASCII Bengali digit in month field",
+                "data": "2020-0৪-01",
+                "valid": false
+            },
+            {
+                "description": "ISO8601 / non-RFC3339: YYYYMMDD without dashes (2023-03-28)",
+                "data": "20230328",
+                "valid": false
+            },
+            {
+                "description": "ISO8601 / non-RFC3339: week number implicit day of week (2023-01-02)",
+                "data": "2023-W01",
+                "valid": false
+            },
+            {
+                "description": "ISO8601 / non-RFC3339: week number with day of week (2023-03-28)",
+                "data": "2023-W13-2",
+                "valid": false
+            },
+            {
+                "description": "ISO8601 / non-RFC3339: week number rollover to next year (2023-01-01)",
+                "data": "2022W527",
+                "valid": false
+            },
+            {
+                "description": "an invalid time string in date-time format",
+                "data": "2020-11-28T23:55:45Z",
+                "valid": false
+            },
+            {
+                "description": "century year 0100 is not a leap year",
+                "comment": "https://www.rfc-editor.org/rfc/rfc3339#appendix-C — 100 % 100 == 0 but 100 % 400 != 0",
+                "data": "0100-02-29",
+                "valid": false
+            },
+            {
+                "description": "century year 0400 is a leap year",
+                "comment": "https://www.rfc-editor.org/rfc/rfc3339#appendix-C — 400-year cycle boundary",
+                "data": "0400-02-29",
+                "valid": true
+            },
+            {
+                "description": "century year 2100 is not a leap year",
+                "comment": "https://www.rfc-editor.org/rfc/rfc3339#appendix-C — future century year",
+                "data": "2100-02-29",
+                "valid": false
+            },
+            {
+                "description": "invalid: leading whitespace is not permitted",
+                "comment": "https://www.rfc-editor.org/rfc/rfc3339#section-5.6 — full-date grammar does not include whitespace",
+                "data": " 2024-01-15",
+                "valid": false
+            },
+            {
+                "description": "invalid: trailing whitespace is not permitted",
+                "comment": "https://www.rfc-editor.org/rfc/rfc3339#section-5.6 — full-date grammar does not include whitespace",
+                "data": "2024-01-15 ",
+                "valid": false
+            },
+            {
+                "description": "invalid: month 00 is not valid per date-month range 01-12",
+                "comment": "https://www.rfc-editor.org/rfc/rfc3339#section-5.6 — date-month = 2DIGIT ; 01-12",
+                "data": "2024-00-15",
+                "valid": false
+            },
+            {
+                "description": "invalid: day 00 is not valid per date-mday minimum of 01",
+                "comment": "https://www.rfc-editor.org/rfc/rfc3339#section-5.6 — date-mday = 2DIGIT ; 01-28/29/30/31",
+                "data": "2024-01-00",
+                "valid": false
+            },
+            {
+                "description": "invalid: empty string",
+                "data": "",
+                "valid": false
+            },
+            {
+                "description": "invalid: embedded whitespace between year and month",
+                "data": "2020 -01-01",
+                "valid": false
+            },
+            {
+                "description": "invalid: trailing character after valid full-date",
+                "data": "2020-01-01X",
+                "valid": false
+            },
+            {
+                "description": "invalid: trailing Z after full-date",
+                "data": "2020-01-01Z",
+                "valid": false
+            },
+            {
+                "description": "invalid: full-date followed by space and time component",
+                "data": "2020-01-01 00:00:00Z",
+                "valid": false
+            },
+            {
+                "description": "valid: four-digit year 0001",
+                "data": "0001-01-01",
+                "valid": true
+            },
+            {
+                "description": "invalid: two-digit year (N-2 digits)",
+                "data": "20-01-01",
+                "valid": false
+            },
+            {
+                "description": "invalid: three-digit year (N-1 digits)",
+                "data": "998-01-01",
+                "valid": false
+            },
+            {
+                "description": "invalid: five-digit year (N+1 digits)",
+                "data": "12020-01-01",
+                "valid": false
+            },
+            {
+                "description": "invalid: positive sign prefix on year",
+                "data": "+2020-01-01",
+                "valid": false
+            },
+            {
+                "description": "invalid: negative sign prefix on year",
+                "data": "-2020-01-01",
+                "valid": false
+            },
+            {
+                "description": "invalid: non-ASCII Bengali digit in year field",
+                "data": "২020-01-01",
+                "valid": false
+            },
+            {
+                "description": "invalid: alphabetic characters in year field",
+                "data": "YYYY-01-01",
+                "valid": false
+            },
+            {
+                "description": "invalid: three-digit month (N+1 digits)",
+                "data": "2020-001-01",
+                "valid": false
+            },
+            {
+                "description": "invalid: alphabetic characters in month field",
+                "data": "2020-MM-01",
+                "valid": false
+            },
+            {
+                "description": "invalid: three-digit day (N+1 digits)",
+                "data": "2020-01-001",
+                "valid": false
+            },
+            {
+                "description": "invalid: alphabetic characters in day field",
+                "data": "2020-01-DD",
+                "valid": false
+            },
+            {
+                "description": "invalid: colon separators",
+                "data": "2020:01:01",
+                "valid": false
+            },
+            {
+                "description": "invalid: dot separators",
+                "data": "2020.01.01",
+                "valid": false
+            },
+            {
+                "description": "invalid: space separators",
+                "data": "2020 01 01",
+                "valid": false
+            },
+            {
+                "description": "invalid: mixed slash and hyphen separators",
+                "data": "2020-01/01",
+                "valid": false
+            },
+            {
+                "description": "invalid: duplicated first hyphen",
+                "data": "2020--01-01",
+                "valid": false
+            },
+            {
+                "description": "invalid: duplicated second hyphen",
+                "data": "2020-01--01",
                 "valid": false
             }
         ]
@@ -72251,7 +78759,11 @@ Map<String, String> specificationTests = {
   "/latest/optional/format/duration.json": r"""[
     {
         "description": "validation of duration strings",
-        "schema": { "format": "duration" },
+        "comment": "RFC 3339 Appendix A defines the ABNF grammar for ISO-8601 durations used by JSON Schema format 'duration'. These tests enforce only the syntax defined by that grammar.",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "format": "duration"
+        },
         "tests": [
             {
                 "description": "all string formats ignore integers",
@@ -72291,6 +78803,11 @@ Map<String, String> specificationTests = {
             {
                 "description": "an invalid duration string",
                 "data": "PT1D",
+                "valid": false
+            },
+            {
+                "description": "must start with P",
+                "data": "4DT12H30M5S",
                 "valid": false
             },
             {
@@ -72369,18 +78886,123 @@ Map<String, String> specificationTests = {
                 "valid": false
             },
             {
-                "description": "non-ascii digits should be rejected",
+                "description": "invalid non-ASCII '২' (a Bengali 2)",
                 "data": "P২Y",
                 "valid": false
+            },
+            {
+                "description": "element without unit",
+                "data": "P1",
+                "valid": false
+            },
+            {
+                "description": "all date and time components",
+                "data": "P1Y2M3DT4H5M6S",
+                "valid": true
+            },
+            {
+                "description": "date components only",
+                "data": "P1Y2M3D",
+                "valid": true
+            },
+            {
+                "description": "time components only",
+                "data": "PT1H2M3S",
+                "valid": true
+            },
+            {
+                "description": "month and day",
+                "data": "P1M2D",
+                "valid": true
+            },
+            {
+                "description": "hour and minute",
+                "data": "PT1H30M",
+                "valid": true
+            },
+            {
+                "description": "multi-digit values in all components",
+                "data": "P10Y10M10DT10H10M10S",
+                "valid": true
+            },
+            {
+                "description": "fractional duration is not allowed by RFC 3339 ABNF",
+                "comment": "numeric components use 1*DIGIT where DIGIT = %x30-39; '.' is not allowed",
+                "data": "PT0.5S",
+                "valid": false
+            },
+            {
+                "description": "leading whitespace is invalid",
+                "data": " P1D",
+                "valid": false
+            },
+            {
+                "description": "trailing whitespace is invalid",
+                "data": "P1D ",
+                "valid": false
+            },
+            {
+                "description": "empty string is invalid",
+                "data": "",
+                "valid": false
+            },
+            {
+                "description": "years and months can appear without days",
+                "data": "P1Y2M",
+                "valid": true
+            },
+            {
+                "description": "years and days cannot appear without months",
+                "data": "P1Y2D",
+                "valid": false
+            },
+            {
+                "description": "months and days can appear without years",
+                "data": "P1M2D",
+                "valid": true
+            },
+            {
+                "description": "hours and minutes can appear without seconds",
+                "data": "PT1H2M",
+                "valid": true
+            },
+            {
+                "description": "hours and seconds cannot appear without minutes",
+                "data": "PT1H2S",
+                "valid": false
+            },
+            {
+                "description": "minutes and seconds can appear without hour",
+                "data": "PT1M2S",
+                "valid": true
             }
         ]
     }
 ]
 """,
+  "/latest/optional/format/ecmascript-regex.json": r"""[
+  {
+    "description": "\\a is not an ECMA 262 control escape",
+    "schema": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "format": "regex"
+    },
+    "tests": [
+      {
+        "description": "when used as a pattern",
+        "data": "\\a",
+        "valid": false
+      }
+    ]
+  }
+]""",
   "/latest/optional/format/email.json": r"""[
     {
         "description": "validation of e-mail addresses",
-        "schema": { "format": "email" },
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "format": "email"
+        },
         "tests": [
             {
                 "description": "all string formats ignore integers",
@@ -72438,6 +79060,31 @@ Map<String, String> specificationTests = {
                 "valid": true
             },
             {
+                "description": "a quoted string with a space in the local part is valid",
+                "data": "\"joe bloggs\"@example.com",
+                "valid": true
+            },
+            {
+                "description": "a quoted string with a double dot in the local part is valid",
+                "data": "\"joe..bloggs\"@example.com",
+                "valid": true
+            },
+            {
+                "description": "a quoted string with a @ in the local part is valid",
+                "data": "\"joe@bloggs\"@example.com",
+                "valid": true
+            },
+            {
+                "description": "an IPv4-address-literal after the @ is valid",
+                "data": "joe.bloggs@[127.0.0.1]",
+                "valid": true
+            },
+            {
+                "description": "an IPv6-address-literal after the @ is valid",
+                "data": "joe.bloggs@[IPv6:::1]",
+                "valid": true
+            },
+            {
                 "description": "dot before local part is not valid",
                 "data": ".test@example.com",
                 "valid": false
@@ -72456,6 +79103,41 @@ Map<String, String> specificationTests = {
                 "description": "two subsequent dots inside local part are not valid",
                 "data": "te..st@example.com",
                 "valid": false
+            },
+            {
+                "description": "an invalid domain",
+                "data": "joe.bloggs@invalid=domain.com",
+                "valid": false
+            },
+            {
+                "description": "an invalid IPv4-address-literal",
+                "data": "joe.bloggs@[127.0.0.300]",
+                "valid": false
+            },
+            {
+                "description": "two email addresses is not valid",
+                "data": "user1@oceania.org, user2@oceania.org",
+                "valid": false
+            },
+            {
+                "description": "full \"From\" header is invalid",
+                "data": "\"Winston Smith\" <winston.smith@recdep.minitrue> (Records Department)",
+                "valid": false
+            },
+            {
+                "description": "local part is required",
+                "data": "@example.com",
+                "valid": false
+            },
+            {
+                "description": "domain is required",
+                "data": "joe.bloggs@",
+                "valid": false
+            },
+            {
+                "description": "unquoted space in local part is invalid",
+                "data": "joe bloggs@example.com",
+                "valid": false
             }
         ]
     }
@@ -72464,7 +79146,10 @@ Map<String, String> specificationTests = {
   "/latest/optional/format/hostname.json": r"""[
     {
         "description": "validation of host names",
-        "schema": { "format": "hostname" },
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "format": "hostname"
+        },
         "tests": [
             {
                 "description": "all string formats ignore integers",
@@ -72502,24 +79187,54 @@ Map<String, String> specificationTests = {
                 "valid": true
             },
             {
-                "description": "a valid punycoded IDN hostname",
-                "data": "xn--4gbwdl.xn--wgbh1c",
+                "description": "single label",
+                "data": "hostname",
                 "valid": true
             },
             {
-                "description": "a host name starting with an illegal character",
-                "data": "-a-host-name-that-starts-with--",
+                "description": "single label with digits",
+                "data": "h0stn4me",
+                "valid": true
+            },
+            {
+                "description": "single label starting with digit",
+                "data": "1host",
+                "valid": true
+            },
+            {
+                "description": "single label ending with digit",
+                "data": "hostnam3",
+                "valid": true
+            },
+            {
+                "description": "empty string",
+                "data": "",
                 "valid": false
             },
             {
-                "description": "a host name containing illegal characters",
-                "data": "not_a_valid_host_name",
+                "description": "single dot",
+                "data": ".",
                 "valid": false
             },
             {
-                "description": "a host name with a component too long",
-                "data": "a-vvvvvvvvvvvvvvvveeeeeeeeeeeeeeeerrrrrrrrrrrrrrrryyyyyyyyyyyyyyyy-long-host-name-component",
+                "description": "leading dot",
+                "data": ".example",
                 "valid": false
+            },
+            {
+                "description": "trailing dot",
+                "data": "example.",
+                "valid": false
+            },
+            {
+                "description": "IDN label separator",
+                "data": "example\uff0ecom",
+                "valid": false
+            },
+            {
+                "description": "single label with hyphen",
+                "data": "host-name",
+                "valid": true
             },
             {
                 "description": "starts with hyphen",
@@ -72532,28 +79247,258 @@ Map<String, String> specificationTests = {
                 "valid": false
             },
             {
-                "description": "starts with underscore",
-                "data": "_hostname",
-                "valid": false
-            },
-            {
-                "description": "ends with underscore",
-                "data": "hostname_",
-                "valid": false
-            },
-            {
                 "description": "contains underscore",
                 "data": "host_name",
                 "valid": false
             },
             {
-                "description": "maximum label length",
+                "description": "exceeds maximum overall length (256)",
+                "data": "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijk.abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijk.abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijk.abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijk.com",
+                "valid": false
+            },
+            {
+                "description": "maximum label length (63)",
                 "data": "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijk.com",
                 "valid": true
             },
             {
-                "description": "exceeds maximum label length",
+                "description": "exceeds maximum label length (63)",
                 "data": "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijkl.com",
+                "valid": false
+            }
+        ]
+    },
+    {
+        "description": "validation of A-label (punycode) host names",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "format": "hostname"
+        },
+        "tests": [
+            {
+                "description": "invalid Punycode",
+                "comment": "https://tools.ietf.org/html/rfc5891#section-4.4 https://tools.ietf.org/html/rfc5890#section-2.3.2.1",
+                "data": "xn--X",
+                "valid": false
+            },
+            {
+                "description": "a valid host name (example.test in Hangul)",
+                "data": "xn--9n2bp8q.xn--9t4b11yi5a",
+                "valid": true
+            },
+            {
+                "description": "contains illegal char U+302E Hangul single dot tone mark",
+                "data": "xn--07jt112bpxg.xn--9t4b11yi5a",
+                "valid": false
+            },
+            {
+                "description": "Begins with a Spacing Combining Mark",
+                "comment": "https://tools.ietf.org/html/rfc5891#section-4.2.3.2",
+                "data": "xn--hello-txk",
+                "valid": false
+            },
+            {
+                "description": "Begins with a Nonspacing Mark",
+                "comment": "https://tools.ietf.org/html/rfc5891#section-4.2.3.2",
+                "data": "xn--hello-zed",
+                "valid": false
+            },
+            {
+                "description": "Begins with an Enclosing Mark",
+                "comment": "https://tools.ietf.org/html/rfc5891#section-4.2.3.2",
+                "data": "xn--hello-6bf",
+                "valid": false
+            },
+            {
+                "description": "Exceptions that are PVALID, left-to-right chars",
+                "comment": "https://tools.ietf.org/html/rfc5891#section-4.2.2 https://tools.ietf.org/html/rfc5892#section-2.6",
+                "data": "xn--zca29lwxobi7a",
+                "valid": true
+            },
+            {
+                "description": "Exceptions that are PVALID, right-to-left chars",
+                "comment": "https://tools.ietf.org/html/rfc5891#section-4.2.2 https://tools.ietf.org/html/rfc5892#section-2.6",
+                "data": "xn--qmbc",
+                "valid": true
+            },
+            {
+                "description": "Exceptions that are DISALLOWED, right-to-left chars",
+                "comment": "https://tools.ietf.org/html/rfc5891#section-4.2.2 https://tools.ietf.org/html/rfc5892#section-2.6",
+                "data": "xn--chb89f",
+                "valid": false
+            },
+            {
+                "description": "Exceptions that are DISALLOWED, left-to-right chars",
+                "comment": "https://tools.ietf.org/html/rfc5891#section-4.2.2 https://tools.ietf.org/html/rfc5892#section-2.6 Note: The two combining marks (U+302E and U+302F) are in the middle and not at the start",
+                "data": "xn--07jceefgh4c",
+                "valid": false
+            },
+            {
+                "description": "MIDDLE DOT with no preceding 'l'",
+                "comment": "https://tools.ietf.org/html/rfc5891#section-4.2.3.3 https://tools.ietf.org/html/rfc5892#appendix-A.3",
+                "data": "xn--al-0ea",
+                "valid": false
+            },
+            {
+                "description": "MIDDLE DOT with nothing preceding",
+                "comment": "https://tools.ietf.org/html/rfc5891#section-4.2.3.3 https://tools.ietf.org/html/rfc5892#appendix-A.3",
+                "data": "xn--l-fda",
+                "valid": false
+            },
+            {
+                "description": "MIDDLE DOT with no following 'l'",
+                "comment": "https://tools.ietf.org/html/rfc5891#section-4.2.3.3 https://tools.ietf.org/html/rfc5892#appendix-A.3",
+                "data": "xn--la-0ea",
+                "valid": false
+            },
+            {
+                "description": "MIDDLE DOT with nothing following",
+                "comment": "https://tools.ietf.org/html/rfc5891#section-4.2.3.3 https://tools.ietf.org/html/rfc5892#appendix-A.3",
+                "data": "xn--l-gda",
+                "valid": false
+            },
+            {
+                "description": "MIDDLE DOT with surrounding 'l's",
+                "comment": "https://tools.ietf.org/html/rfc5891#section-4.2.3.3 https://tools.ietf.org/html/rfc5892#appendix-A.3",
+                "data": "xn--ll-0ea",
+                "valid": true
+            },
+            {
+                "description": "Greek KERAIA not followed by Greek",
+                "comment": "https://tools.ietf.org/html/rfc5891#section-4.2.3.3 https://tools.ietf.org/html/rfc5892#appendix-A.4",
+                "data": "xn--S-jib3p",
+                "valid": false
+            },
+            {
+                "description": "Greek KERAIA not followed by anything",
+                "comment": "https://tools.ietf.org/html/rfc5891#section-4.2.3.3 https://tools.ietf.org/html/rfc5892#appendix-A.4",
+                "data": "xn--wva3j",
+                "valid": false
+            },
+            {
+                "description": "Greek KERAIA followed by Greek",
+                "comment": "https://tools.ietf.org/html/rfc5891#section-4.2.3.3 https://tools.ietf.org/html/rfc5892#appendix-A.4",
+                "data": "xn--wva3je",
+                "valid": true
+            },
+            {
+                "description": "Hebrew GERESH not preceded by Hebrew",
+                "comment": "https://tools.ietf.org/html/rfc5891#section-4.2.3.3 https://tools.ietf.org/html/rfc5892#appendix-A.5",
+                "data": "xn--A-2hc5h",
+                "valid": false
+            },
+            {
+                "description": "Hebrew GERESH not preceded by anything",
+                "comment": "https://tools.ietf.org/html/rfc5891#section-4.2.3.3 https://tools.ietf.org/html/rfc5892#appendix-A.5",
+                "data": "xn--5db1e",
+                "valid": false
+            },
+            {
+                "description": "Hebrew GERESH preceded by Hebrew",
+                "comment": "https://tools.ietf.org/html/rfc5891#section-4.2.3.3 https://tools.ietf.org/html/rfc5892#appendix-A.5",
+                "data": "xn--4dbc5h",
+                "valid": true
+            },
+            {
+                "description": "Hebrew GERSHAYIM not preceded by Hebrew",
+                "comment": "https://tools.ietf.org/html/rfc5891#section-4.2.3.3 https://tools.ietf.org/html/rfc5892#appendix-A.6",
+                "data": "xn--A-2hc8h",
+                "valid": false
+            },
+            {
+                "description": "Hebrew GERSHAYIM not preceded by anything",
+                "comment": "https://tools.ietf.org/html/rfc5891#section-4.2.3.3 https://tools.ietf.org/html/rfc5892#appendix-A.6",
+                "data": "xn--5db3e",
+                "valid": false
+            },
+            {
+                "description": "Hebrew GERSHAYIM preceded by Hebrew",
+                "comment": "https://tools.ietf.org/html/rfc5891#section-4.2.3.3 https://tools.ietf.org/html/rfc5892#appendix-A.6",
+                "data": "xn--4dbc8h",
+                "valid": true
+            },
+            {
+                "description": "KATAKANA MIDDLE DOT with no Hiragana, Katakana, or Han",
+                "comment": "https://tools.ietf.org/html/rfc5891#section-4.2.3.3 https://tools.ietf.org/html/rfc5892#appendix-A.7",
+                "data": "xn--defabc-k64e",
+                "valid": false
+            },
+            {
+                "description": "KATAKANA MIDDLE DOT with no other characters",
+                "comment": "https://tools.ietf.org/html/rfc5891#section-4.2.3.3 https://tools.ietf.org/html/rfc5892#appendix-A.7",
+                "data": "xn--vek",
+                "valid": false
+            },
+            {
+                "description": "KATAKANA MIDDLE DOT with Hiragana",
+                "comment": "https://tools.ietf.org/html/rfc5891#section-4.2.3.3 https://tools.ietf.org/html/rfc5892#appendix-A.7",
+                "data": "xn--k8j5u",
+                "valid": true
+            },
+            {
+                "description": "KATAKANA MIDDLE DOT with Katakana",
+                "comment": "https://tools.ietf.org/html/rfc5891#section-4.2.3.3 https://tools.ietf.org/html/rfc5892#appendix-A.7",
+                "data": "xn--bck0j",
+                "valid": true
+            },
+            {
+                "description": "KATAKANA MIDDLE DOT with Han",
+                "comment": "https://tools.ietf.org/html/rfc5891#section-4.2.3.3 https://tools.ietf.org/html/rfc5892#appendix-A.7",
+                "data": "xn--vek778f",
+                "valid": true
+            },
+            {
+                "description": "Arabic-Indic digits mixed with Extended Arabic-Indic digits",
+                "comment": "https://tools.ietf.org/html/rfc5891#section-4.2.3.3 https://tools.ietf.org/html/rfc5892#appendix-A.8",
+                "data": "xn--ngb6iyr",
+                "valid": false
+            },
+            {
+                "description": "Arabic-Indic digits not mixed with Extended Arabic-Indic digits",
+                "comment": "https://tools.ietf.org/html/rfc5891#section-4.2.3.3 https://tools.ietf.org/html/rfc5892#appendix-A.8",
+                "data": "xn--ngba1o",
+                "valid": true
+            },
+            {
+                "description": "Extended Arabic-Indic digits not mixed with Arabic-Indic digits",
+                "comment": "https://tools.ietf.org/html/rfc5891#section-4.2.3.3 https://tools.ietf.org/html/rfc5892#appendix-A.9",
+                "data": "xn--0-gyc",
+                "valid": true
+            },
+            {
+                "description": "ZERO WIDTH JOINER not preceded by Virama",
+                "comment": "https://tools.ietf.org/html/rfc5891#section-4.2.3.3 https://tools.ietf.org/html/rfc5892#appendix-A.2 https://www.unicode.org/review/pr-37.pdf",
+                "data": "xn--11b2er09f",
+                "valid": false
+            },
+            {
+                "description": "ZERO WIDTH JOINER not preceded by anything",
+                "comment": "https://tools.ietf.org/html/rfc5891#section-4.2.3.3 https://tools.ietf.org/html/rfc5892#appendix-A.2 https://www.unicode.org/review/pr-37.pdf",
+                "data": "xn--02b508i",
+                "valid": false
+            },
+            {
+                "description": "ZERO WIDTH JOINER preceded by Virama",
+                "comment": "https://tools.ietf.org/html/rfc5891#section-4.2.3.3 https://tools.ietf.org/html/rfc5892#appendix-A.2 https://www.unicode.org/review/pr-37.pdf",
+                "data": "xn--11b2ezcw70k",
+                "valid": true
+            },
+            {
+                "description": "ZERO WIDTH NON-JOINER preceded by Virama",
+                "comment": "https://tools.ietf.org/html/rfc5891#section-4.2.3.3 https://tools.ietf.org/html/rfc5892#appendix-A.1",
+                "data": "xn--11b2ezcs70k",
+                "valid": true
+            },
+            {
+                "description": "ZERO WIDTH NON-JOINER not preceded by Virama but matches regexp",
+                "comment": "https://tools.ietf.org/html/rfc5891#section-4.2.3.3 https://tools.ietf.org/html/rfc5892#appendix-A.1 https://www.w3.org/TR/alreq/#h_disjoining_enforcement",
+                "data": "xn--ngba5hb2804a",
+                "valid": true
+            },
+            {
+                "description": "contains \"--\" in the 3rd and 4th position",
+                "comment": "https://tools.ietf.org/html/rfc5891#section-4.2.3.1 https://tools.ietf.org/html/rfc5890#section-2.3.2.1",
+                "data": "XN--aa---o47jg78q",
                 "valid": false
             }
         ]
@@ -72563,7 +79508,10 @@ Map<String, String> specificationTests = {
   "/latest/optional/format/idn-email.json": r"""[
     {
         "description": "validation of an internationalized e-mail addresses",
-        "schema": { "format": "idn-email" },
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "format": "idn-email"
+        },
         "tests": [
             {
                 "description": "all string formats ignore integers",
@@ -72601,7 +79549,7 @@ Map<String, String> specificationTests = {
                 "valid": true
             },
             {
-                "description": "an invalid idn e-mail address",
+                "description": "an invalid e-mail/idn e-mail address",
                 "data": "2962",
                 "valid": false
             },
@@ -72611,9 +79559,29 @@ Map<String, String> specificationTests = {
                 "valid": true
             },
             {
-                "description": "an invalid e-mail address",
-                "data": "2962",
+                "description": "a non-ASCII local part with an ASCII domain is valid",
+                "data": "δοκιμή@example.com",
+                "valid": true
+            },
+            {
+                "description": "a non-ASCII quoted local part is valid",
+                "data": "\"δοκιμή\"@example.com",
+                "valid": true
+            },
+            {
+                "description": "a local part with a lone UTF-16 surrogate is invalid",
+                "data": "\ud800@example.com",
                 "valid": false
+            },
+            {
+                "description": "a domain label that is not in Unicode NFC is valid",
+                "data": "user@cafe\u0301.com",
+                "valid": true
+            },
+            {
+                "description": "a local part that is not in Unicode NFC is valid",
+                "data": "cafe\u0301@example.com",
+                "valid": true
             }
         ]
     }
@@ -72622,7 +79590,10 @@ Map<String, String> specificationTests = {
   "/latest/optional/format/idn-hostname.json": r"""[
     {
         "description": "validation of internationalized host names",
-        "schema": { "format": "idn-hostname" },
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "format": "idn-hostname"
+        },
         "tests": [
             {
                 "description": "all string formats ignore integers",
@@ -72670,8 +79641,13 @@ Map<String, String> specificationTests = {
                 "valid": false
             },
             {
-                "description": "a host name with a component too long",
-                "data": "실실실실실실실실실실실실실실실실실실실실실실실실실실실실실실실실실실실실실실실실실실실실실실실실실실실실례례테스트례례례례례례례례례례례례례례례례례테스트례례례례례례례례례례례례례례례례례례례테스트례례례례례례례례례례례례테스트례례실례.테스트",
+                "description": "a single label of 63 characters is valid",
+                "data": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                "valid": true
+            },
+            {
+                "description": "a single label of 64 characters is too long",
+                "data": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
                 "valid": false
             },
             {
@@ -72875,7 +79851,7 @@ Map<String, String> specificationTests = {
             {
                 "description": "Arabic-Indic digits mixed with Extended Arabic-Indic digits",
                 "comment": "https://tools.ietf.org/html/rfc5891#section-4.2.3.3 https://tools.ietf.org/html/rfc5892#appendix-A.8",
-                "data": "\u0660\u06f0",
+                "data": "\u0628\u0660\u06f0",
                 "valid": false
             },
             {
@@ -72919,6 +79895,219 @@ Map<String, String> specificationTests = {
                 "comment": "https://tools.ietf.org/html/rfc5891#section-4.2.3.3 https://tools.ietf.org/html/rfc5892#appendix-A.1 https://www.w3.org/TR/alreq/#h_disjoining_enforcement",
                 "data": "\u0628\u064a\u200c\u0628\u064a",
                 "valid": true
+            },
+            {
+                "description": "single label",
+                "data": "hostname",
+                "valid": true
+            },
+            {
+                "description": "single label with hyphen",
+                "data": "host-name",
+                "valid": true
+            },
+            {
+                "description": "single label with digits",
+                "data": "h0stn4me",
+                "valid": true
+            },
+            {
+                "description": "single label starting with digit",
+                "data": "1host",
+                "valid": true
+            },
+            {
+                "description": "single label ending with digit",
+                "data": "hostnam3",
+                "valid": true
+            },
+            {
+                "description": "empty string",
+                "data": "",
+                "valid": false
+            },
+            {
+                "description": "zero width non-joiner must pass at every occurrence",
+                "comment": "https://www.rfc-editor.org/rfc/rfc5892#appendix-A.1",
+                "data": "\u0915\u094d\u200c\u0937x\u200cy",
+                "valid": false
+            },
+            {
+                "description": "Bidi domain name with a digit-first label is invalid",
+                "comment": "https://www.rfc-editor.org/rfc/rfc5893#section-2 a label in a Bidi domain name must start with an L, R or AL character",
+                "data": "0a.\u05d0",
+                "valid": false
+            },
+            {
+                "description": "label starting with a digit before a right-to-left letter is invalid",
+                "comment": "https://www.rfc-editor.org/rfc/rfc5893#section-2",
+                "data": "0\u0627",
+                "valid": false
+            },
+            {
+                "description": "left-to-right label containing a right-to-left letter is invalid",
+                "comment": "https://www.rfc-editor.org/rfc/rfc5893#section-2",
+                "data": "a\u05d0",
+                "valid": false
+            },
+            {
+                "description": "right-to-left label mixing both digit types is invalid",
+                "comment": "https://www.rfc-editor.org/rfc/rfc5893#section-2",
+                "data": "\u05d00\u0660",
+                "valid": false
+            },
+            {
+                "description": "A-label that decodes to a disallowed code point is invalid",
+                "comment": "https://www.rfc-editor.org/rfc/rfc5890#section-2.3.2.1 https://www.rfc-editor.org/rfc/rfc5892#section-2.6",
+                "data": "xn--7a",
+                "valid": false
+            },
+            {
+                "description": "A-label that decodes to a Bidi rule violation is invalid",
+                "comment": "https://www.rfc-editor.org/rfc/rfc5890#section-2.3.2.1 https://www.rfc-editor.org/rfc/rfc5893",
+                "data": "xn--0ca24w",
+                "valid": false
+            },
+            {
+                "description": "a U-label whose A-label form is longer than 63 octets is invalid",
+                "comment": "https://www.rfc-editor.org/rfc/rfc5891#section-4.2.4 the 63-octet limit is on the A-label form, not the code point count",
+                "data": "\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc",
+                "valid": false
+            },
+            {
+                "description": "empty label between two dots is invalid",
+                "comment": "https://www.rfc-editor.org/rfc/rfc1034#section-3.1",
+                "data": "a..b",
+                "valid": false
+            },
+            {
+                "description": "a name longer than 253 characters is invalid",
+                "data": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                "valid": false
+            },
+            {
+                "description": "A-label that decodes to only ASCII is invalid",
+                "comment": "https://www.rfc-editor.org/rfc/rfc5890#section-2.3.2.1 a U-label must have at least one non-ASCII character",
+                "data": "xn--example-",
+                "valid": false
+            },
+            {
+                "description": "non-canonical Punycode that does not re-encode to itself is invalid",
+                "comment": "https://www.rfc-editor.org/rfc/rfc5891#section-5.4 a label decoded from Punycode must be identical to the original A-label",
+                "data": "xn---9uc",
+                "valid": false
+            }
+        ]
+    },
+    {
+        "description": "validation of separators in internationalized host names",
+        "specification": [
+            {"rfc3490": "3.1", "quote": "Whenever dots are used as label separators, the following characters MUST be recognized as dots: U+002E (full stop), U+3002 (ideographic full stop), U+FF0E (fullwidth full stop), U+FF61(halfwidth ideographic full stop)"}
+        ],
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "format": "idn-hostname"
+        },
+        "tests": [
+            {
+                "description": "single dot",
+                "data": ".",
+                "valid": false
+            },
+            {
+                "description": "single ideographic full stop",
+                "data": "\u3002",
+                "valid": false
+            },
+            {
+                "description": "single fullwidth full stop",
+                "data": "\uff0e",
+                "valid": false
+            },
+            {
+                "description": "single halfwidth ideographic full stop",
+                "data": "\uff61",
+                "valid": false
+            },
+            {
+                "description": "dot as label separator",
+                "data": "a.b",
+                "valid": true
+            },
+            {
+                "description": "ideographic full stop as label separator",
+                "data": "a\u3002b",
+                "valid": true
+            },
+            {
+                "description": "fullwidth full stop as label separator",
+                "data": "a\uff0eb",
+                "valid": true
+            },
+            {
+                "description": "halfwidth ideographic full stop as label separator",
+                "data": "a\uff61b",
+                "valid": true
+            },
+            {
+                "description": "leading dot",
+                "data": ".example",
+                "valid": false
+            },
+            {
+                "description": "leading ideographic full stop",
+                "data": "\u3002example",
+                "valid": false
+            },
+            {
+                "description": "leading fullwidth full stop",
+                "data": "\uff0eexample",
+                "valid": false
+            },
+            {
+                "description": "leading halfwidth ideographic full stop",
+                "data": "\uff61example",
+                "valid": false
+            },
+            {
+                "description": "trailing dot",
+                "data": "example.",
+                "valid": false
+            },
+            {
+                "description": "trailing ideographic full stop",
+                "data": "example\u3002",
+                "valid": false
+            },
+            {
+                "description": "trailing fullwidth full stop",
+                "data": "example\uff0e",
+                "valid": false
+            },
+            {
+                "description": "trailing halfwidth ideographic full stop",
+                "data": "example\uff61",
+                "valid": false
+            },
+            {
+                "description": "label too long if separator ignored (full stop)",
+                "data": "παράδειγμαπαράδειγμαπαράδειγμαπαράδειγμαπαράδειγμαπα.com",
+                "valid": true
+            },
+            {
+                "description": "label too long if separator ignored (ideographic full stop)",
+                "data": "παράδειγμαπαράδειγμαπαράδειγμαπαράδειγμαπαράδειγμαπα\u3002com",
+                "valid": true
+            },
+            {
+                "description": "label too long if separator ignored (fullwidth full stop)",
+                "data": "παράδειγμαπαράδειγμαπαράδειγμαπαράδειγμαπαράδειγμαπα\uff0ecom",
+                "valid": true
+            },
+            {
+                "description": "label too long if separator ignored (halfwidth ideographic full stop)",
+                "data": "παράδειγμαπαράδειγμαπαράδειγμαπαράδειγμαπαράδειγμαπα\uff61com",
+                "valid": true
             }
         ]
     }
@@ -72927,7 +80116,11 @@ Map<String, String> specificationTests = {
   "/latest/optional/format/ipv4.json": r"""[
     {
         "description": "validation of IP addresses",
-        "schema": { "format": "ipv4" },
+        "comment": "RFC 2673, Section 3.2: dotted-quad = decbyte \".\" decbyte \".\" decbyte \".\" decbyte. A 'decbyte' (1*3DIGIT) restricts semantic values to 0-255, allows leading zeros, and strictly forbids symbols, alpha/hex, whitespace, and non-ASCII characters.",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "format": "ipv4"
+        },
         "tests": [
             {
                 "description": "all string formats ignore integers",
@@ -72980,6 +80173,16 @@ Map<String, String> specificationTests = {
                 "valid": false
             },
             {
+                "description": "a 2-part address resolving to a routable IP (inet_aton shorthand)",
+                "data": "127.1",
+                "valid": false
+            },
+            {
+                "description": "a 3-part address resolving to a routable IP (inet_aton shorthand)",
+                "data": "127.0.1",
+                "valid": false
+            },
+            {
                 "description": "an IP address as an integer",
                 "data": "0x7f000001",
                 "valid": false
@@ -72990,19 +80193,123 @@ Map<String, String> specificationTests = {
                 "valid": false
             },
             {
-                "description": "leading zeroes should be rejected, as they are treated as octals",
-                "comment": "see https://sick.codes/universal-netmask-npm-package-used-by-270000-projects-vulnerable-to-octal-input-data-server-side-request-forgery-remote-file-inclusion-local-file-inclusion-and-more-cve-2021-28918/",
-                "data": "087.10.0.1",
+                "description": "invalid non-ASCII '২' (a Bengali 2)",
+                "data": "1২7.0.0.1",
                 "valid": false
             },
             {
-                "description": "value without leading zero is valid",
-                "data": "87.10.0.1",
+                "description": "invalid fullwidth digits (non-ASCII)",
+                "data": "１９２.１６８.１.１",
+                "valid": false
+            },
+            {
+                "description": "invalid mathematical bold digits (non-ASCII)",
+                "data": "𝟏𝟗𝟐.𝟏𝟔𝟖.𝟏.𝟏",
+                "valid": false
+            },
+            {
+                "description": "netmask is not a part of ipv4 address",
+                "data": "192.168.1.0/24",
+                "valid": false
+            },
+            {
+                "description": "leading whitespace is invalid",
+                "data": " 192.168.0.1",
+                "valid": false
+            },
+            {
+                "description": "trailing whitespace is invalid",
+                "data": "192.168.0.1 ",
+                "valid": false
+            },
+            {
+                "description": "trailing newline is invalid",
+                "data": "192.168.0.1\n",
+                "valid": false
+            },
+            {
+                "description": "hexadecimal notation is invalid",
+                "data": "0x7f.0.0.1",
+                "valid": false
+            },
+            {
+                "description": "octal notation explicit is invalid",
+                "data": "0o10.0.0.1",
+                "valid": false
+            },
+            {
+                "description": "empty part (double dot) is invalid",
+                "data": "192.168..1",
+                "valid": false
+            },
+            {
+                "description": "leading dot is invalid",
+                "data": ".192.168.0.1",
+                "valid": false
+            },
+            {
+                "description": "trailing dot is invalid",
+                "data": "192.168.0.1.",
+                "valid": false
+            },
+            {
+                "description": "minimum valid IPv4 address",
+                "data": "0.0.0.0",
                 "valid": true
             },
             {
-                "description": "non-ascii digits should be rejected",
-                "data": "1২7.0.0.1",
+                "description": "maximum valid IPv4 address",
+                "data": "255.255.255.255",
+                "valid": true
+            },
+            {
+                "description": "empty string is invalid",
+                "data": "",
+                "valid": false
+            },
+            {
+                "description": "plus sign is invalid",
+                "data": "+1.2.3.4",
+                "valid": false
+            },
+            {
+                "description": "negative sign is invalid",
+                "data": "-1.2.3.4",
+                "valid": false
+            },
+            {
+                "description": "exponential notation is invalid",
+                "data": "1e2.0.0.1",
+                "valid": false
+            },
+            {
+                "description": "alpha characters are invalid",
+                "data": "192.168.a.1",
+                "valid": false
+            },
+            {
+                "description": "internal whitespace is invalid",
+                "data": "192. 168.0.1",
+                "valid": false
+            },
+            {
+                "description": "tab character is invalid",
+                "data": "192.168.0.1\t",
+                "valid": false
+            },
+            {
+                "description": "additional content after an embedded NUL byte",
+                "data": "192.168.0.1\u0000.evil.com",
+                "valid": false
+            },
+            {
+                "description": "with port number is invalid",
+                "data": "192.168.0.1:80",
+                "valid": false
+            },
+            {
+                "description": "single octet out of range in last position",
+                "data": "192.168.0.256",
                 "valid": false
             }
         ]
@@ -73012,7 +80319,10 @@ Map<String, String> specificationTests = {
   "/latest/optional/format/ipv6.json": r"""[
     {
         "description": "validation of IPv6 addresses",
-        "schema": { "format": "ipv6" },
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "format": "ipv6"
+        },
         "tests": [
             {
                 "description": "all string formats ignore integers",
@@ -73050,7 +80360,7 @@ Map<String, String> specificationTests = {
                 "valid": true
             },
             {
-                "description": "an IPv6 address with out-of-range values",
+                "description": "a group with 5 hex digits is invalid",
                 "data": "12345::",
                 "valid": false
             },
@@ -73205,12 +80515,12 @@ Map<String, String> specificationTests = {
                 "valid": false
             },
             {
-                "description": "non-ascii digits should be rejected",
+                "description": "invalid non-ASCII '৪' (a Bengali 4)",
                 "data": "1:2:3:4:5:6:7:৪",
                 "valid": false
             },
             {
-                "description": "non-ascii digits should be rejected in the ipv4 portion also",
+                "description": "invalid non-ASCII '৪' (a Bengali 4) in the IPv4 portion",
                 "data": "1:2::192.16৪.0.1",
                 "valid": false
             }
@@ -73221,7 +80531,10 @@ Map<String, String> specificationTests = {
   "/latest/optional/format/iri-reference.json": r"""[
     {
         "description": "validation of IRI References",
-        "schema": { "format": "iri-reference" },
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "format": "iri-reference"
+        },
         "tests": [
             {
                 "description": "all string formats ignore integers",
@@ -73295,7 +80608,10 @@ Map<String, String> specificationTests = {
   "/latest/optional/format/iri.json": r"""[
     {
         "description": "validation of IRIs",
-        "schema": { "format": "iri" },
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "format": "iri"
+        },
         "tests": [
             {
                 "description": "all string formats ignore integers",
@@ -73353,7 +80669,7 @@ Map<String, String> specificationTests = {
                 "valid": true
             },
             {
-                "description": "an invalid IRI based on IPv6",
+                "description": "an IPv6 address without enclosing brackets is invalid",
                 "data": "http://2001:0db8:85a3:0000:0000:8a2e:0370:7334",
                 "valid": false
             },
@@ -73379,7 +80695,10 @@ Map<String, String> specificationTests = {
   "/latest/optional/format/json-pointer.json": r"""[
     {
         "description": "validation of JSON-pointers (JSON String Representation)",
-        "schema": { "format": "json-pointer" },
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "format": "json-pointer"
+        },
         "tests": [
             {
                 "description": "all string formats ignore integers",
@@ -73570,6 +80889,16 @@ Map<String, String> specificationTests = {
                 "description": "not a valid JSON-pointer (isn't empty nor starts with /) #3",
                 "data": "a/a",
                 "valid": false
+            },
+            {
+                "description": "valid JSON-pointer (Unicode characters allowed by RFC 6901)",
+                "data": "/foo/bar/😎",
+                "valid": true
+            },
+            {
+                "description": "valid JSON-pointer (control characters allowed after JSON unescaping)",
+                "data": "/foo\u0000bar\n\tbaz",
+                "valid": true
             }
         ]
     }
@@ -73578,7 +80907,10 @@ Map<String, String> specificationTests = {
   "/latest/optional/format/regex.json": r"""[
     {
         "description": "validation of regular expressions",
-        "schema": { "format": "regex" },
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "format": "regex"
+        },
         "tests": [
             {
                 "description": "all string formats ignore integers",
@@ -73627,7 +80959,10 @@ Map<String, String> specificationTests = {
   "/latest/optional/format/relative-json-pointer.json": r"""[
     {
         "description": "validation of Relative JSON Pointers (RJP)",
-        "schema": { "format": "relative-json-pointer" },
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "format": "relative-json-pointer"
+        },
         "tests": [
             {
                 "description": "all string formats ignore integers",
@@ -73690,6 +81025,16 @@ Map<String, String> specificationTests = {
                 "valid": false
             },
             {
+                "description": "explicit positive prefix",
+                "data": "+1/foo/bar",
+                "valid": false
+            },
+            {
+                "description": "non-ASCII digit in the prefix is not allowed",
+                "data": "١/foo",
+                "valid": false
+            },
+            {
                 "description": "## is not a valid json-pointer",
                 "data": "0##",
                 "valid": false
@@ -73703,6 +81048,21 @@ Map<String, String> specificationTests = {
                 "description": "zero cannot be followed by other digits, plus octothorpe",
                 "data": "01#",
                 "valid": false
+            },
+            {
+                "description": "empty string",
+                "data": "",
+                "valid": false
+            },
+            {
+                "description": "multi-digit integer prefix",
+                "data": "120/foo/bar",
+                "valid": true
+            },
+            {
+                "description": "multi-digit prefix with a zero followed by another digit",
+                "data": "100",
+                "valid": true
             }
         ]
     }
@@ -73711,7 +81071,10 @@ Map<String, String> specificationTests = {
   "/latest/optional/format/time.json": r"""[
     {
         "description": "validation of time strings",
-        "schema": { "format": "time" },
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "format": "time"
+        },
         "tests": [
             {
                 "description": "all string formats ignore integers",
@@ -73747,6 +81110,21 @@ Map<String, String> specificationTests = {
                 "description": "a valid time string",
                 "data": "08:30:06Z",
                 "valid": true
+            },
+            {
+                "description": "invalid time string with extra leading zeros",
+                "data": "008:030:006Z",
+                "valid": false
+            },
+            {
+                "description": "invalid time string with no leading zero for single digit",
+                "data": "8:3:6Z",
+                "valid": false
+            },
+            {
+                "description": "hour, minute, second must be two digits",
+                "data": "8:0030:6Z",
+                "valid": false
             },
             {
                 "description": "a valid time string with leap second, Zulu",
@@ -73839,6 +81217,17 @@ Map<String, String> specificationTests = {
                 "valid": true
             },
             {
+                "description": "time with unknown local offset is valid",
+                "comment": "RFC 3339 section 4.3 (unknown local offset)",
+                "data": "12:34:56-00:00",
+                "valid": true
+            },
+            {
+                "description": "hour, minute in time-offset must be two digits",
+                "data": "08:30:06-8:000",
+                "valid": false
+            },
+            {
                 "description": "a valid time string with case-insensitive Z",
                 "data": "08:30:06z",
                 "valid": true
@@ -73899,8 +81288,28 @@ Map<String, String> specificationTests = {
                 "valid": false
             },
             {
-                "description": "non-ascii digits should be rejected",
+                "description": "no time offset with second fraction",
+                "data": "12:00:00.52",
+                "valid": false
+            },
+            {
+                "description": "invalid non-ASCII '২' (a Bengali 2)",
                 "data": "1২:00:00Z",
+                "valid": false
+            },
+            {
+                "description": "offset not starting with plus or minus",
+                "data": "08:30:06#00:20",
+                "valid": false
+            },
+            {
+                "description": "contains letters",
+                "data": "ab:cd:ef",
+                "valid": false
+            },
+            {
+                "description": "an invalid time string in date-time format",
+                "data": "2020-11-28T23:55:45Z",
                 "valid": false
             }
         ]
@@ -73910,7 +81319,10 @@ Map<String, String> specificationTests = {
   "/latest/optional/format/unknown.json": r"""[
     {
         "description": "unknown format",
-        "schema": { "format": "unknown" },
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "format": "unknown"
+        },
         "tests": [
             {
                 "description": "unknown formats ignore integers",
@@ -73954,7 +81366,10 @@ Map<String, String> specificationTests = {
   "/latest/optional/format/uri-reference.json": r"""[
     {
         "description": "validation of URI References",
-        "schema": { "format": "uri-reference" },
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "format": "uri-reference"
+        },
         "tests": [
             {
                 "description": "all string formats ignore integers",
@@ -74020,6 +81435,28 @@ Map<String, String> specificationTests = {
                 "description": "an invalid URI fragment",
                 "data": "#frag\\ment",
                 "valid": false
+            },
+            {
+                "description": "unescaped non US-ASCII characters",
+                "data": "/foobar®.txt",
+                "valid": false
+            },
+            {
+                "description": "invalid backslash character",
+                "data": "https://example.org/foobar\\.txt",
+                "valid": false
+            },
+            {
+                "description": "URI with leading-zero IPv4 is structurally valid as a reg-name",
+                "comment": "RFC 3986, Section 3.2.2: If an IP literal fails strict IPv4address parsing, it falls back to reg-name. A string of digits and dots is valid under unreserved characters. JSON Schema format asserts syntax, not scheme-specific DNS semantics.",
+                "data": "http://087.10.0.1/",
+                "valid": true
+            },
+            {
+                "description": "URI with out-of-bounds IPv4 is structurally valid as a reg-name",
+                "comment": "RFC 3986, Section 3.2.2: Fallback to reg-name allows digits and dots.",
+                "data": "http://999.999.999.999/",
+                "valid": true
             }
         ]
     }
@@ -74028,7 +81465,10 @@ Map<String, String> specificationTests = {
   "/latest/optional/format/uri-template.json": r"""[
     {
         "description": "format: uri-template",
-        "schema": { "format": "uri-template" },
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "format": "uri-template"
+        },
         "tests": [
             {
                 "description": "all string formats ignore integers",
@@ -74087,8 +81527,41 @@ Map<String, String> specificationTests = {
   "/latest/optional/format/uri.json": r"""[
     {
         "description": "validation of URIs",
-        "schema": { "format": "uri" },
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "format": "uri"
+        },
         "tests": [
+            {
+                "description": "all string formats ignore integers",
+                "data": 12,
+                "valid": true
+            },
+            {
+                "description": "all string formats ignore floats",
+                "data": 13.7,
+                "valid": true
+            },
+            {
+                "description": "all string formats ignore objects",
+                "data": {},
+                "valid": true
+            },
+            {
+                "description": "all string formats ignore arrays",
+                "data": [],
+                "valid": true
+            },
+            {
+                "description": "all string formats ignore booleans",
+                "data": false,
+                "valid": true
+            },
+            {
+                "description": "all string formats ignore nulls",
+                "data": null,
+                "valid": true
+            },
             {
                 "description": "a valid URL with anchor tag",
                 "data": "http://foo.bar/?baz=qux#quux",
@@ -74130,7 +81603,7 @@ Map<String, String> specificationTests = {
                 "valid": true
             },
             {
-                "description": "a valid URL ",
+                "description": "a valid URL",
                 "data": "ldap://[2001:db8::7]/c=GB?objectClass?one",
                 "valid": true
             },
@@ -74188,6 +81661,98 @@ Map<String, String> specificationTests = {
                 "description": "an invalid URI with comma in scheme",
                 "data": "bar,baz:foo",
                 "valid": false
+            },
+            {
+                "description": "invalid userinfo",
+                "data": "https://[@example.org/test.txt",
+                "valid": false
+            },
+            {
+                "description": "unescaped non US-ASCII characters",
+                "data": "https://example.org/foobar®.txt",
+                "valid": false
+            },
+            {
+                "description": "invalid backslash character",
+                "data": "https://example.org/foobar\\.txt",
+                "valid": false
+            },
+            {
+                "description": "invalid \" character",
+                "data": "https://example.org/foobar\".txt",
+                "valid": false
+            },
+            {
+                "description": "invalid <> characters",
+                "data": "https://example.org/foobar<>.txt",
+                "valid": false
+            },
+            {
+                "description": "invalid {} characters",
+                "data": "https://example.org/foobar{}.txt",
+                "valid": false
+            },
+            {
+                "description": "invalid ^ character",
+                "data": "https://example.org/foobar^.txt",
+                "valid": false
+            },
+            {
+                "description": "invalid ` character",
+                "data": "https://example.org/foobar`.txt",
+                "valid": false
+            },
+            {
+                "description": "invalid SPACE character",
+                "data": "https://example.org/foo bar.txt",
+                "valid": false
+            },
+            {
+                "description": "invalid | character",
+                "data": "https://example.org/foobar|.txt",
+                "valid": false
+            },
+            {
+                "description": "URI with leading-zero IPv4 is structurally valid as a reg-name",
+                "comment": "RFC 3986, Section 3.2.2: If an IP literal fails strict IPv4address parsing, it falls back to reg-name. A string of digits and dots is valid under unreserved characters. JSON Schema format asserts syntax, not scheme-specific DNS semantics.",
+                "data": "http://087.10.0.1/",
+                "valid": true
+            },
+            {
+                "description": "URI with out-of-bounds IPv4 is structurally valid as a reg-name",
+                "comment": "RFC 3986, Section 3.2.2: Fallback to reg-name allows digits and dots.",
+                "data": "http://999.999.999.999/",
+                "valid": true
+            },
+            {
+                "description": "invalid percent-encoding with non-hex digits",
+                "data": "http://example.com/%6G",
+                "valid": false
+            },
+            {
+                "description": "incomplete percent-encoding triplet",
+                "data": "http://example.com/%A",
+                "valid": false
+            },
+            {
+                "description": "lone percent sign is invalid",
+                "data": "http://example.com/%",
+                "valid": false
+            },
+            {
+                "description": "scheme must start with a letter",
+                "data": "1http://example.com",
+                "valid": false
+            },
+            {
+                "description": "invalid character in scheme",
+                "data": "ht_tp://example.com",
+                "valid": false
+            },
+            {
+                "description": "non-numeric port is invalid",
+                "data": "http://example.com:abc/path",
+                "valid": false
             }
         ]
     }
@@ -74197,9 +81762,40 @@ Map<String, String> specificationTests = {
     {
         "description": "uuid format",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "format": "uuid"
         },
         "tests": [
+            {
+                "description": "all string formats ignore integers",
+                "data": 12,
+                "valid": true
+            },
+            {
+                "description": "all string formats ignore floats",
+                "data": 13.7,
+                "valid": true
+            },
+            {
+                "description": "all string formats ignore objects",
+                "data": {},
+                "valid": true
+            },
+            {
+                "description": "all string formats ignore arrays",
+                "data": [],
+                "valid": true
+            },
+            {
+                "description": "all string formats ignore booleans",
+                "data": false,
+                "valid": true
+            },
+            {
+                "description": "all string formats ignore nulls",
+                "data": null,
+                "valid": true
+            },
             {
                 "description": "all upper-case",
                 "data": "2EB8AA08-AA98-11EA-B4AA-73B441D16380",
@@ -74256,6 +81852,11 @@ Map<String, String> specificationTests = {
                 "valid": false
             },
             {
+                "description": "shifted dashes",
+                "data": "2eb8aa0-8aa98-11e-ab4aa7-3b441d16380",
+                "valid": false
+            },
+            {
                 "description": "valid version 4",
                 "data": "98d80576-482e-427f-8434-7f86890ab222",
                 "valid": true
@@ -74274,6 +81875,102 @@ Map<String, String> specificationTests = {
                 "description": "hypothetical version 15",
                 "data": "99c17cbb-656f-f64a-940f-1a4568f03487",
                 "valid": true
+            },
+            {
+                "description": "URN prefixed UUID is invalid",
+                "data": "urn:uuid:2eb8aa08-aa98-11ea-b4aa-73b441d16380",
+                "valid": false
+            },
+            {
+                "description": "trailing hyphen after a complete UUID is invalid",
+                "data": "2eb8aa08-aa98-11ea-b4aa-73b441d16380-",
+                "valid": false
+            },
+            {
+                "description": "non-ASCII digit '২' (a Bengali 2) is invalid",
+                "data": "২eb8aa08-aa98-11ea-b4aa-73b441d16380",
+                "valid": false
+            }
+        ]
+    }
+]
+""",
+  "/latest/optional/id.json": r"""[
+    {
+        "description": "$id inside an enum is not a real identifier",
+        "comment": "the implementation must not be confused by an $id buried in the enum",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$defs": {
+                "id_in_enum": {
+                    "enum": [
+                        {
+                          "$id": "https://localhost:1234/draft2020-12/id/my_identifier.json",
+                          "type": "null"
+                        }
+                    ]
+                },
+                "real_id_in_schema": {
+                    "$id": "https://localhost:1234/draft2020-12/id/my_identifier.json",
+                    "type": "string"
+                },
+                "zzz_id_in_const": {
+                    "const": {
+                        "$id": "https://localhost:1234/draft2020-12/id/my_identifier.json",
+                        "type": "null"
+                    }
+                }
+            },
+            "anyOf": [
+                { "$ref": "#/$defs/id_in_enum" },
+                { "$ref": "https://localhost:1234/draft2020-12/id/my_identifier.json" }
+            ]
+        },
+        "tests": [
+            {
+                "description": "exact match to enum, and type matches",
+                "data": {
+                    "$id": "https://localhost:1234/draft2020-12/id/my_identifier.json",
+                    "type": "null"
+                },
+                "valid": true
+            },
+            {
+                "description": "match $ref to $id",
+                "data": "a string to match #/$defs/id_in_enum",
+                "valid": true
+            },
+            {
+                "description": "no match on enum or $ref to $id",
+                "data": 1,
+                "valid": false
+            }
+        ]
+    }
+]
+""",
+  "/latest/optional/no-schema.json": r"""[
+    {
+        "description": "validation without $schema",
+        "comment": "minLength is the same across all drafts",
+        "schema": {
+            "minLength": 2
+        },
+        "tests": [
+            {
+                "description": "a 3-character string is valid",
+                "data": "foo",
+                "valid": true
+            },
+            {
+                "description": "a 1-character string is not valid",
+                "data": "a",
+                "valid": false
+            },
+            {
+                "description": "a non-string is valid",
+                "data": 5,
+                "valid": true
             }
         ]
     }
@@ -74283,7 +81980,10 @@ Map<String, String> specificationTests = {
     {
         "description": "Proper UTF-16 surrogate pair handling: pattern",
         "comment": "Optional because .Net doesn't correctly handle 32-bit Unicode characters",
-        "schema": { "pattern": "^🐲*$" },
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "pattern": "^🐲*$"
+        },
         "tests": [
             {
                 "description": "matches empty",
@@ -74326,6 +82026,7 @@ Map<String, String> specificationTests = {
         "description": "Proper UTF-16 surrogate pair handling: patternProperties",
         "comment": "Optional because .Net doesn't correctly handle 32-bit Unicode characters",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "patternProperties": {
                 "^🐲*$": {
                     "type": "integer"
@@ -74366,6 +82067,7 @@ Map<String, String> specificationTests = {
     {
         "description": "reference of a root arbitrary keyword ",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "unknown-keyword": {"type": "integer"},
             "properties": {
                 "bar": {"$ref": "#/unknown-keyword"}
@@ -74385,8 +82087,31 @@ Map<String, String> specificationTests = {
         ]
     },
     {
+        "description": "reference of a root arbitrary keyword with encoded ref",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "unknown/keyword": {"type": "integer"},
+            "properties": {
+                "bar": {"$ref": "#/unknown~1keyword"}
+            }
+        },
+        "tests": [
+            {
+                "description": "match",
+                "data": {"bar": 3},
+                "valid": true
+            },
+            {
+                "description": "mismatch",
+                "data": {"bar": true},
+                "valid": false
+            }
+        ]
+    },
+    {
         "description": "reference of an arbitrary keyword of a sub-schema",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "properties": {
                 "foo": {"unknown-keyword": {"type": "integer"}},
                 "bar": {"$ref": "#/properties/foo/unknown-keyword"}
@@ -74404,13 +82129,118 @@ Map<String, String> specificationTests = {
                 "valid": false
             }
         ]
+    },
+    {
+        "description": "reference internals of known non-applicator",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "examples": [
+              { "type": "string" }
+            ],
+            "$ref": "#/examples/0"
+        },
+        "tests": [
+            {
+                "description": "match",
+                "data": "a string",
+                "valid": true
+            },
+            {
+                "description": "mismatch",
+                "data": 42,
+                "valid": false
+            }
+        ]
+    },
+    {
+        "description": "reference of an arbitrary keyword of a sub-schema with encoded ref",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "properties": {
+                "foo": {"unknown/keyword": {"type": "integer"}},
+                "bar": {"$ref": "#/properties/foo/unknown~1keyword"}
+            }
+        },
+        "tests": [
+            {
+                "description": "match",
+                "data": {"bar": 3},
+                "valid": true
+            },
+            {
+                "description": "mismatch",
+                "data": {"bar": true},
+                "valid": false
+            }
+        ]
+    }
+]
+""",
+  "/latest/optional/unknownKeyword.json": r"""[
+    {
+        "description": "$id inside an unknown keyword is not a real identifier",
+        "comment": "the implementation must not be confused by an $id in locations we do not know how to parse",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$defs": {
+                "id_in_unknown0": {
+                    "not": {
+                        "array_of_schemas": [
+                            {
+                              "$id": "https://localhost:1234/draft2020-12/unknownKeyword/my_identifier.json",
+                              "type": "null"
+                            }
+                        ]
+                    }
+                },
+                "real_id_in_schema": {
+                    "$id": "https://localhost:1234/draft2020-12/unknownKeyword/my_identifier.json",
+                    "type": "string"
+                },
+                "id_in_unknown1": {
+                    "not": {
+                        "object_of_schemas": {
+                            "foo": {
+                              "$id": "https://localhost:1234/draft2020-12/unknownKeyword/my_identifier.json",
+                              "type": "integer"
+                            }
+                        }
+                    }
+                }
+            },
+            "anyOf": [
+                { "$ref": "#/$defs/id_in_unknown0" },
+                { "$ref": "#/$defs/id_in_unknown1" },
+                { "$ref": "https://localhost:1234/draft2020-12/unknownKeyword/my_identifier.json" }
+            ]
+        },
+        "tests": [
+            {
+                "description": "type matches second anyOf, which has a real schema in it",
+                "data": "a string",
+                "valid": true
+            },
+            {
+                "description": "type matches non-schema in first anyOf",
+                "data": null,
+                "valid": false
+            },
+            {
+                "description": "type matches non-schema in third anyOf",
+                "data": 1,
+                "valid": false
+            }
+        ]
     }
 ]
 """,
   "/latest/pattern.json": r"""[
     {
         "description": "pattern validation",
-        "schema": {"pattern": "^a*$"},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "pattern": "^a*$"
+        },
         "tests": [
             {
                 "description": "a matching pattern is valid",
@@ -74456,12 +82286,40 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "pattern is not anchored",
-        "schema": {"pattern": "a+"},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "pattern": "a+"
+        },
         "tests": [
             {
                 "description": "matches a substring",
                 "data": "xxaayy",
                 "valid": true
+            }
+        ]
+    },
+    {
+        "description": "pattern with Unicode property escape requires unicode mode",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "string",
+            "pattern": "^\\p{Letter}+$"
+        },
+        "tests": [
+            {
+                "description": "ASCII letters match",
+                "data": "Hello",
+                "valid": true
+            },
+            {
+                "description": "Non-ASCII letters match",
+                "data": "π",
+                "valid": true
+            },
+            {
+                "description": "Digits do not match",
+                "data": "123",
+                "valid": false
             }
         ]
     }
@@ -74472,6 +82330,7 @@ Map<String, String> specificationTests = {
         "description":
             "patternProperties validates properties matching a regex",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "patternProperties": {
                 "f.*o": {"type": "integer"}
             }
@@ -74517,6 +82376,7 @@ Map<String, String> specificationTests = {
     {
         "description": "multiple simultaneous patternProperties are validated",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "patternProperties": {
                 "a*": {"type": "integer"},
                 "aaa*": {"maximum": 20}
@@ -74558,6 +82418,7 @@ Map<String, String> specificationTests = {
     {
         "description": "regexes are not anchored by default and are case sensitive",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "patternProperties": {
                 "[0-9]{2,}": { "type": "boolean" },
                 "X_": { "type": "string" }
@@ -74589,6 +82450,7 @@ Map<String, String> specificationTests = {
     {
         "description": "patternProperties with boolean schemas",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "patternProperties": {
                 "f.*": true,
                 "b.*": false
@@ -74621,6 +82483,50 @@ Map<String, String> specificationTests = {
                 "valid": true
             }
         ]
+    },
+    {
+        "description": "patternProperties with null valued instance properties",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "patternProperties": {
+                "^.*bar$": {"type": "null"}
+            }
+        },
+        "tests": [
+            {
+                "description": "allows null values",
+                "data": {"foobar": null},
+                "valid": true
+            }
+        ]
+    },
+    {
+        "description": "patternProperties with Unicode property escape",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "object",
+            "patternProperties": {
+                "^\\p{Letter}+$": {
+                    "type": "number"
+                }
+            }
+        },
+        "tests": [
+            {
+                "description": "Unicode letter property name matches",
+                "data": {
+                    "π": 1
+                },
+                "valid": true
+            },
+            {
+                "description": "Non-letter property name does not match pattern",
+                "data": {
+                    "123": 1
+                },
+                "valid": true
+            }
+        ]
     }
 ]
 """,
@@ -74628,6 +82534,7 @@ Map<String, String> specificationTests = {
     {
         "description": "a schema given for prefixItems",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "prefixItems": [
                 {"type": "integer"},
                 {"type": "string"}
@@ -74673,6 +82580,7 @@ Map<String, String> specificationTests = {
     {
         "description": "prefixItems with boolean schemas",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "prefixItems": [true, false]
         },
         "tests": [
@@ -74695,11 +82603,32 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "additional items are allowed by default",
-        "schema": {"prefixItems": [{"type": "integer"}]},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "prefixItems": [{"type": "integer"}]
+        },
         "tests": [
             {
                 "description": "only the first item is validated",
                 "data": [1, "foo", false],
+                "valid": true
+            }
+        ]
+    },
+    {
+        "description": "prefixItems with null instance elements",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "prefixItems": [
+                {
+                    "type": "null"
+                }
+            ]
+        },
+        "tests": [
+            {
+                "description": "allows null elements",
+                "data": [ null ],
                 "valid": true
             }
         ]
@@ -74710,6 +82639,7 @@ Map<String, String> specificationTests = {
     {
         "description": "object properties validation",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "properties": {
                 "foo": {"type": "integer"},
                 "bar": {"type": "string"}
@@ -74752,6 +82682,7 @@ Map<String, String> specificationTests = {
         "description":
             "properties, patternProperties, additionalProperties interaction",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "properties": {
                 "foo": {"type": "array", "maxItems": 3},
                 "bar": {"type": "array"}
@@ -74805,6 +82736,7 @@ Map<String, String> specificationTests = {
     {
         "description": "properties with boolean schema",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "properties": {
                 "foo": true,
                 "bar": false
@@ -74836,6 +82768,7 @@ Map<String, String> specificationTests = {
     {
         "description": "properties with escaped characters",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "properties": {
                 "foo\nbar": {"type": "number"},
                 "foo\"bar": {"type": "number"},
@@ -74871,6 +82804,77 @@ Map<String, String> specificationTests = {
                 "valid": false
             }
         ]
+    },
+    {
+        "description": "properties with null valued instance properties",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "properties": {
+                "foo": {"type": "null"}
+            }
+        },
+        "tests": [
+            {
+                "description": "allows null values",
+                "data": {"foo": null},
+                "valid": true
+            }
+        ]
+    },
+    {
+        "description": "properties whose names are Javascript object property names",
+        "comment": "Ensure JS implementations don't universally consider e.g. __proto__ to always be present in an object.",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "properties": {
+                "__proto__": {"type": "number"},
+                "toString": {
+                    "properties": { "length": { "type": "string" } }
+                },
+                "constructor": {"type": "number"}
+            }
+        },
+        "tests": [
+            {
+                "description": "ignores arrays",
+                "data": [],
+                "valid": true
+            },
+            {
+                "description": "ignores other non-objects",
+                "data": 12,
+                "valid": true
+            },
+            {
+                "description": "none of the properties mentioned",
+                "data": {},
+                "valid": true
+            },
+            {
+                "description": "__proto__ not valid",
+                "data": { "__proto__": "foo" },
+                "valid": false
+            },
+            {
+                "description": "toString not valid",
+                "data": { "toString": { "length": 37 } },
+                "valid": false
+            },
+            {
+                "description": "constructor not valid",
+                "data": { "constructor": { "length": 37 } },
+                "valid": false
+            },
+            {
+                "description": "all present and valid",
+                "data": { 
+                    "__proto__": 12,
+                    "toString": { "length": "foo" },
+                    "constructor": 37
+                },
+                "valid": true
+            }
+        ]
     }
 ]
 """,
@@ -74878,6 +82882,7 @@ Map<String, String> specificationTests = {
     {
         "description": "propertyNames validation",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "propertyNames": {"maxLength": 3}
         },
         "tests": [
@@ -74916,12 +82921,55 @@ Map<String, String> specificationTests = {
                 "description": "ignores other non-objects",
                 "data": 12,
                 "valid": true
+            },
+            {
+                "description": "ignores null",
+                "data": null,
+                "valid": true
+            },
+            {
+                "description": "ignores booleans",
+                "data": true,
+                "valid": true
+            }
+        ]
+    },
+    {
+        "description": "propertyNames validation with pattern",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "propertyNames": { "pattern": "^a+$" }
+        },
+        "tests": [
+            {
+                "description": "matching property names valid",
+                "data": {
+                    "a": {},
+                    "aa": {},
+                    "aaa": {}
+                },
+                "valid": true
+            },
+            {
+                "description": "non-matching property name is invalid",
+                "data": {
+                    "aaA": {}
+                },
+                "valid": false
+            },
+            {
+                "description": "object without properties is valid",
+                "data": {},
+                "valid": true
             }
         ]
     },
     {
         "description": "propertyNames with boolean schema true",
-        "schema": {"propertyNames": true},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "propertyNames": true
+        },
         "tests": [
             {
                 "description": "object with any properties is valid",
@@ -74937,11 +82985,67 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "propertyNames with boolean schema false",
-        "schema": {"propertyNames": false},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "propertyNames": false
+        },
         "tests": [
             {
                 "description": "object with any properties is invalid",
                 "data": {"foo": 1},
+                "valid": false
+            },
+            {
+                "description": "empty object is valid",
+                "data": {},
+                "valid": true
+            }
+        ]
+    },
+    {
+        "description": "propertyNames with const",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "propertyNames": {"const": "foo"}
+        },
+        "tests": [
+            {
+                "description": "object with property foo is valid",
+                "data": {"foo": 1},
+                "valid": true
+            },
+            {
+                "description": "object with any other property is invalid",
+                "data": {"bar": 1},
+                "valid": false
+            },
+            {
+                "description": "empty object is valid",
+                "data": {},
+                "valid": true
+            }
+        ]
+    },
+    {
+        "description": "propertyNames with enum",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "propertyNames": {"enum": ["foo", "bar"]}
+        },
+        "tests": [
+            {
+                "description": "object with property foo is valid",
+                "data": {"foo": 1},
+                "valid": true
+            },
+            {
+                "description": "object with property foo and bar is valid",
+                "data": {"foo": 1, "bar": 1},
+                "valid": true
+            },
+            {
+                "description": "object with any other property is invalid",
+                "data": {"baz": 1},
                 "valid": false
             },
             {
@@ -74957,6 +83061,7 @@ Map<String, String> specificationTests = {
     {
         "description": "root pointer ref",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "properties": {
                 "foo": {"$ref": "#"}
             },
@@ -74988,6 +83093,7 @@ Map<String, String> specificationTests = {
     {
         "description": "relative pointer ref to object",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "properties": {
                 "foo": {"type": "integer"},
                 "bar": {"$ref": "#/properties/foo"}
@@ -75009,6 +83115,7 @@ Map<String, String> specificationTests = {
     {
         "description": "relative pointer ref to array",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "prefixItems": [
                 {"type": "integer"},
                 {"$ref": "#/prefixItems/0"}
@@ -75030,6 +83137,7 @@ Map<String, String> specificationTests = {
     {
         "description": "escaped pointer ref",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "$defs": {
                 "tilde~field": {"type": "integer"},
                 "slash/field": {"type": "integer"},
@@ -75077,6 +83185,7 @@ Map<String, String> specificationTests = {
     {
         "description": "nested refs",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "$defs": {
                 "a": {"type": "integer"},
                 "b": {"$ref": "#/$defs/a"},
@@ -75100,6 +83209,7 @@ Map<String, String> specificationTests = {
     {
         "description": "ref applies alongside sibling keywords",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "$defs": {
                 "reffed": {
                     "type": "array"
@@ -75133,6 +83243,7 @@ Map<String, String> specificationTests = {
     {
         "description": "remote ref, containing refs itself",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "$ref": "https://json-schema.org/draft/2020-12/schema"
         },
         "tests": [
@@ -75151,6 +83262,7 @@ Map<String, String> specificationTests = {
     {
         "description": "property named $ref that is not a reference",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "properties": {
                 "$ref": {"type": "string"}
             }
@@ -75171,6 +83283,7 @@ Map<String, String> specificationTests = {
     {
         "description": "property named $ref, containing an actual $ref",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "properties": {
                 "$ref": {"$ref": "#/$defs/is-string"}
             },
@@ -75196,6 +83309,7 @@ Map<String, String> specificationTests = {
     {
         "description": "$ref to boolean schema true",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "$ref": "#/$defs/bool",
             "$defs": {
                 "bool": true
@@ -75212,6 +83326,7 @@ Map<String, String> specificationTests = {
     {
         "description": "$ref to boolean schema false",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "$ref": "#/$defs/bool",
             "$defs": {
                 "bool": false
@@ -75228,7 +83343,8 @@ Map<String, String> specificationTests = {
     {
         "description": "Recursive references between schemas",
         "schema": {
-            "$id": "http://localhost:1234/tree",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "http://localhost:1234/draft2020-12/tree",
             "description": "tree of nodes",
             "type": "object",
             "properties": {
@@ -75241,7 +83357,7 @@ Map<String, String> specificationTests = {
             "required": ["meta", "nodes"],
             "$defs": {
                 "node": {
-                    "$id": "http://localhost:1234/node",
+                    "$id": "http://localhost:1234/draft2020-12/node",
                     "description": "node",
                     "type": "object",
                     "properties": {
@@ -75316,6 +83432,7 @@ Map<String, String> specificationTests = {
     {
         "description": "refs with quote",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "properties": {
                 "foo\"bar": {"$ref": "#/$defs/foo%22bar"}
             },
@@ -75343,6 +83460,7 @@ Map<String, String> specificationTests = {
     {
         "description": "ref creates new scope when adjacent to keywords",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "$defs": {
                 "A": {
                     "unevaluatedProperties": false
@@ -75368,6 +83486,7 @@ Map<String, String> specificationTests = {
     {
         "description": "naive replacement of $ref with its destination is not correct",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "$defs": {
                 "a_string": { "type": "string" }
             },
@@ -75396,6 +83515,7 @@ Map<String, String> specificationTests = {
     {
         "description": "refs with relative uris and defs",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "$id": "http://example.com/schema-relative-uri-defs1.json",
             "properties": {
                 "foo": {
@@ -75448,6 +83568,7 @@ Map<String, String> specificationTests = {
     {
         "description": "relative refs with absolute uris and defs",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "$id": "http://example.com/schema-refs-absolute-uris-defs1.json",
             "properties": {
                 "foo": {
@@ -75500,6 +83621,7 @@ Map<String, String> specificationTests = {
     {
         "description": "$id must be resolved against nearest parent, not just immediate parent",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "$id": "http://example.com/a.json",
             "$defs": {
                 "x": {
@@ -75522,12 +83644,498 @@ Map<String, String> specificationTests = {
         },
         "tests": [
             {
-                "description": "number should pass",
+                "description": "number is valid",
                 "data": 1,
                 "valid": true
             },
             {
-                "description": "non-number should fail",
+                "description": "non-number is invalid",
+                "data": "a",
+                "valid": false
+            }
+        ]
+    },
+    {
+        "description": "order of evaluation: $id and $ref",
+        "schema": {
+            "$comment": "$id must be evaluated before $ref to get the proper $ref destination",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://example.com/draft2020-12/ref-and-id1/base.json",
+            "$ref": "int.json",
+            "$defs": {
+                "bigint": {
+                    "$comment": "canonical uri: https://example.com/ref-and-id1/int.json",
+                    "$id": "int.json",
+                    "maximum": 10
+                },
+                "smallint": {
+                    "$comment": "canonical uri: https://example.com/ref-and-id1-int.json",
+                    "$id": "/draft2020-12/ref-and-id1-int.json",
+                    "maximum": 2
+                }
+            }
+        },
+        "tests": [
+            {
+                "description": "data is valid against first definition",
+                "data": 5,
+                "valid": true
+            },
+            {
+                "description": "data is invalid against first definition",
+                "data": 50,
+                "valid": false
+            }
+        ]
+    },
+    {
+        "description": "order of evaluation: $id and $anchor and $ref",
+        "schema": {
+            "$comment": "$id must be evaluated before $ref to get the proper $ref destination",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://example.com/draft2020-12/ref-and-id2/base.json",
+            "$ref": "#bigint",
+            "$defs": {
+                "bigint": {
+                    "$comment": "canonical uri: /ref-and-id2/base.json#/$defs/bigint; another valid uri for this location: /ref-and-id2/base.json#bigint",
+                    "$anchor": "bigint",
+                    "maximum": 10
+                },
+                "smallint": {
+                    "$comment": "canonical uri: https://example.com/ref-and-id2#/$defs/smallint; another valid uri for this location: https://example.com/ref-and-id2/#bigint",
+                    "$id": "https://example.com/draft2020-12/ref-and-id2/",
+                    "$anchor": "bigint",
+                    "maximum": 2
+                }
+            }
+        },
+        "tests": [
+            {
+                "description": "data is valid against first definition",
+                "data": 5,
+                "valid": true
+            },
+            {
+                "description": "data is invalid against first definition",
+                "data": 50,
+                "valid": false
+            }
+        ]
+    },
+    {
+        "description": "order of evaluation: $id and $ref on nested schema",
+        "schema": {
+            "$comment": "$id must be evaluated before $ref to get the proper $ref destination",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://example.com/draft2020-12/ref-and-id3/base.json",
+            "$ref": "nested/foo.json",
+            "$defs": {
+                "foo": {
+                    "$comment": "canonical uri: https://example.com/draft2020-12/ref-and-id3/nested/foo.json",
+                    "$id": "nested/foo.json",
+                    "$ref": "./bar.json"
+                },
+                "bar": {
+                    "$comment": "canonical uri: https://example.com/draft2020-12/ref-and-id3/nested/bar.json",
+                    "$id": "nested/bar.json",
+                    "type": "number"
+                }
+            }
+        },
+        "tests": [
+            {
+                "description": "data is valid against nested sibling",
+                "data": 5,
+                "valid": true
+            },
+            {
+                "description": "data is invalid against nested sibling",
+                "data": "a",
+                "valid": false
+            }
+        ]
+    },
+    {
+        "description": "simple URN base URI with $ref via the URN",
+        "schema": {
+            "$comment": "URIs do not have to have HTTP(s) schemes",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "urn:uuid:deadbeef-1234-ffff-ffff-4321feebdaed",
+            "minimum": 30,
+            "properties": {
+                "foo": {"$ref": "urn:uuid:deadbeef-1234-ffff-ffff-4321feebdaed"}
+            }
+        },
+        "tests": [
+            {
+                "description": "valid under the URN IDed schema",
+                "data": {"foo": 37},
+                "valid": true
+            },
+            {
+                "description": "invalid under the URN IDed schema",
+                "data": {"foo": 12},
+                "valid": false
+            }
+        ]
+    },
+    {
+        "description": "simple URN base URI with JSON pointer",
+        "schema": {
+            "$comment": "URIs do not have to have HTTP(s) schemes",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "urn:uuid:deadbeef-1234-00ff-ff00-4321feebdaed",
+            "properties": {
+                "foo": {"$ref": "#/$defs/bar"}
+            },
+            "$defs": {
+                "bar": {"type": "string"}
+            }
+        },
+        "tests": [
+            {
+                "description": "a string is valid",
+                "data": {"foo": "bar"},
+                "valid": true
+            },
+            {
+                "description": "a non-string is invalid",
+                "data": {"foo": 12},
+                "valid": false
+            }
+        ]
+    },
+    {
+        "description": "URN base URI with NSS",
+        "schema": {
+            "$comment": "RFC 8141 §2.2",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "urn:example:1/406/47452/2",
+            "properties": {
+                "foo": {"$ref": "#/$defs/bar"}
+            },
+            "$defs": {
+                "bar": {"type": "string"}
+            }
+        },
+        "tests": [
+            {
+                "description": "a string is valid",
+                "data": {"foo": "bar"},
+                "valid": true
+            },
+            {
+                "description": "a non-string is invalid",
+                "data": {"foo": 12},
+                "valid": false
+            }
+        ]
+    },
+    {
+        "description": "URN base URI with r-component",
+        "schema": {
+            "$comment": "RFC 8141 §2.3.1",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "urn:example:foo-bar-baz-qux?+CCResolve:cc=uk",
+            "properties": {
+                "foo": {"$ref": "#/$defs/bar"}
+            },
+            "$defs": {
+                "bar": {"type": "string"}
+            }
+        },
+        "tests": [
+            {
+                "description": "a string is valid",
+                "data": {"foo": "bar"},
+                "valid": true
+            },
+            {
+                "description": "a non-string is invalid",
+                "data": {"foo": 12},
+                "valid": false
+            }
+        ]
+    },
+    {
+        "description": "URN base URI with q-component",
+        "schema": {
+            "$comment": "RFC 8141 §2.3.2",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "urn:example:weather?=op=map&lat=39.56&lon=-104.85&datetime=1969-07-21T02:56:15Z",
+            "properties": {
+                "foo": {"$ref": "#/$defs/bar"}
+            },
+            "$defs": {
+                "bar": {"type": "string"}
+            }
+        },
+        "tests": [
+            {
+                "description": "a string is valid",
+                "data": {"foo": "bar"},
+                "valid": true
+            },
+            {
+                "description": "a non-string is invalid",
+                "data": {"foo": 12},
+                "valid": false
+            }
+        ]
+    },
+    {
+        "description": "URN base URI with URN and JSON pointer ref",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "urn:uuid:deadbeef-1234-0000-0000-4321feebdaed",
+            "properties": {
+                "foo": {"$ref": "urn:uuid:deadbeef-1234-0000-0000-4321feebdaed#/$defs/bar"}
+            },
+            "$defs": {
+                "bar": {"type": "string"}
+            }
+        },
+        "tests": [
+            {
+                "description": "a string is valid",
+                "data": {"foo": "bar"},
+                "valid": true
+            },
+            {
+                "description": "a non-string is invalid",
+                "data": {"foo": 12},
+                "valid": false
+            }
+        ]
+    },
+    {
+        "description": "URN base URI with URN and anchor ref",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "urn:uuid:deadbeef-1234-ff00-00ff-4321feebdaed",
+            "properties": {
+                "foo": {"$ref": "urn:uuid:deadbeef-1234-ff00-00ff-4321feebdaed#something"}
+            },
+            "$defs": {
+                "bar": {
+                    "$anchor": "something",
+                    "type": "string"
+                }
+            }
+        },
+        "tests": [
+            {
+                "description": "a string is valid",
+                "data": {"foo": "bar"},
+                "valid": true
+            },
+            {
+                "description": "a non-string is invalid",
+                "data": {"foo": 12},
+                "valid": false
+            }
+        ]
+    },
+    {
+        "description": "URN ref with nested pointer ref",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$ref": "urn:uuid:deadbeef-4321-ffff-ffff-1234feebdaed",
+            "$defs": {
+                "foo": {
+                    "$id": "urn:uuid:deadbeef-4321-ffff-ffff-1234feebdaed",
+                    "$defs": {"bar": {"type": "string"}},
+                    "$ref": "#/$defs/bar"
+                }
+            }
+        },
+        "tests": [
+            {
+                "description": "a string is valid",
+                "data": "bar",
+                "valid": true
+            },
+            {
+                "description": "a non-string is invalid",
+                "data": 12,
+                "valid": false
+            }
+        ]
+    },
+    {
+        "description": "ref to if",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$ref": "http://example.com/ref/if",
+            "if": {
+                "$id": "http://example.com/ref/if",
+                "type": "integer"
+            }
+        },
+        "tests": [
+            {
+                "description": "a non-integer is invalid due to the $ref",
+                "data": "foo",
+                "valid": false
+            },
+            {
+                "description": "an integer is valid",
+                "data": 12,
+                "valid": true
+            }
+        ]
+    },
+    {
+        "description": "ref to then",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$ref": "http://example.com/ref/then",
+            "then": {
+                "$id": "http://example.com/ref/then",
+                "type": "integer"
+            }
+        },
+        "tests": [
+            {
+                "description": "a non-integer is invalid due to the $ref",
+                "data": "foo",
+                "valid": false
+            },
+            {
+                "description": "an integer is valid",
+                "data": 12,
+                "valid": true
+            }
+        ]
+    },
+    {
+        "description": "ref to else",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$ref": "http://example.com/ref/else",
+            "else": {
+                "$id": "http://example.com/ref/else",
+                "type": "integer"
+            }
+        },
+        "tests": [
+            {
+                "description": "a non-integer is invalid due to the $ref",
+                "data": "foo",
+                "valid": false
+            },
+            {
+                "description": "an integer is valid",
+                "data": 12,
+                "valid": true
+            }
+        ]
+    },
+    {
+        "description": "ref with absolute-path-reference",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "http://example.com/ref/absref.json",
+            "$defs": {
+                "a": {
+                    "$id": "http://example.com/ref/absref/foobar.json",
+                    "type": "number"
+                },
+                "b": {
+                    "$id": "http://example.com/absref/foobar.json",
+                    "type": "string"
+                }
+            },
+            "$ref": "/absref/foobar.json"
+        },
+        "tests": [
+            {
+                "description": "a string is valid",
+                "data": "foo",
+                "valid": true
+            },
+            {
+                "description": "an integer is invalid",
+                "data": 12,
+                "valid": false
+            }
+        ]
+    },
+    {
+        "description": "$id with file URI still resolves pointers - *nix",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "file:///folder/file.json",
+            "$defs": {
+                "foo": {
+                    "type": "number"
+                }
+            },
+            "$ref": "#/$defs/foo"
+        },
+        "tests": [
+            {
+                "description": "number is valid",
+                "data": 1,
+                "valid": true
+            },
+            {
+                "description": "non-number is invalid",
+                "data": "a",
+                "valid": false
+            }
+        ]
+    },
+    {
+        "description": "$id with file URI still resolves pointers - windows",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "file:///c:/folder/file.json",
+            "$defs": {
+                "foo": {
+                    "type": "number"
+                }
+            },
+            "$ref": "#/$defs/foo"
+        },
+        "tests": [
+            {
+                "description": "number is valid",
+                "data": 1,
+                "valid": true
+            },
+            {
+                "description": "non-number is invalid",
+                "data": "a",
+                "valid": false
+            }
+        ]
+    },
+    {
+        "description": "empty tokens in $ref json-pointer",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$defs": {
+                "": {
+                    "$defs": {
+                        "": { "type": "number" }
+                    }
+                } 
+            },
+            "allOf": [
+                {
+                    "$ref": "#/$defs//$defs/"
+                }
+            ]
+        },
+        "tests": [
+            {
+                "description": "number is valid",
+                "data": 1,
+                "valid": true
+            },
+            {
+                "description": "non-number is invalid",
                 "data": "a",
                 "valid": false
             }
@@ -75538,7 +84146,10 @@ Map<String, String> specificationTests = {
   "/latest/refRemote.json": r"""[
     {
         "description": "remote ref",
-        "schema": {"$ref": "http://localhost:1234/integer.json"},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$ref": "http://localhost:1234/draft2020-12/integer.json"
+        },
         "tests": [
             {
                 "description": "remote ref valid",
@@ -75554,7 +84165,10 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "fragment within remote ref",
-        "schema": {"$ref": "http://localhost:1234/subSchemas-defs.json#/$defs/integer"},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$ref": "http://localhost:1234/draft2020-12/subSchemas.json#/$defs/integer"
+        },
         "tests": [
             {
                 "description": "remote fragment valid",
@@ -75569,9 +84183,29 @@ Map<String, String> specificationTests = {
         ]
     },
     {
+        "description": "anchor within remote ref",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$ref": "http://localhost:1234/draft2020-12/locationIndependentIdentifier.json#foo"
+        },
+        "tests": [
+            {
+                "description": "remote anchor valid",
+                "data": 1,
+                "valid": true
+            },
+            {
+                "description": "remote anchor invalid",
+                "data": "a",
+                "valid": false
+            }
+        ]
+    },
+    {
         "description": "ref within remote ref",
         "schema": {
-            "$ref": "http://localhost:1234/subSchemas-defs.json#/$defs/refToInteger"
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$ref": "http://localhost:1234/draft2020-12/subSchemas.json#/$defs/refToInteger"
         },
         "tests": [
             {
@@ -75589,7 +84223,8 @@ Map<String, String> specificationTests = {
     {
         "description": "base URI change",
         "schema": {
-            "$id": "http://localhost:1234/",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "http://localhost:1234/draft2020-12/",
             "items": {
                 "$id": "baseUriChange/",
                 "items": {"$ref": "folderInteger.json"}
@@ -75611,7 +84246,8 @@ Map<String, String> specificationTests = {
     {
         "description": "base URI change - change folder",
         "schema": {
-            "$id": "http://localhost:1234/scope_change_defs1.json",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "http://localhost:1234/draft2020-12/scope_change_defs1.json",
             "type" : "object",
             "properties": {"list": {"$ref": "baseUriChangeFolder/"}},
             "$defs": {
@@ -75638,7 +84274,8 @@ Map<String, String> specificationTests = {
     {
         "description": "base URI change - change folder in subschema",
         "schema": {
-            "$id": "http://localhost:1234/scope_change_defs2.json",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "http://localhost:1234/draft2020-12/scope_change_defs2.json",
             "type" : "object",
             "properties": {"list": {"$ref": "baseUriChangeFolderInSubschema/#/$defs/bar"}},
             "$defs": {
@@ -75669,7 +84306,8 @@ Map<String, String> specificationTests = {
     {
         "description": "root ref in remote ref",
         "schema": {
-            "$id": "http://localhost:1234/object",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "http://localhost:1234/draft2020-12/object",
             "type": "object",
             "properties": {
                 "name": {"$ref": "name-defs.json#/$defs/orNull"}
@@ -75704,7 +84342,8 @@ Map<String, String> specificationTests = {
     {
         "description": "remote ref with ref to defs",
         "schema": {
-            "$id": "http://localhost:1234/schema-remote-ref-ref-defs1.json",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "http://localhost:1234/draft2020-12/schema-remote-ref-ref-defs1.json",
             "$ref": "ref-and-defs.json"
         },
         "tests": [
@@ -75723,6 +84362,127 @@ Map<String, String> specificationTests = {
                 "valid": true
             }
         ]
+    },
+    {
+        "description": "Location-independent identifier in remote ref",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$ref": "http://localhost:1234/draft2020-12/locationIndependentIdentifier.json#/$defs/refToInteger"
+        },
+        "tests": [
+            {
+                "description": "integer is valid",
+                "data": 1,
+                "valid": true
+            },
+            {
+                "description": "string is invalid",
+                "data": "foo",
+                "valid": false
+            }
+        ]
+    },
+    {
+        "description": "retrieved nested refs resolve relative to their URI not $id",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "http://localhost:1234/draft2020-12/some-id",
+            "properties": {
+                "name": {"$ref": "nested/foo-ref-string.json"}
+            }
+        },
+        "tests": [
+            {
+                "description": "number is invalid",
+                "data": {
+                    "name": {"foo":  1}
+                },
+                "valid": false
+            },
+            {
+                "description": "string is valid",
+                "data": {
+                    "name": {"foo":  "a"}
+                },
+                "valid": true
+            }
+        ]
+    },
+    {
+        "description": "remote HTTP ref with different $id",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$ref": "http://localhost:1234/draft2020-12/different-id-ref-string.json"
+        },
+        "tests": [
+            {
+                "description": "number is invalid",
+                "data": 1,
+                "valid": false
+            },
+            {
+                "description": "string is valid",
+                "data": "foo",
+                "valid": true
+            }
+        ]
+    },
+    {
+        "description": "remote HTTP ref with different URN $id",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$ref": "http://localhost:1234/draft2020-12/urn-ref-string.json"
+        },
+        "tests": [
+            {
+                "description": "number is invalid",
+                "data": 1,
+                "valid": false
+            },
+            {
+                "description": "string is valid",
+                "data": "foo",
+                "valid": true
+            }
+        ]
+    },
+    {
+        "description": "remote HTTP ref with nested absolute ref",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$ref": "http://localhost:1234/draft2020-12/nested-absolute-ref-to-string.json"
+        },
+        "tests": [
+            {
+                "description": "number is invalid",
+                "data": 1,
+                "valid": false
+            },
+            {
+                "description": "string is valid",
+                "data": "foo",
+                "valid": true
+            }
+        ]
+    },
+    {
+        "description": "$ref to $ref finds detached $anchor",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$ref": "http://localhost:1234/draft2020-12/detached-ref.json#/$defs/foo"
+        },
+        "tests": [
+            {
+                "description": "number is valid",
+                "data": 1,
+                "valid": true
+            },
+            {
+                "description": "non-number is invalid",
+                "data": "a",
+                "valid": false
+            }
+        ]
     }
 ]
 """,
@@ -75730,6 +84490,7 @@ Map<String, String> specificationTests = {
     {
         "description": "required validation",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "properties": {
                 "foo": {},
                 "bar": {}
@@ -75761,12 +84522,24 @@ Map<String, String> specificationTests = {
                 "description": "ignores other non-objects",
                 "data": 12,
                 "valid": true
+            },
+            {
+                "description": "ignores null",
+                "data": null,
+                "valid": true
+            },
+            {
+                "description":"ignores boolean",
+                "data": true,
+                "valid": true
+
             }
         ]
     },
     {
         "description": "required default validation",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "properties": {
                 "foo": {}
             }
@@ -75782,6 +84555,7 @@ Map<String, String> specificationTests = {
     {
         "description": "required with empty array",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "properties": {
                 "foo": {}
             },
@@ -75798,6 +84572,7 @@ Map<String, String> specificationTests = {
     {
         "description": "required with escaped characters",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "required": [
                 "foo\nbar",
                 "foo\"bar",
@@ -75829,13 +84604,65 @@ Map<String, String> specificationTests = {
                 "valid": false
             }
         ]
+    },
+    {
+        "description": "required properties whose names are Javascript object property names",
+        "comment": "Ensure JS implementations don't universally consider e.g. __proto__ to always be present in an object.",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "required": ["__proto__", "toString", "constructor"]
+        },
+        "tests": [
+            {
+                "description": "ignores arrays",
+                "data": [],
+                "valid": true
+            },
+            {
+                "description": "ignores other non-objects",
+                "data": 12,
+                "valid": true
+            },
+            {
+                "description": "none of the properties mentioned",
+                "data": {},
+                "valid": false
+            },
+            {
+                "description": "__proto__ present",
+                "data": { "__proto__": "foo" },
+                "valid": false
+            },
+            {
+                "description": "toString present",
+                "data": { "toString": { "length": 37 } },
+                "valid": false
+            },
+            {
+                "description": "constructor present",
+                "data": { "constructor": { "length": 37 } },
+                "valid": false
+            },
+            {
+                "description": "all present",
+                "data": { 
+                    "__proto__": 12,
+                    "toString": { "length": "foo" },
+                    "constructor": 37
+                },
+                "valid": true
+            }
+        ]
     }
 ]
 """,
   "/latest/type.json": r"""[
     {
         "description": "integer type matches integers",
-        "schema": {"type": "integer"},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "integer"
+        },
         "tests": [
             {
                 "description": "an integer is an integer",
@@ -75886,7 +84713,10 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "number type matches numbers",
-        "schema": {"type": "number"},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "number"
+        },
         "tests": [
             {
                 "description": "an integer is a number",
@@ -75937,7 +84767,10 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "string type matches strings",
-        "schema": {"type": "string"},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "string"
+        },
         "tests": [
             {
                 "description": "1 is not a string",
@@ -75988,7 +84821,10 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "object type matches objects",
-        "schema": {"type": "object"},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "object"
+        },
         "tests": [
             {
                 "description": "an integer is not an object",
@@ -76029,7 +84865,10 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "array type matches arrays",
-        "schema": {"type": "array"},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "array"
+        },
         "tests": [
             {
                 "description": "an integer is not an array",
@@ -76070,7 +84909,10 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "boolean type matches booleans",
-        "schema": {"type": "boolean"},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "boolean"
+        },
         "tests": [
             {
                 "description": "an integer is not a boolean",
@@ -76126,7 +84968,10 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "null type matches only the null object",
-        "schema": {"type": "null"},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "null"
+        },
         "tests": [
             {
                 "description": "an integer is not null",
@@ -76182,7 +85027,10 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "multiple types can be specified in an array",
-        "schema": {"type": ["integer", "string"]},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": ["integer", "string"]
+        },
         "tests": [
             {
                 "description": "an integer is valid",
@@ -76224,6 +85072,7 @@ Map<String, String> specificationTests = {
     {
         "description": "type as array with one item",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": ["string"]
         },
         "tests": [
@@ -76242,6 +85091,7 @@ Map<String, String> specificationTests = {
     {
         "description": "type: array or object",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": ["array", "object"]
         },
         "tests": [
@@ -76275,6 +85125,7 @@ Map<String, String> specificationTests = {
     {
         "description": "type: array, object or null",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": ["array", "object", "null"]
         },
         "tests": [
@@ -76311,7 +85162,7 @@ Map<String, String> specificationTests = {
     {
         "description": "unevaluatedItems true",
         "schema": {
-            "type": "array",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "unevaluatedItems": true
         },
         "tests": [
@@ -76330,7 +85181,7 @@ Map<String, String> specificationTests = {
     {
         "description": "unevaluatedItems false",
         "schema": {
-            "type": "array",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "unevaluatedItems": false
         },
         "tests": [
@@ -76349,7 +85200,7 @@ Map<String, String> specificationTests = {
     {
         "description": "unevaluatedItems as schema",
         "schema": {
-            "type": "array",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "unevaluatedItems": { "type": "string" }
         },
         "tests": [
@@ -76373,7 +85224,7 @@ Map<String, String> specificationTests = {
     {
         "description": "unevaluatedItems with uniform items",
         "schema": {
-            "type": "array",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "items": { "type": "string" },
             "unevaluatedItems": false
         },
@@ -76388,7 +85239,7 @@ Map<String, String> specificationTests = {
     {
         "description": "unevaluatedItems with tuple",
         "schema": {
-            "type": "array",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "prefixItems": [
                 { "type": "string" }
             ],
@@ -76408,9 +85259,9 @@ Map<String, String> specificationTests = {
         ]
     },
     {
-        "description": "unevaluatedItems with items",
+        "description": "unevaluatedItems with items and prefixItems",
         "schema": {
-            "type": "array",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "prefixItems": [
                 { "type": "string" }
             ],
@@ -76426,9 +85277,30 @@ Map<String, String> specificationTests = {
         ]
     },
     {
+        "description": "unevaluatedItems with items",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "items": {"type": "number"},
+            "unevaluatedItems": {"type": "string"}
+        },
+        "tests": [
+            {
+                "description": "valid under items",
+                "comment": "no elements are considered by unevaluatedItems",
+                "data": [5, 6, 7, 8],
+                "valid": true
+            },
+            {
+                "description": "invalid under items",
+                "data": ["foo", "bar", "baz"],
+                "valid": false
+            }
+        ]
+    },
+    {
         "description": "unevaluatedItems with nested tuple",
         "schema": {
-            "type": "array",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "prefixItems": [
                 { "type": "string" }
             ],
@@ -76458,7 +85330,35 @@ Map<String, String> specificationTests = {
     {
         "description": "unevaluatedItems with nested items",
         "schema": {
-            "type": "array",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "unevaluatedItems": {"type": "boolean"},
+            "anyOf": [
+                { "items": {"type": "string"} },
+                true
+            ]
+        },
+        "tests": [
+            {
+                "description": "with only (valid) additional items",
+                "data": [true, false],
+                "valid": true
+            },
+            {
+                "description": "with no additional items",
+                "data": ["yes", "no"],
+                "valid": true
+            },
+            {
+                "description": "with invalid additional item",
+                "data": ["yes", false],
+                "valid": false
+            }
+        ]
+    },
+    {
+        "description": "unevaluatedItems with nested prefixItems and items",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "allOf": [
                 {
                     "prefixItems": [
@@ -76485,16 +85385,14 @@ Map<String, String> specificationTests = {
     {
         "description": "unevaluatedItems with nested unevaluatedItems",
         "schema": {
-            "type": "array",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "allOf": [
                 {
                     "prefixItems": [
                         { "type": "string" }
                     ]
                 },
-                {
-                    "unevaluatedItems": true
-                }
+                { "unevaluatedItems": true }
             ],
             "unevaluatedItems": false
         },
@@ -76514,7 +85412,7 @@ Map<String, String> specificationTests = {
     {
         "description": "unevaluatedItems with anyOf",
         "schema": {
-            "type": "array",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "prefixItems": [
                 { "const": "foo" }
             ],
@@ -76561,7 +85459,7 @@ Map<String, String> specificationTests = {
     {
         "description": "unevaluatedItems with oneOf",
         "schema": {
-            "type": "array",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "prefixItems": [
                 { "const": "foo" }
             ],
@@ -76597,7 +85495,7 @@ Map<String, String> specificationTests = {
     {
         "description": "unevaluatedItems with not",
         "schema": {
-            "type": "array",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "prefixItems": [
                 { "const": "foo" }
             ],
@@ -76622,7 +85520,7 @@ Map<String, String> specificationTests = {
     {
         "description": "unevaluatedItems with if/then/else",
         "schema": {
-            "type": "array",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "prefixItems": [
                 { "const": "foo" }
             ],
@@ -76675,7 +85573,7 @@ Map<String, String> specificationTests = {
     {
         "description": "unevaluatedItems with boolean schemas",
         "schema": {
-            "type": "array",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "allOf": [true],
             "unevaluatedItems": false
         },
@@ -76695,7 +85593,7 @@ Map<String, String> specificationTests = {
     {
         "description": "unevaluatedItems with $ref",
         "schema": {
-            "type": "array",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "$ref": "#/$defs/bar",
             "prefixItems": [
                 { "type": "string" }
@@ -76724,15 +85622,94 @@ Map<String, String> specificationTests = {
         ]
     },
     {
+        "description": "unevaluatedItems before $ref",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "unevaluatedItems": false,
+            "prefixItems": [
+                { "type": "string" }
+            ],
+            "$ref": "#/$defs/bar",
+            "$defs": {
+              "bar": {
+                  "prefixItems": [
+                      true,
+                      { "type": "string" }
+                  ]
+              }
+            }
+        },
+        "tests": [
+            {
+                "description": "with no unevaluated items",
+                "data": ["foo", "bar"],
+                "valid": true
+            },
+            {
+                "description": "with unevaluated items",
+                "data": ["foo", "bar", "baz"],
+                "valid": false
+            }
+        ]
+    },
+    {
+        "description": "unevaluatedItems with $dynamicRef",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://example.com/unevaluated-items-with-dynamic-ref/derived",
+
+            "$ref": "./baseSchema",
+
+            "$defs": {
+                "derived": {
+                    "$dynamicAnchor": "addons",
+                    "prefixItems": [
+                        true,
+                        { "type": "string" }
+                    ]
+                },
+                "baseSchema": {
+                    "$id": "./baseSchema",
+
+                    "$comment": "unevaluatedItems comes first so it's more likely to catch bugs with implementations that are sensitive to keyword ordering",
+                    "unevaluatedItems": false,
+                    "type": "array",
+                    "prefixItems": [
+                        { "type": "string" }
+                    ],
+                    "$dynamicRef": "#addons",
+
+                    "$defs": {
+                        "defaultAddons": {
+                            "$comment": "Needed to satisfy the bookending requirement",
+                            "$dynamicAnchor": "addons"
+                        }
+                    }
+                }
+            }
+        },
+        "tests": [
+            {
+                "description": "with no unevaluated items",
+                "data": ["foo", "bar"],
+                "valid": true
+            },
+            {
+                "description": "with unevaluated items",
+                "data": ["foo", "bar", "baz"],
+                "valid": false
+            }
+        ]
+    },
+    {
         "description": "unevaluatedItems can't see inside cousins",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "allOf": [
                 {
                     "prefixItems": [ true ]
                 },
-                {
-                    "unevaluatedItems": false
-                }
+                { "unevaluatedItems": false }
             ]
         },
         "tests": [
@@ -76746,14 +85723,11 @@ Map<String, String> specificationTests = {
     {
         "description": "item is evaluated in an uncle schema to unevaluatedItems",
         "schema": {
-            "type": "object",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "properties": {
                 "foo": {
-                    "type": "array",
                     "prefixItems": [
-                        {
-                            "type": "string"
-                        }
+                        { "type": "string" }
                     ],
                     "unevaluatedItems": false
                   }
@@ -76764,9 +85738,7 @@ Map<String, String> specificationTests = {
                         "foo": {
                             "prefixItems": [
                                 true,
-                                {
-                                    "type": "string"
-                                }
+                                { "type": "string" }
                             ]
                         }
                     }
@@ -76798,6 +85770,7 @@ Map<String, String> specificationTests = {
     {
         "description": "unevaluatedItems depends on adjacent contains",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "prefixItems": [true],
             "contains": {"type": "string"},
             "unevaluatedItems": false
@@ -76823,6 +85796,7 @@ Map<String, String> specificationTests = {
     {
         "description": "unevaluatedItems depends on multiple nested contains",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "allOf": [
                 { "contains": { "multipleOf": 2 } },
                 { "contains": { "multipleOf": 3 } }
@@ -76845,6 +85819,7 @@ Map<String, String> specificationTests = {
     {
         "description": "unevaluatedItems and contains interact to control item dependency relationship",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "if": {
                 "contains": {"const": "a"}
             },
@@ -76902,6 +85877,139 @@ Map<String, String> specificationTests = {
                 "valid": false
             }
         ]
+    },
+    {
+        "description" : "unevaluatedItems with minContains = 0",
+        "schema" : {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "contains": {"type": "string"},
+            "minContains": 0,
+            "unevaluatedItems": false
+        },
+        "tests" : [
+            {
+                "description": "empty array is valid",
+                "data": [],
+                "valid": true
+            },
+            {
+                "description": "no items evaluated by contains",
+                "data": [0],
+                "valid": false
+            },
+            {
+                "description": "some but not all items evaluated by contains",
+                "data": ["foo", 0],
+                "valid": false
+            },
+            {
+                "description": "all items evaluated by contains",
+                "data": ["foo", "bar"],
+                "valid": true
+            }
+        ]
+    },
+    {
+        "description": "non-array instances are valid",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "unevaluatedItems": false
+        },
+        "tests": [
+            {
+                "description": "ignores booleans",
+                "data": true,
+                "valid": true
+            },
+            {
+                "description": "ignores integers",
+                "data": 123,
+                "valid": true
+            },
+            {
+                "description": "ignores floats",
+                "data": 1.0,
+                "valid": true
+            },
+            {
+                "description": "ignores objects",
+                "data": {},
+                "valid": true
+            },
+            {
+                "description": "ignores strings",
+                "data": "foo",
+                "valid": true
+            },
+            {
+                "description": "ignores null",
+                "data": null,
+                "valid": true
+            }
+        ]
+    },
+    {
+        "description": "unevaluatedItems with null instance elements",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "unevaluatedItems": {
+                "type": "null"
+            }
+        },
+        "tests": [
+            {
+                "description": "allows null elements",
+                "data": [ null ],
+                "valid": true
+            }
+        ]
+    },
+    {
+        "description": "unevaluatedItems can see annotations from if without then and else",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "if": {
+                "prefixItems": [{"const": "a"}]
+            },
+            "unevaluatedItems": false
+        },
+        "tests": [
+            {
+                "description": "valid in case if is evaluated",
+                "data": [ "a" ],
+                "valid": true
+            },
+            {
+                "description": "invalid in case if is evaluated",
+                "data": [ "b" ],
+                "valid": false
+            }
+        ]
+    },
+    {
+        "description": "Evaluated items collection needs to consider instance location",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "prefixItems": [
+                {
+                    "prefixItems": [
+                        true,
+                        { "type": "string" }
+                    ]
+                }
+            ],
+            "unevaluatedItems": false
+        },
+        "tests": [
+            {
+                "description": "with an unevaluated item that exists at another location",
+                "data": [
+                    ["foo", "bar"],
+                    "bar"
+                ],
+                "valid": false
+            }
+        ]
     }
 ]
 """,
@@ -76909,7 +86017,7 @@ Map<String, String> specificationTests = {
     {
         "description": "unevaluatedProperties true",
         "schema": {
-            "type": "object",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "unevaluatedProperties": true
         },
         "tests": [
@@ -76930,7 +86038,7 @@ Map<String, String> specificationTests = {
     {
         "description": "unevaluatedProperties schema",
         "schema": {
-            "type": "object",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "unevaluatedProperties": {
                 "type": "string",
                 "minLength": 3
@@ -76961,7 +86069,7 @@ Map<String, String> specificationTests = {
     {
         "description": "unevaluatedProperties false",
         "schema": {
-            "type": "object",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "unevaluatedProperties": false
         },
         "tests": [
@@ -76982,7 +86090,7 @@ Map<String, String> specificationTests = {
     {
         "description": "unevaluatedProperties with adjacent properties",
         "schema": {
-            "type": "object",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "properties": {
                 "foo": { "type": "string" }
             },
@@ -77009,7 +86117,7 @@ Map<String, String> specificationTests = {
     {
         "description": "unevaluatedProperties with adjacent patternProperties",
         "schema": {
-            "type": "object",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "patternProperties": {
                 "^foo": { "type": "string" }
             },
@@ -77034,8 +86142,9 @@ Map<String, String> specificationTests = {
         ]
     },
     {
-        "description": "unevaluatedProperties with adjacent additionalProperties",
+        "description": "unevaluatedProperties with adjacent bool additionalProperties",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "object",
             "properties": {
                 "foo": { "type": "string" }
@@ -77062,9 +86171,38 @@ Map<String, String> specificationTests = {
         ]
     },
     {
+        "description": "unevaluatedProperties with adjacent non-bool additionalProperties",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "object",
+            "properties": {
+                "foo": { "type": "string" }
+            },
+            "additionalProperties": {"type": "string"},
+            "unevaluatedProperties": false
+        },
+        "tests": [
+            {
+                "description": "with no additional properties",
+                "data": {
+                    "foo": "foo"
+                },
+                "valid": true
+            },
+            {
+                "description": "with additional properties",
+                "data": {
+                    "foo": "foo",
+                    "bar": "bar"
+                },
+                "valid": true
+            }
+        ]
+    },
+    {
         "description": "unevaluatedProperties with nested properties",
         "schema": {
-            "type": "object",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "properties": {
                 "foo": { "type": "string" }
             },
@@ -77100,7 +86238,7 @@ Map<String, String> specificationTests = {
     {
         "description": "unevaluatedProperties with nested patternProperties",
         "schema": {
-            "type": "object",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "properties": {
                 "foo": { "type": "string" }
             },
@@ -77136,7 +86274,7 @@ Map<String, String> specificationTests = {
     {
         "description": "unevaluatedProperties with nested additionalProperties",
         "schema": {
-            "type": "object",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "properties": {
                 "foo": { "type": "string" }
             },
@@ -77168,7 +86306,7 @@ Map<String, String> specificationTests = {
     {
         "description": "unevaluatedProperties with nested unevaluatedProperties",
         "schema": {
-            "type": "object",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "properties": {
                 "foo": { "type": "string" }
             },
@@ -77203,7 +86341,7 @@ Map<String, String> specificationTests = {
     {
         "description": "unevaluatedProperties with anyOf",
         "schema": {
-            "type": "object",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "properties": {
                 "foo": { "type": "string" }
             },
@@ -77271,7 +86409,7 @@ Map<String, String> specificationTests = {
     {
         "description": "unevaluatedProperties with oneOf",
         "schema": {
-            "type": "object",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "properties": {
                 "foo": { "type": "string" }
             },
@@ -77314,7 +86452,7 @@ Map<String, String> specificationTests = {
     {
         "description": "unevaluatedProperties with not",
         "schema": {
-            "type": "object",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "properties": {
                 "foo": { "type": "string" }
             },
@@ -77342,7 +86480,7 @@ Map<String, String> specificationTests = {
     {
         "description": "unevaluatedProperties with if/then/else",
         "schema": {
-            "type": "object",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "if": {
                 "properties": {
                     "foo": { "const": "then" }
@@ -77401,7 +86539,7 @@ Map<String, String> specificationTests = {
     {
         "description": "unevaluatedProperties with if/then/else, then not defined",
         "schema": {
-            "type": "object",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "if": {
                 "properties": {
                     "foo": { "const": "then" }
@@ -77420,17 +86558,15 @@ Map<String, String> specificationTests = {
             {
                 "description": "when if is true and has no unevaluated properties",
                 "data": {
-                    "foo": "then",
-                    "bar": "bar"
+                    "foo": "then"
                 },
-                "valid": false
+                "valid": true
             },
             {
                 "description": "when if is true and has unevaluated properties",
                 "data": {
                     "foo": "then",
-                    "bar": "bar",
-                    "baz": "baz"
+                    "bar": "bar"
                 },
                 "valid": false
             },
@@ -77454,7 +86590,7 @@ Map<String, String> specificationTests = {
     {
         "description": "unevaluatedProperties with if/then/else, else not defined",
         "schema": {
-            "type": "object",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "if": {
                 "properties": {
                     "foo": { "const": "then" }
@@ -77507,7 +86643,7 @@ Map<String, String> specificationTests = {
     {
         "description": "unevaluatedProperties with dependentSchemas",
         "schema": {
-            "type": "object",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "properties": {
                 "foo": { "type": "string" }
             },
@@ -77542,7 +86678,7 @@ Map<String, String> specificationTests = {
     {
         "description": "unevaluatedProperties with boolean schemas",
         "schema": {
-            "type": "object",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "properties": {
                 "foo": { "type": "string" }
             },
@@ -77569,7 +86705,7 @@ Map<String, String> specificationTests = {
     {
         "description": "unevaluatedProperties with $ref",
         "schema": {
-            "type": "object",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "$ref": "#/$defs/bar",
             "properties": {
                 "foo": { "type": "string" }
@@ -77604,8 +86740,100 @@ Map<String, String> specificationTests = {
         ]
     },
     {
+        "description": "unevaluatedProperties before $ref",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "unevaluatedProperties": false,
+            "properties": {
+                "foo": { "type": "string" }
+            },
+            "$ref": "#/$defs/bar",
+            "$defs": {
+                "bar": {
+                    "properties": {
+                        "bar": { "type": "string" }
+                    }
+                }
+            }
+        },
+        "tests": [
+            {
+                "description": "with no unevaluated properties",
+                "data": {
+                    "foo": "foo",
+                    "bar": "bar"
+                },
+                "valid": true
+            },
+            {
+                "description": "with unevaluated properties",
+                "data": {
+                    "foo": "foo",
+                    "bar": "bar",
+                    "baz": "baz"
+                },
+                "valid": false
+            }
+        ]
+    },
+    {
+        "description": "unevaluatedProperties with $dynamicRef",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://example.com/unevaluated-properties-with-dynamic-ref/derived",
+
+            "$ref": "./baseSchema",
+
+            "$defs": {
+                "derived": {
+                    "$dynamicAnchor": "addons",
+                    "properties": {
+                        "bar": { "type": "string" }
+                    }
+                },
+                "baseSchema": {
+                    "$id": "./baseSchema",
+
+                    "$comment": "unevaluatedProperties comes first so it's more likely to catch bugs with implementations that are sensitive to keyword ordering",
+                    "unevaluatedProperties": false,
+                    "properties": {
+                        "foo": { "type": "string" }
+                    },
+                    "$dynamicRef": "#addons",
+
+                    "$defs": {
+                        "defaultAddons": {
+                            "$comment": "Needed to satisfy the bookending requirement",
+                            "$dynamicAnchor": "addons"
+                        }
+                    }
+                }
+            }
+        },
+        "tests": [
+            {
+                "description": "with no unevaluated properties",
+                "data": {
+                    "foo": "foo",
+                    "bar": "bar"
+                },
+                "valid": true
+            },
+            {
+                "description": "with unevaluated properties",
+                "data": {
+                    "foo": "foo",
+                    "bar": "bar",
+                    "baz": "baz"
+                },
+                "valid": false
+            }
+        ]
+    },
+    {
         "description": "unevaluatedProperties can't see inside cousins",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "allOf": [
                 {
                     "properties": {
@@ -77628,9 +86856,34 @@ Map<String, String> specificationTests = {
         ]
     },
     {
+        "description": "unevaluatedProperties can't see inside cousins (reverse order)",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "allOf": [
+                {
+                    "unevaluatedProperties": false
+                },
+                {
+                    "properties": {
+                        "foo": true
+                    }
+                }
+            ]
+        },
+        "tests": [
+            {
+                "description": "always fails",
+                "data": {
+                    "foo": 1
+                },
+                "valid": false
+            }
+        ]
+    },
+    {
         "description": "nested unevaluatedProperties, outer false, inner true, properties outside",
         "schema": {
-            "type": "object",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "properties": {
                 "foo": { "type": "string" }
             },
@@ -77662,7 +86915,7 @@ Map<String, String> specificationTests = {
     {
         "description": "nested unevaluatedProperties, outer false, inner true, properties inside",
         "schema": {
-            "type": "object",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "allOf": [
                 {
                     "properties": {
@@ -77694,7 +86947,7 @@ Map<String, String> specificationTests = {
     {
         "description": "nested unevaluatedProperties, outer true, inner false, properties outside",
         "schema": {
-            "type": "object",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "properties": {
                 "foo": { "type": "string" }
             },
@@ -77726,7 +86979,7 @@ Map<String, String> specificationTests = {
     {
         "description": "nested unevaluatedProperties, outer true, inner false, properties inside",
         "schema": {
-            "type": "object",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "allOf": [
                 {
                     "properties": {
@@ -77758,7 +87011,7 @@ Map<String, String> specificationTests = {
     {
         "description": "cousin unevaluatedProperties, true and false, true with properties",
         "schema": {
-            "type": "object",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "allOf": [
                 {
                     "properties": {
@@ -77792,7 +87045,7 @@ Map<String, String> specificationTests = {
     {
         "description": "cousin unevaluatedProperties, true and false, false with properties",
         "schema": {
-            "type": "object",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "allOf": [
                 {
                     "unevaluatedProperties": true
@@ -77827,10 +87080,9 @@ Map<String, String> specificationTests = {
         "description": "property is evaluated in an uncle schema to unevaluatedProperties",
         "comment": "see https://stackoverflow.com/questions/66936884/deeply-nested-unevaluatedproperties-and-their-expectations",
         "schema": {
-            "type": "object",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "properties": {
                 "foo": {
-                    "type": "object",
                     "properties": {
                         "bar": {
                             "type": "string"
@@ -77878,7 +87130,7 @@ Map<String, String> specificationTests = {
     {
         "description": "in-place applicator siblings, allOf has unevaluated",
         "schema": {
-            "type": "object",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "allOf": [
                 {
                     "properties": {
@@ -77923,7 +87175,7 @@ Map<String, String> specificationTests = {
     {
         "description": "in-place applicator siblings, anyOf has unevaluated",
         "schema": {
-            "type": "object",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "allOf": [
                 {
                     "properties": {
@@ -77968,7 +87220,7 @@ Map<String, String> specificationTests = {
     {
         "description": "unevaluatedProperties + single cyclic ref",
         "schema": {
-            "type": "object",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "properties": {
                 "x": { "$ref": "#" }
             },
@@ -78015,6 +87267,7 @@ Map<String, String> specificationTests = {
     {
         "description": "unevaluatedProperties + ref inside allOf / oneOf",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "$defs": {
                 "one": {
                     "properties": { "a": true }
@@ -78085,6 +87338,7 @@ Map<String, String> specificationTests = {
     {
         "description": "dynamic evalation inside nested refs",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "$defs": {
                 "one": {
                     "oneOf": [
@@ -78216,28 +87470,238 @@ Map<String, String> specificationTests = {
         ]
     },
     {
-      "description": "additionalProperties",
-      "schema": {
-        "type": "object",
-        "additionalProperties": {"type": "object"},
-        "unevaluatedProperties": false
-      },
-      "tests": [
-       {
-          "description": "are evaluated",
-          "data": {
-            "anyKey": {}
-          },
-          "valid": true
-       }
-    ]
-  }
+        "description": "non-object instances are valid",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "unevaluatedProperties": false
+        },
+        "tests": [
+            {
+                "description": "ignores booleans",
+                "data": true,
+                "valid": true
+            },
+            {
+                "description": "ignores integers",
+                "data": 123,
+                "valid": true
+            },
+            {
+                "description": "ignores floats",
+                "data": 1.0,
+                "valid": true
+            },
+            {
+                "description": "ignores arrays",
+                "data": [],
+                "valid": true
+            },
+            {
+                "description": "ignores strings",
+                "data": "foo",
+                "valid": true
+            },
+            {
+                "description": "ignores null",
+                "data": null,
+                "valid": true
+            }
+        ]
+    },
+    {
+        "description": "unevaluatedProperties with null valued instance properties",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "unevaluatedProperties": {
+                "type": "null"
+            }
+        },
+        "tests": [
+            {
+                "description": "allows null valued properties",
+                "data": {"foo": null},
+                "valid": true
+            }
+        ]
+    },
+    {
+        "description": "unevaluatedProperties not affected by propertyNames",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "propertyNames": {"maxLength": 1},
+            "unevaluatedProperties": {
+                "type": "number"
+            }
+        },
+        "tests": [
+            {
+                "description": "allows only number properties",
+                "data": {"a": 1},
+                "valid": true
+            },
+            {
+                "description": "string property is invalid",
+                "data": {"a": "b"},
+                "valid": false
+            }
+        ]
+    },
+    {
+        "description": "unevaluatedProperties can see annotations from if without then and else",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "if": {
+                "patternProperties": {
+                    "foo": {
+                        "type": "string"
+                    }
+                }
+            },
+            "unevaluatedProperties": false
+        },
+        "tests": [
+            {
+                "description": "valid in case if is evaluated",
+                "data": {
+                    "foo": "a"
+                },
+                "valid": true
+            },
+            {
+                "description": "invalid in case if is evaluated",
+                "data": {
+                    "bar": "a"
+                },
+                "valid": false
+            }
+        ]
+    },
+    {
+        "description": "dependentSchemas with unevaluatedProperties",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "properties": {"foo2": {}},
+            "dependentSchemas": {
+                "foo" : {},
+                "foo2": {
+                    "properties": {
+                        "bar":{}
+                    }
+                }
+            },
+            "unevaluatedProperties": false
+        },
+        "tests": [
+            {
+                "description": "unevaluatedProperties doesn't consider dependentSchemas",
+                "data": {"foo": ""},
+                "valid": false
+            },
+            {
+                "description": "unevaluatedProperties doesn't see bar when foo2 is absent",
+                "data": {"bar": ""},
+                "valid": false
+            },
+            {
+                "description": "unevaluatedProperties sees bar when foo2 is present",
+                "data": { "foo2": "", "bar": ""},
+                "valid": true
+            }
+        ]
+    },
+    {
+        "description": "Evaluated properties collection needs to consider instance location",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "properties": {
+                "foo": {
+                    "properties": {
+                        "bar": { "type": "string" }
+                    }
+                }
+            },
+            "unevaluatedProperties": false
+        },
+        "tests": [
+            {
+                "description": "with an unevaluated property that exists at another location",
+                "data": {
+                    "foo": { "bar": "foo" },
+                    "bar": "bar"
+                },
+                "valid": false
+            }
+        ]
+    },
+    {
+        "description": "Evaluated properties collection needs to consider instance location with patternProperties",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "properties": {
+                "foo": {
+                    "patternProperties": {
+                        "^bar$": { "type": "string" }
+                    }
+                }
+            },
+            "unevaluatedProperties": false
+        },
+        "tests": [
+            {
+                "description": "with only the nested evaluated property",
+                "data": {
+                    "foo": { "bar": "foo" }
+                },
+                "valid": true
+            },
+            {
+                "description": "with an unevaluated property that exists at another location",
+                "data": {
+                    "foo": { "bar": "foo" },
+                    "bar": "bar"
+                },
+                "valid": false
+            }
+        ]
+    },
+    {
+        "description": "Evaluated properties collection needs to consider instance location with additionalProperties",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "properties": {
+                "foo": {
+                    "additionalProperties": { "type": "string" }
+                }
+            },
+            "unevaluatedProperties": false
+        },
+        "tests": [
+            {
+                "description": "with only the nested evaluated property",
+                "data": {
+                    "foo": { "bar": "foo" }
+                },
+                "valid": true
+            },
+            {
+                "description": "with an unevaluated property that exists at another location",
+                "data": {
+                    "foo": { "bar": "foo" },
+                    "bar": "bar"
+                },
+                "valid": false
+            }
+        ]
+    }
 ]
 """,
   "/latest/uniqueItems.json": r"""[
     {
         "description": "uniqueItems validation",
-        "schema": {"uniqueItems": true},
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "uniqueItems": true
+        },
         "tests": [
             {
                 "description": "unique array of integers is valid",
@@ -78287,6 +87751,11 @@ Map<String, String> specificationTests = {
             {
                 "description": "non-unique array of objects is invalid",
                 "data": [{"foo": "bar"}, {"foo": "bar"}],
+                "valid": false
+            },
+            {
+                "description": "property order of array of objects is ignored",
+                "data": [{"foo": "bar", "bar": "foo"}, {"bar": "foo", "foo": "bar"}],
                 "valid": false
             },
             {
@@ -78385,6 +87854,7 @@ Map<String, String> specificationTests = {
     {
         "description": "uniqueItems with an array of items",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "prefixItems": [{"type": "boolean"}, {"type": "boolean"}],
             "uniqueItems": true
         },
@@ -78434,6 +87904,7 @@ Map<String, String> specificationTests = {
     {
         "description": "uniqueItems with an array of items and additionalItems=false",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "prefixItems": [{"type": "boolean"}, {"type": "boolean"}],
             "uniqueItems": true,
             "items": false
@@ -78468,7 +87939,10 @@ Map<String, String> specificationTests = {
     },
     {
         "description": "uniqueItems=false validation",
-        "schema": { "uniqueItems": false },
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "uniqueItems": false
+        },
         "tests": [
             {
                 "description": "unique array of integers is valid",
@@ -78556,6 +88030,7 @@ Map<String, String> specificationTests = {
     {
         "description": "uniqueItems=false with an array of items",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "prefixItems": [{"type": "boolean"}, {"type": "boolean"}],
             "uniqueItems": false
         },
@@ -78605,6 +88080,7 @@ Map<String, String> specificationTests = {
     {
         "description": "uniqueItems=false with an array of items and additionalItems=false",
         "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "prefixItems": [{"type": "boolean"}, {"type": "boolean"}],
             "uniqueItems": false,
             "items": false
@@ -78633,63 +88109,6 @@ Map<String, String> specificationTests = {
             {
                 "description": "extra items are invalid even if unique",
                 "data": [false, true, null],
-                "valid": false
-            }
-        ]
-    }
-]
-""",
-  "/latest/unknownKeyword.json": r"""[
-    {
-        "description": "$id inside an unknown keyword is not a real identifier",
-        "comment": "the implementation must not be confused by an $id in locations we do not know how to parse",
-        "schema": {
-            "$defs": {
-                "id_in_unknown0": {
-                    "not": {
-                        "array_of_schemas": [
-                            {
-                              "$id": "https://localhost:1234/unknownKeyword/my_identifier.json",
-                              "type": "null"
-                            }
-                        ]
-                    }
-                },
-                "real_id_in_schema": {
-                    "$id": "https://localhost:1234/unknownKeyword/my_identifier.json",
-                    "type": "string"
-                },
-                "id_in_unknown1": {
-                    "not": {
-                        "object_of_schemas": {
-                            "foo": {
-                              "$id": "https://localhost:1234/unknownKeyword/my_identifier.json",
-                              "type": "integer"
-                            }
-                        }
-                    }
-                }
-            },
-            "anyOf": [
-                { "$ref": "#/$defs/id_in_unknown0" },
-                { "$ref": "#/$defs/id_in_unknown1" },
-                { "$ref": "https://localhost:1234/unknownKeyword/my_identifier.json" }
-            ]
-        },
-        "tests": [
-            {
-                "description": "type matches second anyOf, which has a real schema in it",
-                "data": "a string",
-                "valid": true
-            },
-            {
-                "description": "type matches non-schema in first anyOf",
-                "data": null,
-                "valid": false
-            },
-            {
-                "description": "type matches non-schema in third anyOf",
-                "data": 1,
                 "valid": false
             }
         ]
@@ -78729,6 +88148,25 @@ Map<String, String> specificationTests = {
                 "data": {
                     "numberProperty": 1
                 },
+                "valid": true
+            }
+        ]
+    },
+    {
+        "description": "ignore unrecognized optional vocabulary",
+        "schema": {
+            "$schema": "http://localhost:1234/draft2020-12/metaschema-optional-vocabulary.json",
+            "type": "number"
+        },
+        "tests": [
+            {
+                "description": "string value",
+                "data": "foobar",
+                "valid": false
+            },
+            {
+                "description": "number value",
+                "data": 20,
                 "valid": true
             }
         ]
