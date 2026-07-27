@@ -78,10 +78,11 @@ class Validator {
   /// [inEvaluatedItemsContext] and [inEvaluatedPropertiesContext] are used to pass in the parents context state.
   Validator._(this._rootSchema,
       {List<bool>? inEvaluatedItemsContext,
+      String? inEvaluatedItemsOwnerPath,
       bool inEvaluatedPropertiesContext = false,
       Map<JsonSchema, JsonSchema>? initialDynamicParents}) {
     if (inEvaluatedItemsContext != null) {
-      _pushEvaluatedItemsContext(inEvaluatedItemsContext.length);
+      _pushEvaluatedItemsContext(inEvaluatedItemsContext.length, inEvaluatedItemsOwnerPath);
     }
     if (inEvaluatedPropertiesContext) {
       _pushEvaluatedPropertiesContext();
@@ -97,6 +98,13 @@ class Validator {
   /// The context is an [List] of [bool], representing the number of successful evaluations for the list in the
   /// given context.
   final List<List<bool>> _evaluatedItemsContext = [];
+
+  /// The instance location that owns each entry in [_evaluatedItemsContext].
+  /// Evaluated-items marks are recorded by array index, so they are only valid
+  /// for the array instance that owns the context. Descending into a nested
+  /// array (a different instance location) must not mark items in an ancestor's
+  /// context. This parallel stack scopes marks to their owning instance.
+  final List<String?> _evaluatedItemsOwnerPath = [];
 
   /// Keep track of the evaluated properties contexts in a list, treating the list as a stack.
   /// The context is a [Set] of [Instance], keeping track of the instances that have been evaluated
@@ -256,12 +264,17 @@ class Validator {
 
   void _enumValidation(JsonSchema schema, dynamic instance) {
     final enumValues = schema.enumValues;
-    if (enumValues?.isNotEmpty == true) {
-      try {
-        enumValues!.singleWhere((v) => DeepCollectionEquality().equals(instance.data, v));
-      } on StateError {
-        _err('enum violated $instance', instance.path, schema.path!);
-      }
+    if (enumValues == null) return;
+    // A present-but-empty `enum: []` matches nothing, so every instance is
+    // invalid. Only an absent `enum` (null) leaves the instance unconstrained.
+    if (enumValues.isEmpty) {
+      _err('enum violated $instance', instance.path, schema.path!);
+      return;
+    }
+    try {
+      enumValues.singleWhere((v) => DeepCollectionEquality().equals(instance.data, v));
+    } on StateError {
+      _err('enum violated $instance', instance.path, schema.path!);
     }
   }
 
@@ -303,7 +316,7 @@ class Validator {
       for (int i = 0; i < end; i++) {
         final itemInstance = Instance(instance.data[i], path: '${instance.path}/$i');
         _validate(items![i], itemInstance);
-        _setItemAsEvaluated(i);
+        _setItemAsEvaluated(i, instance.path);
       }
     }
 
@@ -311,7 +324,7 @@ class Validator {
       for (int i = end; i < actual; i++) {
         final itemInstance = Instance(instance.data[i], path: '${instance.path}/$i');
         _validate(schema.items!, itemInstance);
-        _setItemAsEvaluated(i);
+        _setItemAsEvaluated(i, instance.path);
       }
     }
   }
@@ -327,7 +340,7 @@ class Validator {
         instance.data.asMap().forEach((index, item) {
           final itemInstance = Instance(item, path: '${instance.path}/$index');
           _validate(singleSchema, itemInstance);
-          _setItemAsEvaluated(index);
+          _setItemAsEvaluated(index, instance.path);
         });
       } else {
         final items = schema.itemsList;
@@ -343,7 +356,7 @@ class Validator {
             }
             final itemInstance = Instance(instance.data[i], path: '${instance.path}/$i');
             _validate(schema, itemInstance);
-            _setItemAsEvaluated(i);
+            _setItemAsEvaluated(i, instance.path);
           }
           final additionalItemsSchema = schema.additionalItemsSchema;
           final additionalItemsBool = schema.additionalItemsBool;
@@ -357,7 +370,7 @@ class Validator {
               _err('additionalItems false', instance.path, '${schema.path!}/additionalItems');
             } else {
               // All the items in this list have been evaluated.
-              _setAllItemsAsEvaluated();
+              _setAllItemsAsEvaluated(instance.path);
             }
           }
         }
@@ -393,7 +406,7 @@ class Validator {
         var item = instance.data[i];
         final res = _validateAndCaptureEvaluations(schema.contains, Instance(item));
         if (res) {
-          _setItemAsEvaluated(i);
+          _setItemAsEvaluated(i, instance.path);
           containsItems.add(item);
         }
       }
@@ -427,7 +440,7 @@ class Validator {
         }
       }
       // If we passed these test, then all the items have been evaluated.
-      _setAllItemsAsEvaluated();
+      _setAllItemsAsEvaluated(instance.path);
     }
   }
 
@@ -436,6 +449,7 @@ class Validator {
     Validator v = Validator._(
       s,
       inEvaluatedItemsContext: _evaluatedItemsContext.lastOrNull,
+      inEvaluatedItemsOwnerPath: _evaluatedItemsOwnerPath.lastOrNull,
       inEvaluatedPropertiesContext: _isInEvaluatedPropertiesContext,
       initialDynamicParents: _dynamicParents,
     );
@@ -669,7 +683,7 @@ class Validator {
   void _validate(JsonSchema schema, Instance instance) {
     if (schema.unevaluatedItems != null) {
       var length = instance.data is List ? instance.data.length : 0;
-      _pushEvaluatedItemsContext(length);
+      _pushEvaluatedItemsContext(length, instance.path);
     }
     if (schema.unevaluatedProperties != null) {
       _pushEvaluatedPropertiesContext();
@@ -794,38 +808,55 @@ class Validator {
   //////
   // Helper functions to deal with evaluatedItems.
   //////
-  _pushEvaluatedItemsContext(int length) {
+  _pushEvaluatedItemsContext(int length, [String? ownerPath]) {
     _evaluatedItemsContext.add(List.filled(length, false));
+    _evaluatedItemsOwnerPath.add(ownerPath);
   }
 
   _popEvaluatedItemsContext() {
     var last = _evaluatedItemsContext.removeLast();
-    _mergeEvaluatedItems(last);
+    var lastOwner = _evaluatedItemsOwnerPath.removeLast();
+    // Only merge marks up when the popped context shares the owning instance
+    // location with the new top context. A nested context for a deeper array
+    // tracks a different instance, so merging it by index would leak evaluated
+    // items across instance locations.
+    if (_evaluatedItemsOwnerPath.isNotEmpty && _evaluatedItemsOwnerPath.last == lastOwner) {
+      _mergeEvaluatedItems(last);
+    }
   }
 
   bool get _isInEvaluatedItemContext => _evaluatedItemsContext.isNotEmpty;
 
   bool get _isInEvaluatedItemsOrPropertiesContext => _isInEvaluatedItemContext || _isInEvaluatedPropertiesContext;
 
-  _setItemAsEvaluated(int position) {
-    if (_isInEvaluatedItemContext) {
+  /// Whether the current instance location owns the top evaluated-items context.
+  bool _ownsEvaluatedItemsContext(String currentPath) =>
+      _isInEvaluatedItemContext &&
+      (_evaluatedItemsOwnerPath.last == null || _evaluatedItemsOwnerPath.last == currentPath);
+
+  _setItemAsEvaluated(int position, String currentPath) {
+    if (_ownsEvaluatedItemsContext(currentPath)) {
       _evaluatedItemsContext.last[position] = true;
     }
   }
 
-  _setAllItemsAsEvaluated() {
-    if (_isInEvaluatedItemContext) {
+  _setAllItemsAsEvaluated(String currentPath) {
+    if (_ownsEvaluatedItemsContext(currentPath)) {
       for (var i = 0; i < _evaluatedItemsContext.last.length; i++) {
         _evaluatedItemsContext.last[i] = true;
       }
     }
   }
 
+  /// Merges evaluated-item marks from a same-location context (an in-place
+  /// applicator's sub-validator, or a popped context sharing the owner path)
+  /// directly into the top context. Callers guarantee the marks belong to the
+  /// same instance location, so no per-index location guard is applied here.
   _mergeEvaluatedItems(List<bool>? evaluatedItems) {
     if (_isInEvaluatedItemContext) {
       evaluatedItems?.forEachIndexed((index, element) {
-        if (element) {
-          _setItemAsEvaluated(index);
+        if (element && index < _evaluatedItemsContext.last.length) {
+          _evaluatedItemsContext.last[index] = true;
         }
       });
     }

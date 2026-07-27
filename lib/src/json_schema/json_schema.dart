@@ -1046,13 +1046,16 @@ class JsonSchema {
   String? _contentEncoding;
 
   /// Content Schema.
-  String? _contentSchema;
+  JsonSchema? _contentSchema;
 
   /// A [JsonSchema] used for validataion if the schema doesn't validate against the 'if' schema.
   JsonSchema? _elseSchema;
 
   /// Possible values of the [JsonSchema].
-  List? _enumValues = [];
+  ///
+  /// Left `null` when the `enum` keyword is absent so it can be distinguished
+  /// from a present-but-empty `enum: []`, which matches no instance.
+  List? _enumValues;
 
   /// Example values for the given schema.
   List _examples = [];
@@ -1670,7 +1673,7 @@ class JsonSchema {
   /// Description of the [JsonSchema].
   ///
   /// Spec: https://json-schema.org/draft/2019-09/json-schema-validation.html#rfc.section.8.5
-  String? get contentSchema => _contentSchema;
+  JsonSchema? get contentSchema => _contentSchema;
 
   /// A [JsonSchema] used for validataion if the schema doesn't validate against the 'if' schema.
   ///
@@ -2225,7 +2228,15 @@ class JsonSchema {
   _setContentEncoding(dynamic value) => _contentEncoding = TypeValidators.string('contentEncoding', value);
 
   /// Validate, calculate and set the value of the 'contentSchema' JSON Schema keyword.
-  _setContentSchema(dynamic value) => _contentSchema = TypeValidators.string('contentSchema', value);
+  ///
+  /// Per spec, `contentSchema` is a subschema (annotation only), not a string.
+  _setContentSchema(dynamic value) {
+    if (value is Map || value is bool && schemaVersion >= SchemaVersion.draft6) {
+      _createOrRetrieveSchema('$_path/contentSchema', value, (rhs) => _contentSchema = rhs);
+    } else {
+      throw FormatExceptions.error('contentSchema must be object (or boolean in draft6 and later): $value');
+    }
+  }
 
   /// Validate, calculate and set the value of the 'else' JSON Schema keyword.
   _setElse(dynamic value) {

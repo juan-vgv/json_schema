@@ -66,6 +66,11 @@ class TypeValidators {
 
   static int nonNegativeInt(String key, Object value) {
     if (value is int) return nonNegative(key, value);
+    // JSON Schema treats a number with a zero fractional part (e.g. 2.0) as an
+    // integer, so accept an integral finite `num` and coerce it to int.
+    if (value is double && value.isFinite && value == value.truncateToDouble()) {
+      return nonNegative(key, value.toInt());
+    }
     throw FormatExceptions.int(key, value);
   }
 
