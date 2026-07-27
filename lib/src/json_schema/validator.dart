@@ -679,7 +679,11 @@ class Validator {
     /// from the [refMap] instead.
     if (schema.ref != null) {
       _withRefScope(schema.ref, instance, () {
-        JsonSchema nextSchema = schema.resolvePath(schema.ref);
+        // Resolve one hop at a time (rather than collapsing the whole chain to
+        // its terminal target) so each intermediate resource scope registers as
+        // a dynamic parent. A chained `$dynamicRef` needs those scopes to find
+        // the outermost matching `$dynamicAnchor`.
+        JsonSchema nextSchema = schema.resolvePath(schema.ref, stopAtTerminalRef: true);
         final prevParent = _setDynamicParent(nextSchema, schema);
         _validate(nextSchema, instance);
         _setDynamicParent(nextSchema, prevParent);
@@ -710,14 +714,20 @@ class Validator {
     }
 
     if (schema.dynamicRef != null) {
-      _withRefScope(schema.recursiveRef, instance, () {
+      _withRefScope(schema.dynamicRef, instance, () {
         JsonSchema nextSchema = schema.resolvePath(schema.dynamicRef);
-        var anchorParent = _findDynamicAnchorParent(schema, nextSchema.dynamicAnchor);
-        if (anchorParent != null) {
-          _validate(anchorParent, instance);
-        } else {
-          _validate(nextSchema, instance);
-        }
+        // Bookending (draft 2020-12): only bootstrap to an outer dynamic scope
+        // when the reference is a plain-name fragment that names the same
+        // $dynamicAnchor the static resolution lands on. A JSON-pointer fragment
+        // (or a target with no matching $dynamicAnchor) behaves exactly like $ref.
+        final fragment = schema.dynamicRef!.fragment;
+        final isPlainNameAnchor =
+            fragment.isNotEmpty && !fragment.startsWith('/') && nextSchema.dynamicAnchor == fragment;
+        final anchorParent = isPlainNameAnchor ? _findDynamicAnchorParent(schema, nextSchema.dynamicAnchor) : null;
+        final target = anchorParent ?? nextSchema;
+        final prevParent = _setDynamicParent(target, schema);
+        _validate(target, instance);
+        _setDynamicParent(target, prevParent);
       });
     }
 
