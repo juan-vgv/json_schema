@@ -74,13 +74,14 @@ final Map<SchemaVersion, JsonSchema> _emptySchemas = {};
 /// the schema itself is done on construction. Any errors in the schema
 /// result in a FormatException being thrown.
 class JsonSchema {
-  JsonSchema._fromMap(this._root, Map? schemaMap, this._path, {JsonSchema? parent})
+  JsonSchema._fromMap(this._root, Map? schemaMap, this._path, {JsonSchema? parent, bool insideUnknownKeyword = false})
       : _schemaMap = schemaMap != null ? Map<String, dynamic>.unmodifiable(schemaMap) : null,
         _schemaBool = null {
     if (schemaMap == null) {
       throw ArgumentError.notNull('schemaMap');
     }
     _parent = parent;
+    _insideUnknownKeyword = insideUnknownKeyword;
     _initialize();
   }
 
@@ -362,7 +363,13 @@ class JsonSchema {
         ..addAll(_vocabMaps)
         ..addAll(_customVocabMap);
       for (final vocabUri in metaschemaVocabulary?.keys ?? <Uri>[]) {
-        accessMap.addAll(vocabMap[vocabUri.toString()]);
+        // An unrecognized vocabulary declared `false` (optional) is ignored.
+        // Unrecognized vocabularies declared `true` (required) already throw at
+        // parse time in [_setMetaschemaVocabulary], so they never reach here.
+        final vocabSetters = vocabMap[vocabUri.toString()];
+        if (vocabSetters != null) {
+          accessMap.addAll(vocabSetters);
+        }
       }
     } else {
       accessMap = _accessMapV7;
@@ -375,11 +382,14 @@ class JsonSchema {
         accessor(this, v);
       } else {
         // Attempt to create a schema out of the custom property and register the ref, but don't error if it's not a valid schema.
+        // The value of an unknown keyword is not a schema, so mark its subtree
+        // as opaque: any `$id`/`$anchor` inside it must not become a real
+        // identifier (see [_insideUnknownKeyword]).
         _createOrRetrieveSchema('$_path/$k', v, (rhs) {
           // Translate ref for schema to include full inheritedUri.
           final String refPath = rhs._translateLocalRefToFullUri(Uri.parse(rhs.path!)).toString();
           return _refMap[refPath] = rhs;
-        }, mustBeValid: false);
+        }, mustBeValid: false, insideUnknownKeyword: true);
       }
     }
 
@@ -822,9 +832,12 @@ class JsonSchema {
   }
 
   /// Create a sub-schema inside the root, using either a directly nested schema, or a definition.
-  JsonSchema _createSubSchema(Object? schemaDefinition, String path) {
+  JsonSchema _createSubSchema(Object? schemaDefinition, String path, {bool insideUnknownKeyword = false}) {
+    // An opaque (unknown-keyword) subtree stays opaque for all descendants.
+    final childInsideUnknownKeyword = _insideUnknownKeyword || insideUnknownKeyword;
     if (schemaDefinition is Map) {
-      return JsonSchema._fromMap(_root, schemaDefinition, path, parent: this);
+      return JsonSchema._fromMap(_root, schemaDefinition, path,
+          parent: this, insideUnknownKeyword: childInsideUnknownKeyword);
 
       // Boolean schemas are only supported in draft 6 and later.
     } else if (schemaDefinition is bool && schemaVersion >= SchemaVersion.draft6) {
@@ -928,6 +941,14 @@ class JsonSchema {
 
   /// The parent [JsonSchema] for this [JsonSchema].
   JsonSchema? _parent;
+
+  /// Whether this [JsonSchema] lives inside the value of an unknown keyword.
+  ///
+  /// Per spec, an unknown keyword is not a schema, so any `$id`, `$anchor`, or
+  /// `$dynamicAnchor` found within its value must not be registered as a real
+  /// identifier. This flag is inherited by all descendant sub-schemas so the
+  /// entire opaque subtree is excluded from identifier resolution.
+  bool _insideUnknownKeyword = false;
 
   /// JSON of the [JsonSchema] as a [Map]. Only this value or [_schemaBool] should be set, not both.
   final Map<String, dynamic>? _schemaMap;
@@ -1396,7 +1417,9 @@ class JsonSchema {
   static final Map<String, SchemaPropertySetter> _draft2020FormatAnnotation = <String, SchemaPropertySetter>{}
     ..addAll({'format': (JsonSchema s, dynamic v) => s._setFormat(v)});
 
-  // Not used in the draft 2020, but including for completeness and potential future vocabulary useage.
+  // Parses `format` identically to the annotation vocabulary. Whether `format`
+  // is enforced as an assertion is decided at validation time via
+  // [JsonSchema.formatIsAssertion], which detects this vocabulary in the dialect.
   static final Map<String, SchemaPropertySetter> _draft2020FormatAssertion = <String, SchemaPropertySetter>{}
     ..addAll({'format': (JsonSchema s, dynamic v) => s._setFormat(v)});
 
@@ -1779,6 +1802,13 @@ class JsonSchema {
   /// Spec: https://json-schema.org/draft/2019-09/json-schema-core.html#rfc.section.8.1.2
   Map<Uri, bool>? get metaschemaVocabulary => _metaschemaVocabulary ?? _root?._metaschemaVocabulary;
 
+  /// Whether the active dialect declares the Draft 2020-12 format-assertion
+  /// vocabulary. When present, `format` behaves as an assertion regardless of
+  /// the caller's `validateFormats` option.
+  ///
+  /// Spec: https://json-schema.org/draft/2020-12/json-schema-validation.html#rfc.section.7
+  bool get formatIsAssertion => metaschemaVocabulary?.containsKey(SupportedVocabularies.formatAssertion2020) ?? false;
+
   // --------------------------------------------------------------------------
   // Schema List Item Related Getters
   // --------------------------------------------------------------------------
@@ -2037,7 +2067,8 @@ class JsonSchema {
   JsonSchema? _addSchemaToRefMap(String path, JsonSchema? schema) => _refMap[path] = schema!;
 
   // Create a [JsonSchema] from a sub-schema of the root.
-  _createOrRetrieveSchema(String path, dynamic schema, SchemaAssigner assigner, {mustBeValid = true}) {
+  _createOrRetrieveSchema(String path, dynamic schema, SchemaAssigner assigner,
+      {mustBeValid = true, bool insideUnknownKeyword = false}) {
     Never Function()? throwError;
 
     if (schema is bool && !(schemaVersion >= SchemaVersion.draft6)) {
@@ -2071,11 +2102,11 @@ class JsonSchema {
         _schemaAssignments.add(() => assigner(_getSchemaFromPath(ref)));
       } else {
         // References can't overwrite the reference node in draft 2019 or later.
-        assigner(_createSubSchema(schema, path));
+        assigner(_createSubSchema(schema, path, insideUnknownKeyword: insideUnknownKeyword));
       }
     } else {
       // Sub schema can be created immediately.
-      assigner(_createSubSchema(schema, path));
+      assigner(_createSubSchema(schema, path, insideUnknownKeyword: insideUnknownKeyword));
     }
   }
 
@@ -2191,9 +2222,13 @@ class JsonSchema {
       // This is expected behavior.
     }
 
-    // Add the current schema to the ref map by its id, so it can be referenced elsewhere.
-    final String refMapString = '$_id${_id!.hasFragment ? '' : '#'}';
-    _addSchemaToRefMap(refMapString, this);
+    // Add the current schema to the ref map by its id, so it can be referenced
+    // elsewhere. An `$id` inside an unknown keyword is not a real identifier, so
+    // it must not be registered.
+    if (!_insideUnknownKeyword) {
+      final String refMapString = '$_id${_id!.hasFragment ? '' : '#'}';
+      _addSchemaToRefMap(refMapString, this);
+    }
     return _id;
   }
 
@@ -2207,17 +2242,23 @@ class JsonSchema {
   /// Validate, set, and register the value of the '$anchor' JSON Schema keyword.
   _setAnchor(dynamic value) {
     _anchor = TypeValidators.anchorString(r"$anchor", value);
-    final uri = _uri ?? _inheritedUri ?? '';
-    final String refMapString = '$uri#$_anchor';
-    _addSchemaToRefMap(refMapString, this);
+    // An `$anchor` inside an unknown keyword is not a real identifier.
+    if (!_insideUnknownKeyword) {
+      final uri = _uri ?? _inheritedUri ?? '';
+      final String refMapString = '$uri#$_anchor';
+      _addSchemaToRefMap(refMapString, this);
+    }
     return _anchor;
   }
 
   _setDynamicAnchor(dynamic value) {
     _dynamicAnchor = TypeValidators.anchorString(r"$dynamicAnchor", value);
-    final uri = _uri ?? _inheritedUri ?? '';
-    final String refMapString = '$uri#$_dynamicAnchor';
-    _addSchemaToRefMap(refMapString, this);
+    // A `$dynamicAnchor` inside an unknown keyword is not a real identifier.
+    if (!_insideUnknownKeyword) {
+      final uri = _uri ?? _inheritedUri ?? '';
+      final String refMapString = '$uri#$_dynamicAnchor';
+      _addSchemaToRefMap(refMapString, this);
+    }
     return _dynamicAnchor;
   }
 

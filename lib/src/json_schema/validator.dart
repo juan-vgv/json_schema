@@ -491,7 +491,9 @@ class Validator {
   }
 
   void _validateFormat(JsonSchema schema, Instance instance) {
-    if (!_validateFormats) return;
+    // The format-assertion vocabulary forces `format` to be an assertion for
+    // the schemas that declare it, independent of the `validateFormats` option.
+    if (!_validateFormats && !schema.formatIsAssertion) return;
 
     // Non-strings in formats should be ignored.
     if (instance.data is! String) return;
