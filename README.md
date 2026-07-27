@@ -1,6 +1,6 @@
 # JSON Schema
 
-  A *platform agnostic* (web, flutter or vm) Dart library for validating JSON instances against JSON Schemas (multi-version support with latest of Draft 7).
+  A *platform agnostic* (web, flutter or vm) Dart library for validating JSON instances against JSON Schemas (multi-version support through Draft 2020-12; Draft 7 remains the default when no `$schema` or version is specified).
 
 ## Getting Started
 
@@ -58,6 +58,34 @@ And run `dart run ./example/readme/synchronous_creation/self_contained.dart`
 
 
 ## Advanced Usage
+
+### Selecting a Schema Version
+
+The library supports Draft 4, 6, 7, 2019-09, and 2020-12. The version for a schema is resolved in this order:
+
+1. An explicit `schemaVersion` argument passed to the constructor.
+2. The `$schema` keyword declared in the schema document.
+3. The default, `SchemaVersion.draft7`, when neither of the above is present.
+
+To use Draft 2020-12, either pass it explicitly:
+
+```dart
+import 'package:json_schema/json_schema.dart';
+
+final schema = JsonSchema.create(
+  mySchemaMap,
+  schemaVersion: SchemaVersion.draft2020_12,
+);
+```
+
+Or declare it in the schema itself:
+
+```dart
+final schema = JsonSchema.create({
+  r'$schema': 'https://json-schema.org/draft/2020-12/schema',
+  'type': 'object',
+});
+```
 
 ### Synchronous Creation, Local Ref Cache
 
